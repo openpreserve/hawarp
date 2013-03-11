@@ -28,21 +28,12 @@ import org.apache.commons.io.IOUtils;
 import uk.gov.nationalarchives.droid.core.SignatureParseException;
 import uk.gov.nationalarchives.droid.core.BinarySignatureIdentifier;
 
-import uk.gov.nationalarchives.droid.core.interfaces.DroidCore;
-import uk.gov.nationalarchives.droid.core.interfaces.IdentificationMethod;
 import uk.gov.nationalarchives.droid.core.interfaces.IdentificationRequest;
 import uk.gov.nationalarchives.droid.core.interfaces.IdentificationResult;
 import uk.gov.nationalarchives.droid.core.interfaces.IdentificationResultCollection;
-import uk.gov.nationalarchives.droid.core.interfaces.IdentificationResultImpl;
 import uk.gov.nationalarchives.droid.core.interfaces.RequestIdentifier;
 import uk.gov.nationalarchives.droid.core.interfaces.resource.FileSystemIdentificationRequest;
 import uk.gov.nationalarchives.droid.core.interfaces.resource.RequestMetaData;
-import uk.gov.nationalarchives.droid.core.signature.ByteReader;
-import uk.gov.nationalarchives.droid.core.signature.FileFormat;
-import uk.gov.nationalarchives.droid.core.signature.FileFormatCollection;
-import uk.gov.nationalarchives.droid.core.signature.FileFormatHit;
-import uk.gov.nationalarchives.droid.core.signature.droid6.FFSignatureFile;
-import uk.gov.nationalarchives.droid.submitter.FileIdentificationRequestFactory;
 
 /**
  * Droid File Format Identification Hadoop Job.
@@ -86,14 +77,13 @@ public class DroidIdentification {
         URI resourceUri = file.toURI();
         InputStream in = new FileInputStream(file);
         
-        RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(),file.getName());
+        RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(),file.getName());  
         RequestIdentifier identifier = new RequestIdentifier(resourceUri);
-        identifier.setParentId(1L);
+        
         IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
         request.open(in);
         IdentificationResultCollection results = bsi.matchBinarySignatures(request);
-        
-        IdentificationResult result = results.getResults().iterator().next();
+        IdentificationResult result = (IdentificationResult)results.getResults().iterator().next();
         return result;
     }
 }
