@@ -49,8 +49,41 @@ public class DroidIdentification {
     
     private BinarySignatureIdentifier bsi;
     
-    public DroidIdentification() throws IOException, SignatureParseException {
-        
+    // Singleton Instance
+    private static DroidIdentification instance = null;
+    
+    /**
+     * Get instance with default signature file
+     * @return DroidIdentification instance
+     * @throws IOException
+     * @throws SignatureParseException 
+     */
+    public static DroidIdentification getInstance() throws IOException, SignatureParseException {
+        if (instance == null) {
+            instance = new DroidIdentification();
+        }
+        return instance;
+    }
+    
+    /**
+     * Get instance with path to signature file
+     * @param sigFilePath Path to signature file
+     * @return DroidIdentification instance
+     * @throws IOException
+     * @throws SignatureParseException 
+     */
+    public static DroidIdentification getInstance(String sigFilePath) throws IOException, SignatureParseException {
+        // reset instance if new signature file is used
+        if(instance != null && !instance.sigFilePath.equals(sigFilePath)) {
+            instance = null;
+        }
+        if (instance == null) {
+            instance = new DroidIdentification(sigFilePath);
+        }
+        return instance;
+    }
+    
+    private DroidIdentification() throws IOException, SignatureParseException {
         URL sigFileV67Url = new URL(SIGNATURE_FILE_V67_URL);
         InputStream sigFileStream = sigFileV67Url.openStream();
         File tmpSigFile = File.createTempFile("tmpsigfile", ".xml");
@@ -61,7 +94,7 @@ public class DroidIdentification {
         this.init();
     }
     
-    public DroidIdentification(String sigFilePath) throws SignatureParseException {
+    private DroidIdentification(String sigFilePath) throws SignatureParseException {
         this.sigFilePath = sigFilePath;
         this.init();
     }

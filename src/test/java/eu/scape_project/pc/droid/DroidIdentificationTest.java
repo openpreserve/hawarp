@@ -50,7 +50,7 @@ public class DroidIdentificationTest {
         FileOutputStream fos = new FileOutputStream(tmpSigFile);
         IOUtils.copy(sigFileStream, fos);
         fos.close();
-        dihj = new DroidIdentification(tmpSigFile.getAbsolutePath());
+        dihj = DroidIdentification.getInstance(tmpSigFile.getAbsolutePath());
     }
 
     @AfterClass
