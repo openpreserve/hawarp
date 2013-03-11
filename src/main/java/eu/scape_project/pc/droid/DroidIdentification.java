@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import org.apache.commons.io.IOUtils;
 import uk.gov.nationalarchives.droid.core.SignatureParseException;
@@ -42,21 +43,19 @@ import uk.gov.nationalarchives.droid.core.interfaces.resource.RequestMetaData;
  * @version 0.1
  */
 public class DroidIdentification {
-    
+
     public static final String SIGNATURE_FILE_V67_URL = "http://www.nationalarchives.gov.uk/documents/DROID_SignatureFile_V67.xml";
-    
     private String sigFilePath;
-    
     private BinarySignatureIdentifier bsi;
-    
     // Singleton Instance
     private static DroidIdentification instance = null;
-    
+
     /**
      * Get instance with default signature file
+     *
      * @return DroidIdentification instance
      * @throws IOException
-     * @throws SignatureParseException 
+     * @throws SignatureParseException
      */
     public static DroidIdentification getInstance() throws IOException, SignatureParseException {
         if (instance == null) {
@@ -64,17 +63,18 @@ public class DroidIdentification {
         }
         return instance;
     }
-    
+
     /**
      * Get instance with path to signature file
+     *
      * @param sigFilePath Path to signature file
      * @return DroidIdentification instance
      * @throws IOException
-     * @throws SignatureParseException 
+     * @throws SignatureParseException
      */
     public static DroidIdentification getInstance(String sigFilePath) throws IOException, SignatureParseException {
         // reset instance if new signature file is used
-        if(instance != null && !instance.sigFilePath.equals(sigFilePath)) {
+        if (instance != null && !instance.sigFilePath.equals(sigFilePath)) {
             instance = null;
         }
         if (instance == null) {
@@ -82,7 +82,7 @@ public class DroidIdentification {
         }
         return instance;
     }
-    
+
     private DroidIdentification() throws IOException, SignatureParseException {
         URL sigFileV67Url = new URL(SIGNATURE_FILE_V67_URL);
         InputStream sigFileStream = sigFileV67Url.openStream();
@@ -93,30 +93,54 @@ public class DroidIdentification {
         sigFilePath = tmpSigFile.getAbsolutePath();
         this.init();
     }
-    
+
     private DroidIdentification(String sigFilePath) throws SignatureParseException {
         this.sigFilePath = sigFilePath;
         this.init();
     }
-    
+
     private void init() throws SignatureParseException {
         bsi = new BinarySignatureIdentifier();
         bsi.setSignatureFile(sigFilePath);
         bsi.init();
     }
-    
+
     public IdentificationResult identify(String filePath) throws FileNotFoundException, IOException {
         File file = new File(filePath);
         URI resourceUri = file.toURI();
         InputStream in = new FileInputStream(file);
-        
-        RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(),file.getName());  
+
+        RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(), file.getName());
         RequestIdentifier identifier = new RequestIdentifier(resourceUri);
-        
+
         IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
         request.open(in);
         IdentificationResultCollection results = bsi.matchBinarySignatures(request);
-        IdentificationResult result = (IdentificationResult)results.getResults().iterator().next();
+        IdentificationResult result = (IdentificationResult) results.getResults().iterator().next();
+        return result;
+    }
+
+    public IdentificationResult identify(InputStream in, Long length) throws FileNotFoundException, IOException, URISyntaxException {
+        
+        // dummy request metadata
+        Long lastMod = 1363005532000L;
+        String tmpPath = "/tmp/dummy.tmp";
+        
+        File file = new File(tmpPath);
+        URI resourceUri = file.toURI();
+        
+        RequestMetaData metaData = new RequestMetaData(length, lastMod, file.getName());
+        RequestIdentifier identifier = new RequestIdentifier(resourceUri);
+        IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
+        request.open(in);
+
+        IdentificationResultCollection results = bsi.matchBinarySignatures(request);
+        IdentificationResult result = null;
+        if (results != null && results.getResults() != null) {
+            if (results.getResults().iterator().hasNext()) {
+                result = (IdentificationResult) results.getResults().iterator().next();
+            }
+        }
         return result;
     }
 }

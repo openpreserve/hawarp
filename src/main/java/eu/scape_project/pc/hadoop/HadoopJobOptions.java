@@ -44,18 +44,16 @@ public class HadoopJobOptions {
     public static final String NAME_OPT_DESC = "Job name.";
     
     public static org.apache.commons.cli.Options OPTIONS = new org.apache.commons.cli.Options();
-    public static final String USAGE = "hadoop jar"
-            + " target/tb-lsdr-hocrparser-0.1-SNAPSHOT-jar-with-dependencies.jar";
+    public static final String USAGE = "hadoop jar "
+            + "target/droid-identify-hadoopjob-1.0-jar-with-dependencies.jar "
+            + "-n job_name -d /path/to/hdfs/input/directory";
     static {
         OPTIONS.addOption(HELP_FLG, HELP_OPT, false, HELP_OPT_DESC);
-        
         OPTIONS.addOption(DIR_FLG, DIR_OPT, true, DIR_OPT_DESC);
         OPTIONS.addOption(NAME_FLG, NAME_OPT, true, NAME_OPT_DESC);
     }
     
     public static void initOptions(CommandLine cmd, HadoopJobCliConfig pc) {
-
-        
         // dir
         String dirStr;
         if (!(cmd.hasOption(DIR_OPT) && cmd.getOptionValue(DIR_OPT) != null)) {
@@ -65,7 +63,6 @@ public class HadoopJobOptions {
             pc.setDirStr(dirStr);
             logger.info("Directory: " + dirStr);
         }
-        
         // name
         String nameStr;
         if (!(cmd.hasOption(NAME_OPT) && cmd.getOptionValue(NAME_OPT) != null)) {
@@ -75,7 +72,6 @@ public class HadoopJobOptions {
             pc.setHadoopJobName(nameStr);
             logger.info("Hadoop job name: " + nameStr);
         }
-       
     }
 
     public static void exit(String msg, int status) {

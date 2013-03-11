@@ -37,10 +37,6 @@ public class HadoopJobCliConfig implements Cloneable {
         this.hadoopJobName = hadoopJobName;
     }
 
-    
-    
-    
-
     /**
      * Empty constructor
      */
@@ -49,8 +45,6 @@ public class HadoopJobCliConfig implements Cloneable {
     }
 
     private static Logger logger = LoggerFactory.getLogger(HadoopJobCliConfig.class.getName());
-
-    
 
     /**
      * Getter for the directories parameter
@@ -68,8 +62,6 @@ public class HadoopJobCliConfig implements Cloneable {
         this.dirStr = dirsStr;
     }
 
-  
-
     /**
      * Clone object
      * @return cloned object
@@ -82,6 +74,5 @@ public class HadoopJobCliConfig implements Cloneable {
             throw new AssertionError();
         }
     }
-
-
+    
 }

@@ -16,10 +16,8 @@
  */
 package eu.scape_project.pc.droid;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import org.apache.commons.io.IOUtils;
 import org.junit.*;
@@ -66,7 +64,7 @@ public class DroidIdentificationTest {
     }
 
     /**
-     * 
+     * Test ODT file format identification
      * @throws IOException 
      */
     @Test
@@ -83,7 +81,7 @@ public class DroidIdentificationTest {
     }
     
     /**
-     * 
+     * Test PDF file format identification
      * @throws IOException 
      */
     @Test
@@ -94,6 +92,22 @@ public class DroidIdentificationTest {
         IOUtils.copy(odtTestFileStream, fos);
         fos.close();
         IdentificationResult result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
+        assertEquals("fmt/18",result.getPuid());
+        assertEquals("application/pdf",result.getMimeType()); 
+        assertEquals("Acrobat PDF 1.4 - Portable Document Format",result.getName()); 
+    }
+    
+    /**
+     * Test PDF file format identification using an input stream of known length
+     * @throws IOException 
+     */
+    @Test
+    public void testPdfInputStreamIdentify() throws IOException, FileNotFoundException, URISyntaxException {
+        InputStream pdfInputStream = DroidIdentificationTest.class.getResourceAsStream("testfile.pdf");
+        // Length of input stream is known here, must be determined beforehand 
+        // when running file format identification on an input stream.
+        Long length = 8255L;
+        IdentificationResult result = dihj.identify(pdfInputStream , length);
         assertEquals("fmt/18",result.getPuid());
         assertEquals("application/pdf",result.getMimeType()); 
         assertEquals("Acrobat PDF 1.4 - Portable Document Format",result.getName()); 
