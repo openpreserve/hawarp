@@ -16,6 +16,7 @@
  */
 package eu.scape_project.pc.droid;
 
+import eu.scape_project.pc.hadoop.DroidIdentifyHadoopJob;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,7 +26,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.NoSuchElementException;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.nationalarchives.droid.core.SignatureParseException;
 import uk.gov.nationalarchives.droid.core.BinarySignatureIdentifier;
 
@@ -43,6 +47,8 @@ import uk.gov.nationalarchives.droid.core.interfaces.resource.RequestMetaData;
  * @version 0.1
  */
 public class DroidIdentification {
+    
+    private static Logger logger = LoggerFactory.getLogger(DroidIdentification.class.getName());
 
     public static final String SIGNATURE_FILE_V67_URL = "http://www.nationalarchives.gov.uk/documents/DROID_SignatureFile_V67.xml";
     private String sigFilePath;
@@ -109,26 +115,42 @@ public class DroidIdentification {
         File file = new File(filePath);
         URI resourceUri = file.toURI();
         InputStream in = new FileInputStream(file);
-
+        
+        logger.info("Identification of resource: "+resourceUri.toString());
+        
         RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(), file.getName());
+        logger.info("File length: "+file.length());
+        logger.info("File modified: "+file.lastModified());
+        logger.info("File name: "+file.getName());
         RequestIdentifier identifier = new RequestIdentifier(resourceUri);
 
         IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
         request.open(in);
-        IdentificationResultCollection results = bsi.matchBinarySignatures(request);
-        IdentificationResult result = (IdentificationResult) results.getResults().iterator().next();
+        IdentificationResult result = null;
+        try {
+            IdentificationResultCollection results = bsi.matchBinarySignatures(request);
+
+            if (results != null && results.getResults() != null) {
+                if (results.getResults().iterator().hasNext()) {
+                    result = (IdentificationResult) results.getResults().iterator().next();
+                }
+            }
+        } catch (NoSuchElementException ex) {
+            logger.error("Element not found error",ex);
+            return null;
+        }
         return result;
     }
 
     public IdentificationResult identify(InputStream in, Long length) throws FileNotFoundException, IOException, URISyntaxException {
-        
+
         // dummy request metadata
         Long lastMod = 1363005532000L;
         String tmpPath = "/tmp/dummy.tmp";
-        
+
         File file = new File(tmpPath);
         URI resourceUri = file.toURI();
-        
+
         RequestMetaData metaData = new RequestMetaData(length, lastMod, file.getName());
         RequestIdentifier identifier = new RequestIdentifier(resourceUri);
         IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);

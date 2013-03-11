@@ -18,10 +18,7 @@
 package eu.scape_project.pc.hadoop;
 
 import eu.scape_project.pc.droid.DroidIdentification;
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import org.apache.commons.cli.CommandLine;
@@ -81,6 +78,8 @@ public class DroidIdentifyHadoopJob {
             
             DroidIdentification dihj = null;
             
+            File dummy = new File("/tmp/dummy.tmp");
+            
             // Attention: Hadoop versions < 0.22.0 return a padded byte array
             // with arbitrary data chunks and zero bytes using BytesWritable.getBytes.
             // BytesWritable.getBytes.getLength() returns the real size of the
@@ -133,6 +132,11 @@ public class DroidIdentifyHadoopJob {
 
         try {
             Job job = new Job(conf, name);
+            
+              // local debugging
+            job.getConfiguration().set("mapred.job.tracker", "local");
+            job.getConfiguration().set("fs.default.name", "file:///");
+            
             job.setJarByClass(DroidIdentifyHadoopJob.class);
 
             job.setMapperClass(DroidIdentifyMapper.class);
