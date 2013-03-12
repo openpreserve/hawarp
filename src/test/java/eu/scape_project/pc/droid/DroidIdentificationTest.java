@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
 import uk.gov.nationalarchives.droid.core.interfaces.IdentificationResult;
 
 /**
- * Test class for the Droid File Format Identification Hadoop Job.
+ * Test class for the Droid File Format Identification.
  *
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
@@ -76,6 +76,9 @@ public class DroidIdentificationTest {
         IOUtils.copy(odtTestFileStream, fos);
         fos.close();
         List<IdentificationResult> result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
+        if(result.isEmpty()) {
+            fail("No identification result");
+        }
         IdentificationResult res = result.get(0);
         assertEquals("fmt/290",res.getPuid());
         assertEquals("application/vnd.oasis.opendocument.text",res.getMimeType()); 
@@ -94,6 +97,9 @@ public class DroidIdentificationTest {
         IOUtils.copy(odtTestFileStream, fos);
         fos.close();
         List<IdentificationResult> result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
+        if(result.isEmpty()) {
+            fail("No identification result");
+        }
         IdentificationResult res = result.get(0);
         assertEquals("fmt/18",res.getPuid());
         assertEquals("application/pdf",res.getMimeType()); 
@@ -107,10 +113,13 @@ public class DroidIdentificationTest {
     @Test
     public void testPdfInputStreamIdentify() throws IOException, FileNotFoundException, URISyntaxException {
         InputStream pdfInputStream = DroidIdentificationTest.class.getResourceAsStream("testfile.pdf");
-        // Length of input stream is known here, must be determined beforehand 
-        // when running file format identification on an input stream.
-        Long length = 8255L;
+        // Length of input stream must be known in order to perform the
+        // identification process on the input stream.
+        Long length = 12577L;
         List<IdentificationResult> result = dihj.identify(pdfInputStream , length);
+        if(result.isEmpty()) {
+            fail("No identification result");
+        }
         IdentificationResult res = result.get(0);
         assertEquals("fmt/18",res.getPuid());
         assertEquals("application/pdf",res.getMimeType()); 
