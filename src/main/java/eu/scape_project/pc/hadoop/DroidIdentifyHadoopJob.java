@@ -14,7 +14,6 @@
  * limitations under the License.
  * under the License.
  */
-
 package eu.scape_project.pc.hadoop;
 
 import eu.scape_project.pc.droid.DroidIdentification;
@@ -26,6 +25,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
@@ -44,7 +44,7 @@ import uk.gov.nationalarchives.droid.core.SignatureParseException;
 import uk.gov.nationalarchives.droid.core.interfaces.IdentificationResult;
 
 public class DroidIdentifyHadoopJob {
-    
+
     // Logger instance
     private static Logger logger = LoggerFactory.getLogger(DroidIdentifyHadoopJob.class.getName());
 
@@ -76,11 +76,16 @@ public class DroidIdentifyHadoopJob {
         @Override
         public void map(Text key, BytesWritable value, Mapper.Context context)
                 throws IOException, InterruptedException {
-            
+
             DroidIdentification dihj = null;
-            
-            File dummy = new File("/tmp/dummy.tmp");
-            
+
+            // default file that is defined when performing file format 
+            // identification on an input stream using Droid 6.1.
+            File defaultDroidFile = new File("/tmp/dummy.tmp");
+            if (!defaultDroidFile.exists()) {
+                FileUtils.touch(defaultDroidFile);
+            }
+
             // Attention: Hadoop versions < 0.22.0 return a padded byte array
             // with arbitrary data chunks and zero bytes using BytesWritable.getBytes.
             // BytesWritable.getBytes.getLength() returns the real size of the
@@ -94,20 +99,23 @@ public class DroidIdentifyHadoopJob {
             InputStream valueInputStream = new ByteArrayInputStream(slicedBytes);
             try {
                 dihj = DroidIdentification.getInstance();
-                if(dihj != null) {
-                    List<IdentificationResult> result = dihj.identify(valueInputStream , new Long(bytesLen));
-                    String mime = "";
-                    for(IdentificationResult ir : result) {
-                        if(ir.getMimeType() != null && !ir.getMimeType().isEmpty()) {
-                            // take first mime type, ignore others
-                            mime = ir.getMimeType();
-                            break;
+                if (dihj != null) {
+                    List<IdentificationResult> result = dihj.identify(valueInputStream, new Long(bytesLen));
+                    String puid = "";
+                    if (result != null && !result.isEmpty()) {
+                        for (IdentificationResult ir : result) {
+                            String identifier = ir.getPuid();
+                            if (identifier != null && !identifier.isEmpty()) {
+                                // take first puid, ignore others
+                                puid = identifier;
+                                break;
+                            }
                         }
                     }
-                    if(mime.equals("")) {
-                        mime = "application/octet-stream"; // unknown
+                    if (puid.isEmpty()) {
+                        puid = "fmt/0"; // unknown
                     }
-                    context.write(new Text(mime), new LongWritable(1L) );
+                    context.write(new Text(puid), new LongWritable(1L));
                 } else {
                     logger.error("Droid identifier not available");
                 }
@@ -144,11 +152,11 @@ public class DroidIdentifyHadoopJob {
 
         try {
             Job job = new Job(conf, name);
-            
-              // local debugging
+
+            // local debugging
             job.getConfiguration().set("mapred.job.tracker", "local");
             job.getConfiguration().set("fs.default.name", "file:///");
-            
+
             job.setJarByClass(DroidIdentifyHadoopJob.class);
 
             job.setMapperClass(DroidIdentifyMapper.class);
