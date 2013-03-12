@@ -21,6 +21,7 @@ import eu.scape_project.pc.droid.DroidIdentification;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.ParseException;
@@ -94,8 +95,19 @@ public class DroidIdentifyHadoopJob {
             try {
                 dihj = DroidIdentification.getInstance();
                 if(dihj != null) {
-                    IdentificationResult result = dihj.identify(valueInputStream , new Long(bytesLen));
-                    context.write(new Text(result.getMimeType()), new LongWritable(1L) );
+                    List<IdentificationResult> result = dihj.identify(valueInputStream , new Long(bytesLen));
+                    String mime = "";
+                    for(IdentificationResult ir : result) {
+                        if(ir.getMimeType() != null && !ir.getMimeType().isEmpty()) {
+                            // take first mime type, ignore others
+                            mime = ir.getMimeType();
+                            break;
+                        }
+                    }
+                    if(mime.equals("")) {
+                        mime = "application/octet-stream"; // unknown
+                    }
+                    context.write(new Text(mime), new LongWritable(1L) );
                 } else {
                     logger.error("Droid identifier not available");
                 }

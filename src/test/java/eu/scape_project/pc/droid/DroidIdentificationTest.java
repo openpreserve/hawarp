@@ -19,6 +19,7 @@ package eu.scape_project.pc.droid;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -74,10 +75,11 @@ public class DroidIdentificationTest {
         FileOutputStream fos = new FileOutputStream(tmpOdtTestFile);
         IOUtils.copy(odtTestFileStream, fos);
         fos.close();
-        IdentificationResult result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
-        assertEquals("fmt/290",result.getPuid());
-        assertEquals("application/vnd.oasis.opendocument.text",result.getMimeType()); 
-        assertEquals("OpenDocument Text",result.getName()); 
+        List<IdentificationResult> result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
+        IdentificationResult res = result.get(0);
+        assertEquals("fmt/290",res.getPuid());
+        assertEquals("application/vnd.oasis.opendocument.text",res.getMimeType()); 
+        assertEquals("OpenDocument Text",res.getName()); 
     }
     
     /**
@@ -91,10 +93,11 @@ public class DroidIdentificationTest {
         FileOutputStream fos = new FileOutputStream(tmpOdtTestFile);
         IOUtils.copy(odtTestFileStream, fos);
         fos.close();
-        IdentificationResult result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
-        assertEquals("fmt/18",result.getPuid());
-        assertEquals("application/pdf",result.getMimeType()); 
-        assertEquals("Acrobat PDF 1.4 - Portable Document Format",result.getName()); 
+        List<IdentificationResult> result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
+        IdentificationResult res = result.get(0);
+        assertEquals("fmt/18",res.getPuid());
+        assertEquals("application/pdf",res.getMimeType()); 
+        assertEquals("Acrobat PDF 1.4 - Portable Document Format",res.getName()); 
     }
     
     /**
@@ -107,10 +110,11 @@ public class DroidIdentificationTest {
         // Length of input stream is known here, must be determined beforehand 
         // when running file format identification on an input stream.
         Long length = 8255L;
-        IdentificationResult result = dihj.identify(pdfInputStream , length);
-        assertEquals("fmt/18",result.getPuid());
-        assertEquals("application/pdf",result.getMimeType()); 
-        assertEquals("Acrobat PDF 1.4 - Portable Document Format",result.getName()); 
+        List<IdentificationResult> result = dihj.identify(pdfInputStream , length);
+        IdentificationResult res = result.get(0);
+        assertEquals("fmt/18",res.getPuid());
+        assertEquals("application/pdf",res.getMimeType()); 
+        assertEquals("Acrobat PDF 1.4 - Portable Document Format",res.getName()); 
     }
     
 }

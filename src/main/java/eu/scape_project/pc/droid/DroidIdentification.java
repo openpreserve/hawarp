@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -41,15 +42,19 @@ import uk.gov.nationalarchives.droid.core.interfaces.resource.FileSystemIdentifi
 import uk.gov.nationalarchives.droid.core.interfaces.resource.RequestMetaData;
 
 /**
- * Droid File Format Identification Hadoop Job.
+ * Droid File Format Identification. File format identification using the Droid
+ * version 6.1 API. A DroidIdentification object can be initialised with a
+ * default signature file version 67 using the default constructor or with
+ * another signature file using the constructor that allows to give a path to
+ * another signature file. Identification can be performed using a file or an
+ * input stream.
  *
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
  */
 public class DroidIdentification {
-    
-    private static Logger logger = LoggerFactory.getLogger(DroidIdentification.class.getName());
 
+    private static Logger logger = LoggerFactory.getLogger(DroidIdentification.class.getName());
     public static final String SIGNATURE_FILE_V67_URL = "http://www.nationalarchives.gov.uk/documents/DROID_SignatureFile_V67.xml";
     private String sigFilePath;
     private BinarySignatureIdentifier bsi;
@@ -89,6 +94,12 @@ public class DroidIdentification {
         return instance;
     }
 
+    /**
+     * Constructor which initialises a default signature file (v67)
+     *
+     * @throws IOException
+     * @throws SignatureParseException
+     */
     private DroidIdentification() throws IOException, SignatureParseException {
         URL sigFileV67Url = new URL(SIGNATURE_FILE_V67_URL);
         InputStream sigFileStream = sigFileV67Url.openStream();
@@ -100,69 +111,83 @@ public class DroidIdentification {
         this.init();
     }
 
+    /**
+     * Constructor which initialises a given specified signature file
+     *
+     * @param sigFilePath
+     * @throws SignatureParseException
+     */
     private DroidIdentification(String sigFilePath) throws SignatureParseException {
         this.sigFilePath = sigFilePath;
         this.init();
     }
 
+    /**
+     * Initialise signature parser
+     *
+     * @throws SignatureParseException
+     */
     private void init() throws SignatureParseException {
         bsi = new BinarySignatureIdentifier();
         bsi.setSignatureFile(sigFilePath);
         bsi.init();
     }
 
-    public IdentificationResult identify(String filePath) throws FileNotFoundException, IOException {
+    /**
+     * Run droid identification on file
+     *
+     * @param filePath Absolute file path
+     * @return Result list
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public List<IdentificationResult> identify(String filePath) throws FileNotFoundException, IOException {
         File file = new File(filePath);
         URI resourceUri = file.toURI();
         InputStream in = new FileInputStream(file);
-        
-        logger.info("Identification of resource: "+resourceUri.toString());
-        
+        logger.debug("Identification of resource: " + resourceUri.toString());
         RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(), file.getName());
-        logger.info("File length: "+file.length());
-        logger.info("File modified: "+file.lastModified());
-        logger.info("File name: "+file.getName());
+        logger.debug("File length: " + file.length());
+        logger.debug("File modified: " + file.lastModified());
+        logger.debug("File name: " + file.getName());
         RequestIdentifier identifier = new RequestIdentifier(resourceUri);
-
         IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
         request.open(in);
-        IdentificationResult result = null;
-        try {
-            IdentificationResultCollection results = bsi.matchBinarySignatures(request);
-
-            if (results != null && results.getResults() != null) {
-                if (results.getResults().iterator().hasNext()) {
-                    result = (IdentificationResult) results.getResults().iterator().next();
-                }
-            }
-        } catch (NoSuchElementException ex) {
-            logger.error("Element not found error",ex);
+        IdentificationResultCollection results = bsi.matchBinarySignatures(request);
+        if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
+            logger.warn("No identification result");
             return null;
+        } else {
+            return results.getResults();
         }
-        return result;
     }
 
-    public IdentificationResult identify(InputStream in, Long length) throws FileNotFoundException, IOException, URISyntaxException {
-
+    /**
+     * Run droid identification on input stream of determined length
+     *
+     * @param in Input stream
+     * @param length Length
+     * @return Result list
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    public List<IdentificationResult> identify(InputStream in, Long length) throws FileNotFoundException, IOException, URISyntaxException {
         // dummy request metadata
         Long lastMod = 1363005532000L;
         String tmpPath = "/tmp/dummy.tmp";
-
         File file = new File(tmpPath);
         URI resourceUri = file.toURI();
-
         RequestMetaData metaData = new RequestMetaData(length, lastMod, file.getName());
         RequestIdentifier identifier = new RequestIdentifier(resourceUri);
         IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
         request.open(in);
-
         IdentificationResultCollection results = bsi.matchBinarySignatures(request);
-        IdentificationResult result = null;
-        if (results != null && results.getResults() != null) {
-            if (results.getResults().iterator().hasNext()) {
-                result = (IdentificationResult) results.getResults().iterator().next();
-            }
+        if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
+            logger.warn("No identification result");
+            return null;
+        } else {
+            return results.getResults();
         }
-        return result;
     }
 }
