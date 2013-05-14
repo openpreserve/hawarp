@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
@@ -71,50 +72,16 @@ public class DroidIdentifyHadoopJob {
      * The map class of HocrParser.
      */
     public static class DroidIdentifyMapper
-            extends Mapper<Text, BytesWritable, Text, LongWritable> {
+            extends Mapper<LongWritable, Text, Text, LongWritable> {
 
         @Override
-        public void map(Text key, BytesWritable value, Mapper.Context context)
+        public void map(LongWritable key, Text value, Mapper.Context context)
                 throws IOException, InterruptedException {
-
             DroidIdentification dihj = null;
-
-            // default file that is defined when performing file format 
-            // identification on an input stream using Droid 6.1.
-            File defaultDroidFile = new File("/tmp/dummy.tmp");
-            if (!defaultDroidFile.exists()) {
-                FileUtils.touch(defaultDroidFile);
-            }
-
-            // Attention: Hadoop versions < 0.22.0 return a padded byte array
-            // with arbitrary data chunks and zero bytes using BytesWritable.getBytes.
-            // BytesWritable.getBytes.getLength() returns the real size of the
-            // BytesWritable content. The name of BytesWritable.getBytes is
-            // misleading, which has been fixed in Hadoop version 0.22.0.
-            // See https://issues.apache.org/jira/browse/HADOOP-6298
-            byte[] bytes = value.getBytes();
-            int bytesLen = value.getLength();
-            byte[] slicedBytes = new byte[bytesLen];
-            System.arraycopy(bytes, 0, slicedBytes, 0, bytesLen);
-            InputStream valueInputStream = new ByteArrayInputStream(slicedBytes);
             try {
                 dihj = DroidIdentification.getInstance();
                 if (dihj != null) {
-                    List<IdentificationResult> result = dihj.identify(valueInputStream, new Long(bytesLen));
-                    String puid = "";
-                    if (result != null && !result.isEmpty()) {
-                        for (IdentificationResult ir : result) {
-                            String identifier = ir.getPuid();
-                            if (identifier != null && !identifier.isEmpty()) {
-                                // take first puid, ignore others
-                                puid = identifier;
-                                break;
-                            }
-                        }
-                    }
-                    if (puid.isEmpty()) {
-                        puid = "fmt/0"; // unknown
-                    }
+                    String puid = dihj.identify(value.toString());
                     context.write(new Text(puid), new LongWritable(1L));
                 } else {
                     logger.error("Droid identifier not available");
@@ -123,8 +90,6 @@ public class DroidIdentifyHadoopJob {
                 logger.error("Error parsing signature file", ex);
             } catch (FileNotFoundException ex) {
                 logger.error("File not found error", ex);
-            } catch (URISyntaxException ex) {
-                logger.error("URI syntax error", ex);
             }
         }
     }
@@ -154,8 +119,8 @@ public class DroidIdentifyHadoopJob {
             Job job = new Job(conf, name);
 
             // local debugging
-            job.getConfiguration().set("mapred.job.tracker", "local");
-            job.getConfiguration().set("fs.default.name", "file:///");
+//            job.getConfiguration().set("mapred.job.tracker", "local");
+//            job.getConfiguration().set("fs.default.name", "file:///");
 
             job.setJarByClass(DroidIdentifyHadoopJob.class);
 
@@ -163,7 +128,7 @@ public class DroidIdentifyHadoopJob {
             //job.setCombinerClass(DroidIdentifyReducer.class);
             job.setReducerClass(DroidIdentifyReducer.class);
 
-            job.setInputFormatClass(SequenceFileInputFormat.class);
+            job.setInputFormatClass(TextInputFormat.class);
 
             job.setOutputFormatClass(TextOutputFormat.class);
             //SequenceFileOutputFormat.setOutputCompressionType(job, SequenceFile.CompressionType.NONE);

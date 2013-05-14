@@ -141,7 +141,8 @@ public class DroidIdentification {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public List<IdentificationResult> identify(String filePath) throws FileNotFoundException, IOException {
+    public String identify(String filePath) throws FileNotFoundException, IOException {
+        String puid = "fmt/0";
         File file = new File(filePath);
         URI resourceUri = file.toURI();
         InputStream in = new FileInputStream(file);
@@ -154,12 +155,26 @@ public class DroidIdentification {
         IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
         request.open(in);
         IdentificationResultCollection results = bsi.matchBinarySignatures(request);
+        bsi.removeLowerPriorityHits(results);
         if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
             logger.warn("No identification result");
-            return null;
         } else {
-            return results.getResults();
+            List<IdentificationResult> result = results.getResults();
+            if (result != null && !result.isEmpty()) {
+                for (IdentificationResult ir : result) {
+                    String id = ir.getPuid();
+                    if (id != null && !id.isEmpty()) {
+                        // take first puid, ignore others
+                        puid = id;
+                        break;
+                    }
+                }
+            }
+            if (puid.isEmpty()) {
+                puid = "fmt/0"; // unknown
+            }
         }
+        return puid;
     }
 
     /**
@@ -183,6 +198,7 @@ public class DroidIdentification {
         IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
         request.open(in);
         IdentificationResultCollection results = bsi.matchBinarySignatures(request);
+        bsi.removeLowerPriorityHits(results);
         if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
             logger.warn("No identification result");
             return null;

@@ -37,7 +37,7 @@ public class HadoopJobOptions {
 
     public static final String DIR_FLG = "d";
     public static final String DIR_OPT = "dir";
-    public static final String DIR_OPT_DESC = "HDFS directory containing sequence files.";
+    public static final String DIR_OPT_DESC = "HDFS directory containing text file(s) with file references.";
     
     public static final String NAME_FLG = "n";
     public static final String NAME_OPT = "name";

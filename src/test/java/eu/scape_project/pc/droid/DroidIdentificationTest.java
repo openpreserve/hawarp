@@ -68,43 +68,43 @@ public class DroidIdentificationTest {
      * Test ODT file format identification
      * @throws IOException 
      */
-    @Test
-    public void testIdentifyOdt() throws IOException {
-        InputStream odtTestFileStream = DroidIdentificationTest.class.getResourceAsStream("testfile.odt");
-        File tmpOdtTestFile = File.createTempFile("odttestfile", ".odt");
-        FileOutputStream fos = new FileOutputStream(tmpOdtTestFile);
-        IOUtils.copy(odtTestFileStream, fos);
-        fos.close();
-        List<IdentificationResult> result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
-        if(result.isEmpty()) {
-            fail("No identification result");
-        }
-        IdentificationResult res = result.get(0);
-        assertEquals("fmt/290",res.getPuid());
-        assertEquals("application/vnd.oasis.opendocument.text",res.getMimeType()); 
-        assertEquals("OpenDocument Text",res.getName()); 
-    }
+//    @Test
+//    public void testIdentifyOdt() throws IOException {
+//        InputStream odtTestFileStream = DroidIdentificationTest.class.getResourceAsStream("testfile.odt");
+//        File tmpOdtTestFile = File.createTempFile("odttestfile", ".odt");
+//        FileOutputStream fos = new FileOutputStream(tmpOdtTestFile);
+//        IOUtils.copy(odtTestFileStream, fos);
+//        fos.close();
+//        List<IdentificationResult> result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
+//        if(result.isEmpty()) {
+//            fail("No identification result");
+//        }
+//        IdentificationResult res = result.get(0);
+//        assertEquals("fmt/290",res.getPuid());
+//        assertEquals("application/vnd.oasis.opendocument.text",res.getMimeType()); 
+//        assertEquals("OpenDocument Text",res.getName()); 
+//    }
     
     /**
      * Test PDF file format identification
      * @throws IOException 
      */
-    @Test
-    public void testIdentifyPdf() throws IOException {
-        InputStream odtTestFileStream = DroidIdentificationTest.class.getResourceAsStream("testfile.pdf");
-        File tmpOdtTestFile = File.createTempFile("pdftestfile", ".pdf");
-        FileOutputStream fos = new FileOutputStream(tmpOdtTestFile);
-        IOUtils.copy(odtTestFileStream, fos);
-        fos.close();
-        List<IdentificationResult> result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
-        if(result.isEmpty()) {
-            fail("No identification result");
-        }
-        IdentificationResult res = result.get(0);
-        assertEquals("fmt/18",res.getPuid());
-        assertEquals("application/pdf",res.getMimeType()); 
-        assertEquals("Acrobat PDF 1.4 - Portable Document Format",res.getName()); 
-    }
+//    @Test
+//    public void testIdentifyPdf() throws IOException {
+//        InputStream odtTestFileStream = DroidIdentificationTest.class.getResourceAsStream("testfile.pdf");
+//        File tmpOdtTestFile = File.createTempFile("pdftestfile", ".pdf");
+//        FileOutputStream fos = new FileOutputStream(tmpOdtTestFile);
+//        IOUtils.copy(odtTestFileStream, fos);
+//        fos.close();
+//        List<IdentificationResult> result = dihj.identify(tmpOdtTestFile.getAbsolutePath());
+//        if(result.isEmpty()) {
+//            fail("No identification result");
+//        }
+//        IdentificationResult res = result.get(0);
+//        assertEquals("fmt/18",res.getPuid());
+//        assertEquals("application/pdf",res.getMimeType()); 
+//        assertEquals("Acrobat PDF 1.4 - Portable Document Format",res.getName()); 
+//    }
     
     /**
      * Test PDF file format identification using an input stream of known length
