@@ -47,7 +47,7 @@ public class TikaIdentifyHadoopJob {
     // Logger instance
     private static Logger logger = LoggerFactory.getLogger(TikaIdentifyHadoopJob.class.getName());
 
-    public static class DroidIdentifyReducer
+    public static class TikaIdentifyReducer
             extends Reducer<Text, LongWritable, Text, LongWritable> {
 
         @Override
@@ -69,7 +69,7 @@ public class TikaIdentifyHadoopJob {
     /**
      * The map class of HocrParser.
      */
-    public static class DroidIdentifyMapper
+    public static class TikaIdentifyMapper
             extends Mapper<LongWritable, Text, Text, LongWritable> {
 
         @Override
@@ -108,7 +108,7 @@ public class TikaIdentifyHadoopJob {
 
         String name = pc.getHadoopJobName();
         if (name == null || name.equals("")) {
-            name = "droid_identification";
+            name = "tika_identification";
         }
 
         try {
@@ -120,9 +120,9 @@ public class TikaIdentifyHadoopJob {
 
             job.setJarByClass(TikaIdentifyHadoopJob.class);
 
-            job.setMapperClass(DroidIdentifyMapper.class);
-            //job.setCombinerClass(DroidIdentifyReducer.class);
-            job.setReducerClass(DroidIdentifyReducer.class);
+            job.setMapperClass(TikaIdentifyMapper.class);
+            //job.setCombinerClass(TikaIdentifyReducer.class);
+            job.setReducerClass(TikaIdentifyReducer.class);
 
             job.setInputFormatClass(TextInputFormat.class);
 
@@ -137,7 +137,7 @@ public class TikaIdentifyHadoopJob {
             job.setOutputValueClass(LongWritable.class);
 
             SequenceFileInputFormat.addInputPath(job, new Path(dir));
-            String outpath = "output/" + System.currentTimeMillis() + "dri";
+            String outpath = "output/" + System.currentTimeMillis() + "tid";
             FileOutputFormat.setOutputPath(job, new Path(outpath));
             job.waitForCompletion(true);
             System.out.print(outpath);
