@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +101,7 @@ public class DroidIdentification {
      * @throws IOException
      * @throws SignatureParseException
      */
-    private DroidIdentification() throws IOException, SignatureParseException {
+    public DroidIdentification() throws IOException, SignatureParseException {
         URL sigFileV67Url = new URL(SIGNATURE_FILE_V67_URL);
         InputStream sigFileStream = sigFileV67Url.openStream();
         File tmpSigFile = File.createTempFile("tmpsigfile", ".xml");
@@ -141,69 +142,59 @@ public class DroidIdentification {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public String identify(String filePath) throws FileNotFoundException, IOException {
+    public String identify(String filePath)  {
+        InputStream in = null;
         String puid = "fmt/0";
-        File file = new File(filePath);
-        URI resourceUri = file.toURI();
-        InputStream in = new FileInputStream(file);
-        logger.debug("Identification of resource: " + resourceUri.toString());
-        RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(), file.getName());
-        logger.debug("File length: " + file.length());
-        logger.debug("File modified: " + file.lastModified());
-        logger.debug("File name: " + file.getName());
-        RequestIdentifier identifier = new RequestIdentifier(resourceUri);
-        IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
-        request.open(in);
-        IdentificationResultCollection results = bsi.matchBinarySignatures(request);
-        bsi.removeLowerPriorityHits(results);
-        if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
-            logger.warn("No identification result");
-        } else {
-            List<IdentificationResult> result = results.getResults();
-            if (result != null && !result.isEmpty()) {
-                for (IdentificationResult ir : result) {
-                    String id = ir.getPuid();
-                    if (id != null && !id.isEmpty()) {
-                        // take first puid, ignore others
-                        puid = id;
-                        break;
+        IdentificationRequest request = null;
+        try {
+            
+            File file = new File(filePath);
+            URI resourceUri = file.toURI();
+            in = new FileInputStream(file);
+            logger.debug("Identification of resource: " + resourceUri.toString());
+            RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(), file.getName());
+            logger.debug("File length: " + file.length());
+            logger.debug("File modified: " + file.lastModified());
+            logger.debug("File name: " + file.getName());
+            RequestIdentifier identifier = new RequestIdentifier(resourceUri);
+            request = new FileSystemIdentificationRequest(metaData, identifier);
+            request.open(in);
+            IdentificationResultCollection results = bsi.matchBinarySignatures(request);
+            bsi.removeLowerPriorityHits(results);
+            if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
+                logger.warn("No identification result");
+            } else {
+                List<IdentificationResult> result = results.getResults();
+                if (result != null && !result.isEmpty()) {
+                    for (IdentificationResult ir : result) {
+                        String id = ir.getPuid();
+                        if (id != null && !id.isEmpty()) {
+                            // take first puid, ignore others
+                            puid = id;
+                            break;
+                        }
                     }
                 }
+                if (puid.isEmpty()) {
+                    puid = "fmt/0"; // unknown
+                }
             }
-            if (puid.isEmpty()) {
-                puid = "fmt/0"; // unknown
+             request.close();
+        } catch (IOException ex) {
+            logger.error("I/O Exception", ex);
+        } finally {
+            try {
+                if(request != null) {
+                    request.close();
+                }
+                if(in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+                logger.warn("I/O error when closing stream",ex);
             }
         }
+        
         return puid;
-    }
-
-    /**
-     * Run droid identification on input stream of determined length
-     *
-     * @param in Input stream
-     * @param length Length
-     * @return Result list
-     * @throws FileNotFoundException
-     * @throws IOException
-     * @throws URISyntaxException
-     */
-    public List<IdentificationResult> identify(InputStream in, Long length) throws FileNotFoundException, IOException, URISyntaxException {
-        // dummy request metadata
-        Long lastMod = 1363005532000L;
-        String tmpPath = "/tmp/dummy.tmp";
-        File file = new File(tmpPath);
-        URI resourceUri = file.toURI();
-        RequestMetaData metaData = new RequestMetaData(length, lastMod, file.getName());
-        RequestIdentifier identifier = new RequestIdentifier(resourceUri);
-        IdentificationRequest request = new FileSystemIdentificationRequest(metaData, identifier);
-        request.open(in);
-        IdentificationResultCollection results = bsi.matchBinarySignatures(request);
-        bsi.removeLowerPriorityHits(results);
-        if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
-            logger.warn("No identification result");
-            return null;
-        } else {
-            return results.getResults();
-        }
     }
 }

@@ -22,7 +22,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>eu.scape_project.pc.hadoop.DroidIdentifyHadoopJob</mainClass>
+                            <mainClass>eu.scape_project.pc.droid.cli.DroidCli</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
