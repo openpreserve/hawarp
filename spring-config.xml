@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
+    <!--
+    1st parameter: container file name (e.g. name of the ARC file: 3-2-20130522085320-00000-prepc2.arc.gz)
+    2nd parameter: record identifier (e.g. 20130522085321/http://someserver.com/test/image.png-mime)
+    The character sequence %1$s denotes the first parameter, %2$s the second one.
+    The order can be changed. For example, the format string "%2$s-%1$s" 
+    defines a hyphen-separated key output in reverse order.
+    -->
+    <bean id="outputKeyFormat" class="java.lang.String">
+        <constructor-arg type="java.lang.String" value="%1$s/%2$s"/>
+    </bean>
+    
+    <!--
+    1st parameter: tool (e.g. 'tika' used as an identifier)
+    2nd parameter: property (e.g. 'mime' for a mime type identifier)
+    3rd parameter: value (e.g. 'image/png' as value of the property 'mime')
+    The character sequence %1$s denotes the first parameter, %2$s the second one, and so forth.
+    The order can be changed. For example, the format string "%3$s %2$s %1$s" 
+    defines a white space separated value output in reverse order.
+    The default config is using a tab delimiter (Numeric hexadecimal character 
+    reference: &#x9;).
+    -->
+    <bean id="outputValueFormat" class="java.lang.String">
+        <constructor-arg type="java.lang.String" value="%1$s&#x9;%2$s&#x9;%3$s"/>
+    </bean>
+    
+    <bean id="containerBean" class="eu.scape_project.tb.cipex.container.ArcContainer">
+    </bean>
+    
+    <!-- Using &#x9; as tab delimiter, for example. -->
+    <bean id="reporterBean" class="eu.scape_project.tb.cipex.reporters.SimpleKeyValueReporter">
+        <constructor-arg value="&#x9;"/>
+    </bean>
+    
+    <!-- Identification stack -->
+    <bean id="identificationStack"
+          class="eu.scape_project.tb.cipex.identifiers.IdentifierCollection">
+        <property name="identifiers">
+            <list>
+                <ref bean="droidIdentificationBean" />
+                <ref bean="tikaIdentificationBean" />
+                <ref bean="unixfileIdentificationBean" />
+<!--                <ref bean="headerIdentificationBean" />-->
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="droidIdentificationBean" class="eu.scape_project.tb.cipex.identifiers.DroidIdentification">
+        <!-- Load the signature file from the local file system /-->
+        <!--constructor-arg value="file:DROID_SignatureFile_V67.xml" /-->
+        <!-- Load the signature file from the class path (included in jar) /-->
+        <constructor-arg value="classpath:eu/scape_project/tb/cipex/identifiers/DROID_SignatureFile_V67.xml" />
+        <property name="tool" value="droid" />
+        <property name="outputKeyFormat" ref="outputKeyFormat"/>
+        <property name="outputValueFormat" ref="outputValueFormat"/>
+    </bean>
+    
+    <bean id="tikaIdentificationBean" class="eu.scape_project.tb.cipex.identifiers.TikaIdentification">
+        <property name="tool" value="tika" />
+        <property name="outputKeyFormat" ref="outputKeyFormat"/>
+        <property name="outputValueFormat" ref="outputValueFormat"/>
+    </bean>
+    
+    <bean id="unixfileIdentificationBean" class="eu.scape_project.tb.cipex.identifiers.UnixFileIdentification">
+        <property name="tool" value="unixfile" />
+        <property name="command" value="file --mime-type" />
+        <property name="outputKeyFormat" ref="outputKeyFormat"/>
+        <property name="outputValueFormat" ref="outputValueFormat"/>
+    </bean>
+    
+<!--    <bean id="headerIdentificationBean" class="eu.scape_project.tb.cipex.identifiers.HeaderIdentification">
+        <property name="tool" value="header" />
+        <property name="outputKeyFormat" ref="outputKeyFormat"/>
+        <property name="outputValueFormat" ref="outputValueFormat"/>
+    </bean>-->
+</beans>
