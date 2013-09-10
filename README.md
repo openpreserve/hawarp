@@ -4,14 +4,21 @@ Cipex - Container Item Property EXtraction
 Introduction
 ------------
 
-This project can be executed as a command line application or hadoop job 
+Cipex is a tool to identify files packaged in container files.
+
+The tool can be executed as a command line application or as a hadoop job 
 (Hadoop 0.20 API) and provides a stack of identification tools which is 
-executed on a set of web archive container files (ARC format) in order to
+executed on a set of container files (TAR, ZIP, ARC) in order to
 extract identifying properties. Each tool can output a specific identification
 property (e.g. Tika - mime type: image/png) or a list of properties
 (e.g. Droid - mime type: image/png, droid puid: fmt/11). The output is in 
 tabular form which allows importing the result as a comma separated file (CSV)
 in spreadsheet applications or for large data sets in a HIVE table.
+
+The number of elements packaged in a container file should not bee too high,
+i.e. rather hundreds of thousands than millions, because, firstly, the file lists 
+are internally managed as ArrayList and HashMap objects and, secondly, in the
+Hadoop job, one container is processed in a map task.
 
 The spring-based application configuration allows easily adding new 
 identification tools by extending the abstract class 'Identification' and
@@ -26,23 +33,23 @@ defined separately.
 In order to give a simple example, let us assume we have the following 
 container aggregating an HTML file and a picture in PNG format:
 
-    containerfile.gz
+    containerfile.zip
         - index.html
         - picture.png
 
 Using three different identification tools, the following tabular output of 
 properties is produced:
 
-    Identifier                      Tool       Property    Value
-    ----------------------------------------------------------------
-    containerfile.gz/index.html     droid      mime        text/html
-    containerfile.gz/index.html     droid      puid        fmt/96
-    containerfile.gz/picture.png    droid      mime        image/png
-    containerfile.gz/picture.png    droid      puid        fmt/11
-    containerfile.gz/index.html     tika       mime        text/html
-    containerfile.gz/picture.png    tika       mime        image/png
-    containerfile.gz/index.html     unixfile   mime        text/html
-    containerfile.gz/picture.png    unixfile   mime        image/png
+    Identifier                       Tool       Property    Value
+    -----------------------------------------------------------------
+    containerfile.zip/index.html     droid      mime        text/html
+    containerfile.zip/index.html     droid      puid        fmt/96
+    containerfile.zip/picture.png    droid      mime        image/png
+    containerfile.zip/picture.png    droid      puid        fmt/11
+    containerfile.zip/index.html     tika       mime        text/html
+    containerfile.zip/picture.png    tika       mime        image/png
+    containerfile.zip/index.html     unixfile   mime        text/html
+    containerfile.zip/picture.png    unixfile   mime        image/png
 
 In this example, the tool droid is the only tool which outputs two different
 properties, the mime type of the file and the puid (pronom unique identifier),

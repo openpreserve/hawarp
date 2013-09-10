@@ -17,6 +17,11 @@
             <name>SpringSource Repository</name>
             <url>http://repo.springsource.org/release</url>
         </repository>
+        <repository>
+            <id>archive-releases</id>
+            <name>Archive Releases</name>
+            <url>http://builds.archive.org:8080/maven2</url>
+        </repository>
     </repositories>
    
     <build>
