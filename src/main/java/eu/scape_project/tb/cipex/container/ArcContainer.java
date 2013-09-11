@@ -57,13 +57,9 @@ public class ArcContainer extends DualHashBidiMap implements Container {
     }
 
     /**
-     * Constructor based on the reader to initialise maps.
-     *
-     * @param reader Archive Record reader
-     * @throws IOException IO Error
+     * Constructor
      */
-    public ArcContainer() throws IOException {
-        
+    public ArcContainer() {
     }
     
     @Override

@@ -33,21 +33,21 @@ public class Options {
     // Statics to set up command line arguments
     public static final String HELP_FLG = "h";
     public static final String HELP_OPT = "help";
-    public static final String HELP_OPT_DESC = "print this message.";
+    public static final String HELP_OPT_DESC = "print this message [optional].";
 
     public static final String DIR_FLG = "d";
     public static final String DIR_OPT = "dir";
-    public static final String DIR_OPT_DESC = "Directory with container file(s).";
+    public static final String DIR_OPT_DESC = "Directory with container file(s) [required].";
     
     
     public static final String SPRING_FLG = "s";
     public static final String SPRING_OPT = "springconfig";
-    public static final String SPRING_OPT_DESC = "Spring configuration XML file.";
+    public static final String SPRING_OPT_DESC = "Spring configuration XML file [optional].";
     
     
     public static final String MAPREDUCE_FLG = "m";
     public static final String MAPREDUCE_OPT = "mapreduce";
-    public static final String MAPREDUCE_OPT_DESC = "Start Hadoop Map Reduce job.";
+    public static final String MAPREDUCE_OPT_DESC = "Start Hadoop Map Reduce job [optional].";
     
     
     public static org.apache.commons.cli.Options OPTIONS = new org.apache.commons.cli.Options();

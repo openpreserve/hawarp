@@ -18,7 +18,9 @@ package eu.scape_project.tb.cipex;
 
 import eu.scape_project.tb.cipex.cli.CliConfig;
 import eu.scape_project.tb.cipex.cli.Options;
+import eu.scape_project.tb.cipex.container.ArcContainer;
 import eu.scape_project.tb.cipex.container.Container;
+import eu.scape_project.tb.cipex.container.ZipContainer;
 import eu.scape_project.tb.cipex.identifiers.Identification;
 import eu.scape_project.tb.cipex.identifiers.IdentifierCollection;
 import eu.scape_project.tb.cipex.reporters.Reportable;
@@ -178,13 +180,24 @@ public class Cipex {
     /**
      * Apply identification stack
      *
-     * @param arcFilePath Path to ARC file
-     * @throws FileNotFoundException File not found
-     * @throws IOException IO Error
+     * @param containerFileStream Content of the container file
+     * @param containerFileName File name
+     * @param context Hadoop context (only for Hadoop job execution)
+     * @throws FileNotFoundException Exception if the container file cannot be
+     * found
+     * @throws IOException I/O Exception
      */
     private void executeIdentificationStack(InputStream containerFileStream, String containerFileName, Mapper.Context context) throws FileNotFoundException, IOException {
-        Container arcFilesMap = (Container) ctx.getBean("containerBean");
-        arcFilesMap.init(containerFileName, containerFileStream);
+        Container containerFilesMap = null; //= (Container) ctx.getBean("containerBean");
+        if (containerFileName.endsWith(".arc.gz")) {
+            containerFilesMap = new ArcContainer();
+        } else if (containerFileName.endsWith(".zip")) {
+            containerFilesMap = new ZipContainer();
+        } else {
+            logger.warn("Unsupported file skipped: " + containerFileName);
+            return;
+        }
+        containerFilesMap.init(containerFileName, containerFileStream);
         if (ctx == null) {
             ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG_RESOURCE_PATH);
         }
@@ -193,9 +206,9 @@ public class Cipex {
             Identification fli = (Identification) identifierItem;
             Reportable rep = (Reportable) ctx.getBean("reporterBean");
             if (context != null) {
-                rep.report(fli.identifyFileList(arcFilesMap.getBidiIdentifierFilenameMap()), context);
+                rep.report(fli.identifyFileList(containerFilesMap.getBidiIdentifierFilenameMap()), context);
             } else {
-                rep.report(fli.identifyFileList(arcFilesMap.getBidiIdentifierFilenameMap()));
+                rep.report(fli.identifyFileList(containerFilesMap.getBidiIdentifierFilenameMap()));
             }
         }
     }
@@ -207,17 +220,18 @@ public class Cipex {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private void traverseDir(File dir) throws FileNotFoundException, IOException {
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
+    private void traverseDir(File dirStructItem) throws FileNotFoundException, IOException {
+        if (dirStructItem.isDirectory()) {
+            String[] children = dirStructItem.list();
             for (String child : children) {
-                traverseDir(new File(dir, child));
+                traverseDir(new File(dirStructItem, child));
             }
-        } else if (!dir.isDirectory() && dir.toString().endsWith(".arc.gz")) {
-            File arcFile = new File(dir.getAbsolutePath());
+        } else if (!dirStructItem.isDirectory()) {
+            File arcFile = new File(dirStructItem.getAbsolutePath());
             FileInputStream fileInputStream = new FileInputStream(arcFile);
 
             executeIdentificationStack(fileInputStream, arcFile.getName(), null);
+
         }
     }
 }

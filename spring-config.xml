@@ -29,8 +29,8 @@
         <constructor-arg type="java.lang.String" value="%1$s&#x9;%2$s&#x9;%3$s"/>
     </bean>
     
-    <bean id="containerBean" class="eu.scape_project.tb.cipex.container.ArcContainer">
-    </bean>
+<!--    <bean id="containerBean" class="eu.scape_project.tb.cipex.container.ZipContainer">
+    </bean>-->
     
     <!-- Using &#x9; as tab delimiter, for example. -->
     <bean id="reporterBean" class="eu.scape_project.tb.cipex.reporters.SimpleKeyValueReporter">

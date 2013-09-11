@@ -100,7 +100,7 @@ public class UnixFileIdentification extends Identification {
 
     @Override
     public HashMap<String, List<String>> identifyFileList(DualHashBidiMap fileRecidBidiMap) throws IOException {
-       HashMap<String, List<String>> resultMap = new HashMap<String, List<String>>();
+        HashMap<String, List<String>> resultMap = new HashMap<String, List<String>>();
         String ufidRes = this.identify(fileRecidBidiMap.values());
         Scanner s = new Scanner(ufidRes);
         // one file identification result per line
@@ -111,16 +111,19 @@ public class UnixFileIdentification extends Identification {
             String fileName = st.nextToken().trim();
             // output key
             String key = (String) fileRecidBidiMap.getKey(fileName);
-            String containerFileName = key.substring(0, key.indexOf("/"));
-            String containerIdentifier = key.substring(key.indexOf("/") + 1);
-            String outputKey = String.format(outputKeyFormat, containerFileName, containerIdentifier);
-            // output value
-            String property = "mime";
-            String value = st.nextToken().trim();
-            String outputValue = String.format(outputValueFormat, tool, property, value);
-            List<String> valueLineList = new ArrayList<String>();
-            valueLineList.add(outputValue);
-            resultMap.put(outputKey, valueLineList);
+            if (key != null) {
+                String containerFileName = key.substring(0, key.indexOf("/"));
+                String containerIdentifier = key.substring(key.indexOf("/") + 1);
+                String outputKey = String.format(outputKeyFormat, containerFileName, containerIdentifier);
+                // output value
+                String property = "mime";
+                String value = st.nextToken().trim();
+                String outputValue = String.format(outputValueFormat, tool, property, value);
+                List<String> valueLineList = new ArrayList<String>();
+                valueLineList.add(outputValue);
+                resultMap.put(outputKey, valueLineList);
+            } else {
+            }
         }
         return resultMap;
     }
