@@ -94,7 +94,39 @@ and the hadoop job is be executed by typing
 
 where
 
-    -d,--dir <arg>    HDFS directory web archive container files.
+    -d,--dir <arg>    HDFS directory containing (the) text file(s) listing HDFS 
+                      paths to container files.
+
+The HDFS directory must point to a directory containing (the) text file(s)
+listing HDFS paths to container files. If the file size is smaller than the
+default split size (64MB), then the maximum number of records per tasks 
+should be configured. If this is not possible for some reason, Hadoop can be 
+forced to create a specific number of records per task by splitting the input 
+text file.
+
+For example, let us assume a textfile named zipcontainerhdfspaths.txt 
+which is input for the Hadoop job:
+
+    /user/name/input/000.zip
+    /user/name/input/001.zip
+    /user/name/input/002.zip
+    /user/name/input/003.zip
+    /user/name/input/004.zip
+    /user/name/input/005.zip
+    /user/name/input/006.zip
+    /user/name/input/007.zip
+    /user/name/input/008.zip
+    /user/name/input/009.zip
+
+The size of this textfile is far below the 64MB default split size, therefore
+Hadoop would process all files in one single map task. 
+
+If you want to force Hadoop to create 10 tasks, you can split the textfile:
+
+    split -a 4 -l 1 zipcontainerhdfspaths.txt
+
+and load the splitted files into HDFS as input. Hadoop will create at least 
+one map task per input file.
 
 The optional parameter -s allows defining a spring configuration file
 available on the local file system instead of the one available as a resource

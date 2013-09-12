@@ -37,7 +37,7 @@ public class Options {
 
     public static final String DIR_FLG = "d";
     public static final String DIR_OPT = "dir";
-    public static final String DIR_OPT_DESC = "Directory with container file(s) [required].";
+    public static final String DIR_OPT_DESC = "Local mode (default): Directory with container file(s), Hadoop mode (option -m): HDFS directory containing (the) text file(s) listing HDFS paths to container files. [required].";
     
     
     public static final String SPRING_FLG = "s";
