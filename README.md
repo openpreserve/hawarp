@@ -95,7 +95,8 @@ and the hadoop job is be executed by typing
 where
 
     -d,--dir <arg>    HDFS directory containing (the) text file(s) listing HDFS 
-                      paths to container files.
+                      paths to container files. Attention: Not the container 
+                      files directory like in local mode execution!
 
 The HDFS directory must point to a directory containing (the) text file(s)
 listing HDFS paths to container files. If the file size is smaller than the
