@@ -49,4 +49,12 @@ public interface Container {
      * @return bidirectional map (DualHashBidiMap)
      */
     public DualHashBidiMap getBidiIdentifierFilenameMap();
+    
+    /**
+     * Directory where container files are extracted to. The files of a 
+     * container file must be extracted to a temporary directory in order to
+     * enable usage of tools which take a complete directory as input. 
+     * @return 
+     */
+    public String getExtractDirectoryName();
 }

@@ -69,7 +69,7 @@ public class ZipContainerTest {
         ZipContainer instance = new ZipContainer();
         instance.init(containerFileName, containerFileStream);
         DualHashBidiMap bidiIdentifierFilenameMap = instance.getBidiIdentifierFilenameMap();
-        String key = "/test.zip/test.doc";
+        String key = instance.getExtractDirectoryName() + "test.zip/test.doc";
         assertTrue(bidiIdentifierFilenameMap.containsKey(key));
         String value = (String) bidiIdentifierFilenameMap.get(key);
         assertNotNull(value);
@@ -96,7 +96,8 @@ public class ZipContainerTest {
         ZipContainer instance = new ZipContainer();
         instance.init(containerFileName, containerFileStream);
         DualHashBidiMap bidiIdentifierFilenameMap = instance.getBidiIdentifierFilenameMap();
-        String key = "/testsub.zip/test/sub/test.doc";
+        String key = instance.getExtractDirectoryName() + "testsub.zip/test/sub/test.doc";
+        //String key = "/testsub.zip/test/sub/test.doc";
         assertTrue(bidiIdentifierFilenameMap.containsKey(key));
         String value = (String) bidiIdentifierFilenameMap.get(key);
         assertNotNull(value);

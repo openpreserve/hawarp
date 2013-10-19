@@ -22,6 +22,12 @@
             <name>Archive Releases</name>
             <url>http://builds.archive.org:8080/maven2</url>
         </repository>
+        <repository>
+            <id>libs-release-local</id>
+            <name>CDH3u5</name>
+            <url>https://repository.cloudera.com/artifactory/libs-release-local</url>
+        </repository>
+        
     </repositories>
    
     <build>
@@ -63,9 +69,9 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.apache.mahout.hadoop</groupId>
+            <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
-            <version>0.20.1</version>
+            <version>0.20.2-cdh3u5</version>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
@@ -77,6 +83,7 @@
             <artifactId>commons-cli</artifactId>
             <version>1.2</version>
         </dependency>
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -124,7 +131,11 @@
             <artifactId>spring-beans</artifactId>
             <version>${org.springframework.version}</version>
         </dependency>
-        
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

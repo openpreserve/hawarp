@@ -17,6 +17,7 @@
 package eu.scape_project.tb.cipex.utils;
 
 import java.io.*;
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +70,43 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Copy byte array to file in temporary directory
+     *
+     * @param barray byte array
+     * @param dir Directory where the temporary file is created
+     * @param ext Extension of temporary file
+     * @return Temporary file
+     */
+    public static File copyByteArrayToTempFileInDir(byte[] barray, String dir, String ext) {
+        String filename = System.currentTimeMillis()+RandomStringUtils.randomAlphabetic(5)+ext;
+        if(!dir.endsWith("/")) {
+            dir += "/";
+        }
+        FileOutputStream fos = null;
+        File tmpFile = null;
+        try {
+            tmpFile = new File(dir+filename);
+            fos = new FileOutputStream(tmpFile);
+            org.apache.commons.io.IOUtils.write(barray, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException ex) {
+            logger.error("Temporary file not available.", ex);
+        } catch (IOException ex) {
+            logger.error("I/O Error", ex);
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException _) {
+                    // ignore
+                }
+            }
+        }
+        return tmpFile;
+    }
+    
     /**
      * Copy byte array to temporary file
      *

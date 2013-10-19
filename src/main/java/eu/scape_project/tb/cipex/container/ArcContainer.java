@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.commons.lang.RandomStringUtils;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveReaderFactory;
 import org.archive.io.ArchiveRecord;
@@ -42,6 +43,17 @@ public class ArcContainer extends DualHashBidiMap implements Container {
     private static Logger logger = LoggerFactory.getLogger(ArcContainer.class.getName());
     private static ArchiveReader reader;
     private ArrayList<ArchiveRecord> archiveRecords;
+    
+    private String extractDirectoryName;
+
+    @Override
+    public String getExtractDirectoryName() {
+        return extractDirectoryName;
+    }
+
+    public void setExtractDirectoryName(String extractDirectoryName) {
+        this.extractDirectoryName = extractDirectoryName;
+    }
 
     /**
      * Delete temporary files.
@@ -124,6 +136,9 @@ public class ArcContainer extends DualHashBidiMap implements Container {
      * @throws IOException IO Error
      */
     private void arcRecContentsToTempFiles() throws IOException {
+        extractDirectoryName = "/tmp/cipex_"+RandomStringUtils.randomAlphabetic(10)+"/";
+        File destDir = new File(extractDirectoryName);
+        destDir.mkdir();
         Iterator<ArchiveRecord> recordIterator = reader.iterator();
         try {
             // K: Record key V: Temporary file
@@ -132,11 +147,12 @@ public class ArcContainer extends DualHashBidiMap implements Container {
                 archiveRecords.add(nativeArchiveRecord);
                 String readerIdentifier = nativeArchiveRecord.getHeader().getReaderIdentifier();
                 String recordIdentifier = nativeArchiveRecord.getHeader().getRecordIdentifier();
-                byte[] content = ArcContainer.readArcRecContentToByteArr((ARCRecord) nativeArchiveRecord);
+                ARCRecord arcRecord = (ARCRecord)nativeArchiveRecord;
+                byte[] content = ArcContainer.readArcRecContentToByteArr(arcRecord);
                 String recordKey = readerIdentifier+"/"+recordIdentifier;
                 if (nativeArchiveRecord.getHeader().getLength() < Integer.MAX_VALUE) {
-                    File tmpFile = IOUtils.copyByteArrayToTempFile(content, "rec", ".tmp");
-                    tmpFile.deleteOnExit();
+                    File tmpFile = IOUtils.copyByteArrayToTempFileInDir(content, extractDirectoryName, ".tmp");
+//                    tmpFile.deleteOnExit();
                     this.put(recordKey, tmpFile.getAbsolutePath());
                 }
             }

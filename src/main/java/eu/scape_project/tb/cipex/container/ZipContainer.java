@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.zip.ZipInputStream;
+import org.apache.commons.lang.RandomStringUtils;
 
 /**
  * ZIP files map. Different Key-value pair maps for managing ZIP file records.
@@ -43,6 +44,17 @@ public class ZipContainer extends DualHashBidiMap implements Container {
     private static Logger logger = LoggerFactory.getLogger(ZipContainer.class.getName());
     
     private static final int BUFFER_SIZE = 4096;
+    
+    private String extractDirectoryName;
+
+    @Override
+    public String getExtractDirectoryName() {
+        return extractDirectoryName;
+    }
+
+    public void setExtractDirectoryName(String extractDirectoryName) {
+        this.extractDirectoryName = extractDirectoryName;
+    }
 
     /**
      * Delete temporary files.
@@ -81,16 +93,16 @@ public class ZipContainer extends DualHashBidiMap implements Container {
      * @throws IOException
      */
     public void unzip(String containerFileName, InputStream containerFileStream) throws IOException {
-        File destDir = File.createTempFile(containerFileName, "");
-        destDir.delete();
+        extractDirectoryName = "/tmp/cipex_"+RandomStringUtils.randomAlphabetic(10)+"/";
+        File destDir = new File(extractDirectoryName);
         destDir.mkdir();
-        if (!destDir.exists()) {
-            destDir.mkdir();
-        }
+        String subDestDirStr = extractDirectoryName+containerFileName+"/";
+        File subDestDir = new File(subDestDirStr);
+        subDestDir.mkdir();
         ZipInputStream zipIn = new ZipInputStream(containerFileStream);
         ZipEntry entry = zipIn.getNextEntry();
         while (entry != null) {
-            String filePath = destDir.getAbsolutePath() + File.separator + entry.getName();
+            String filePath = subDestDirStr + entry.getName();
             if (!entry.isDirectory()) {
                 extractFile(zipIn, filePath);
             } else {
@@ -118,9 +130,9 @@ public class ZipContainer extends DualHashBidiMap implements Container {
         bos.close();
         if((new File(filePath).exists())) {
             String id = filePath.replaceFirst("[0-9]{10,30}", "");
-            id = id.replace("/tmp", "");
+            //id = id.replace(this.tmpDirName"/tmp", "");
             // key-value pair
-            this.put(id, filePath);
+            this.put(filePath, filePath);
         }
     }
     

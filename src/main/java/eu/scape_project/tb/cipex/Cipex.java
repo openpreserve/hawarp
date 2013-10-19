@@ -34,7 +34,9 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.PosixParser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -43,6 +45,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.slf4j.Logger;
@@ -50,6 +53,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 /**
  * Cipex - Container Item Property EXtraction.
@@ -84,7 +89,7 @@ public class Cipex {
      */
     public static class ContainerItemIdentificationMapper
             extends Mapper<LongWritable, Text, Text, Text> {
-
+        
         @Override
         public void map(LongWritable key, Text value, Mapper.Context context) throws IOException, InterruptedException, FileNotFoundException {
             Cipex wai = new Cipex();
@@ -147,6 +152,7 @@ public class Cipex {
     public static void startHadoopJob(Configuration conf) {
         try {
             Job job = new Job(conf, "cipex");
+            
 
             // local debugging (pseudo-distributed)
             // job.getConfiguration().set("mapred.job.tracker", "local");
