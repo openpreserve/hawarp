@@ -74,12 +74,25 @@ public class Cipex {
      * Reducer class.
      */
     public static class ContainerItemIdentificationReducer
-            extends Reducer<Text, Text, Text, Text> {
+            extends Reducer<Text, Text, Text, Object> {
+
+        private MultipleOutputs mos;
+
+        @Override
+        public void setup(Context context) {
+            mos = new MultipleOutputs(context);
+        }
+
+        @Override
+        public void cleanup(Context context) throws IOException, InterruptedException {
+            mos.close();
+        }
 
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             for (Text val : values) {
-                context.write(key, val);
+                mos.write("identification",key, val);
+                mos.write("characterisation",key, val);
             }
         }
     }
@@ -89,13 +102,25 @@ public class Cipex {
      */
     public static class ContainerItemIdentificationMapper
             extends Mapper<LongWritable, Text, Text, Text> {
-        
+
+        private MultipleOutputs mos;
+
+        @Override
+        public void setup(Context context) {
+            mos = new MultipleOutputs(context);
+        }
+
+        @Override
+        public void cleanup(Context context) throws IOException, InterruptedException {
+            mos.close();
+        }
+
         @Override
         public void map(LongWritable key, Text value, Mapper.Context context) throws IOException, InterruptedException, FileNotFoundException {
             Cipex wai = new Cipex();
             Path pt = new Path("hdfs://" + value);
             FileSystem fs = FileSystem.get(new Configuration());
-            wai.executeIdentificationStack(fs.open(pt), pt.getName(), context);
+            wai.executeIdentificationStack(fs.open(pt), pt.getName(), mos);
         }
     }
 
@@ -152,7 +177,7 @@ public class Cipex {
     public static void startHadoopJob(Configuration conf) {
         try {
             Job job = new Job(conf, "cipex");
-            
+
 
             // local debugging (pseudo-distributed)
             // job.getConfiguration().set("mapred.job.tracker", "local");
@@ -164,13 +189,16 @@ public class Cipex {
             job.setReducerClass(Cipex.ContainerItemIdentificationReducer.class);
 
             job.setInputFormatClass(TextInputFormat.class);
-            job.setOutputFormatClass(TextOutputFormat.class);
+//            job.setOutputFormatClass(TextOutputFormat.class);
+
+            MultipleOutputs.addNamedOutput(job, "identification", TextOutputFormat.class, Text.class, Text.class);
+            MultipleOutputs.addNamedOutput(job, "characterisation", SequenceFileOutputFormat.class, Text.class, BytesWritable.class);
 
             job.setMapOutputKeyClass(Text.class);
-            job.setMapOutputValueClass(Text.class);
+            job.setMapOutputValueClass(Object.class);
 
             job.setOutputKeyClass(Text.class);
-            job.setOutputValueClass(Text.class);
+            job.setOutputValueClass(Object.class);
 
             SequenceFileInputFormat.addInputPath(job, new Path(config.getDirStr()));
             String outpath = "output/" + System.currentTimeMillis();
@@ -193,7 +221,7 @@ public class Cipex {
      * found
      * @throws IOException I/O Exception
      */
-    private void executeIdentificationStack(InputStream containerFileStream, String containerFileName, Mapper.Context context) throws FileNotFoundException, IOException {
+    private void executeIdentificationStack(InputStream containerFileStream, String containerFileName, MultipleOutputs mos) throws FileNotFoundException, IOException {
         Container containerFilesMap = null; //= (Container) ctx.getBean("containerBean");
         if (containerFileName.endsWith(".arc.gz")) {
             containerFilesMap = new ArcContainer();
@@ -211,8 +239,8 @@ public class Cipex {
         for (Identification identifierItem : identificationStack.getIdentifiers()) {
             Identification fli = (Identification) identifierItem;
             Reportable rep = (Reportable) ctx.getBean("reporterBean");
-            if (context != null) {
-                rep.report(fli.identifyFileList(containerFilesMap.getBidiIdentifierFilenameMap()), context);
+            if (mos != null) {
+                rep.report(fli.identifyFileList(containerFilesMap.getBidiIdentifierFilenameMap()), mos);
             } else {
                 rep.report(fli.identifyFileList(containerFilesMap.getBidiIdentifierFilenameMap()));
             }

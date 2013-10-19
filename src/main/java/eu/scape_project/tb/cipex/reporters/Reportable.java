@@ -19,6 +19,7 @@ package eu.scape_project.tb.cipex.reporters;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,5 +48,5 @@ public interface Reportable {
      * tool identificationtype identificationresult)
      * @param context Mapper context for creating the key-value output.
      */ // HashMap<Integer, List<String>> myMap = new HashMap<Integer, List<String>>();
-    public void report(HashMap<String, List<String>> resultMap, Mapper.Context context);
+    public void report(HashMap<String, List<String>> resultMap, MultipleOutputs mos);
 }

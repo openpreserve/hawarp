@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,14 +72,14 @@ public class SimpleKeyValueReporter implements Reportable {
      * @param context Mapper context for creating the key-value output.
      */
     @Override
-    public void report(HashMap<String, List<String>> resultMap, Mapper.Context context) {
+    public void report(HashMap<String, List<String>> resultMap, MultipleOutputs mos) {
         Iterator iter = resultMap.keySet().iterator();
         while (iter.hasNext()) {
             String key = (String) iter.next();
             List<String> valueList = resultMap.get(key);
             try {
                 for (String value : valueList) {
-                    context.write(new Text(key), new Text(value));
+                    mos.write("identification",new Text(key), new Text(value));
                 }
             } catch (IOException ex) {
                 logger.error("I/O Error", ex);
