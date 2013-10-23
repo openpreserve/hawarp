@@ -180,8 +180,8 @@ public class Cipex {
             Job job = new Job(conf, "cipex");
 
             // local debugging (pseudo-distributed)
-             job.getConfiguration().set("mapred.job.tracker", "local");
-             job.getConfiguration().set("fs.default.name", "file:///");
+//             job.getConfiguration().set("mapred.job.tracker", "local");
+//             job.getConfiguration().set("fs.default.name", "file:///");
 
             job.setJarByClass(Cipex.class);
 

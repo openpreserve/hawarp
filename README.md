@@ -1,15 +1,16 @@
-Cipex - Container Item Property EXtraction [![Build Status](https://api.travis-ci.org/shsdev/cipex.png)](https://travis-ci.org/shsdev/cipex) 
-==========================================
+Cipex -  [![Build Status](https://api.travis-ci.org/shsdev/cipex.png)](https://travis-ci.org/shsdev/cipex) 
+=====
+
+Cipex is a tool to identify and/or characterise files packaged in container 
+files using as standalone java application or as a Hadoop job.
 
 Introduction
 ------------
 
-Cipex is a tool to identify files packaged in container files.
-
-The tool can be executed as a command line application or as a hadoop job 
+Cipex can be executed as a command line application or as a hadoop job 
 (Hadoop 0.20 API) and provides a stack of identification tools which is 
-executed on a set of container files (TAR, ZIP, ARC) in order to
-extract identifying properties. Each tool can output a specific identification
+executed on a set of container files (ZIP, ARC) in order to
+determine properties. Each tool can output a specific identification
 property (e.g. Tika - mime type: image/png) or a list of properties
 (e.g. Droid - mime type: image/png, droid puid: fmt/11). The output is in 
 tabular form which allows importing the result as a comma separated file (CSV)
