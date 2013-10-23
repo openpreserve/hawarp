@@ -1,4 +1,4 @@
-Cipex - Container Item Property EXtraction
+Cipex - Container Item Property EXtraction [![Build Status](https://api.travis-ci.org/shsdev/cipex.png)](https://travis-ci.org/shsdev/cipex) 
 ==========================================
 
 Introduction
@@ -60,9 +60,6 @@ Installation
 
     cd cipex
     mvn install
-
-[Travis CI](http://travis-ci.org/) is used to verify the build: 
-[![Build Status](https://api.travis-ci.org/shsdev/cipex.png)](https://travis-ci.org/shsdev/cipex) 
 
 Configuration
 -------------

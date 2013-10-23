@@ -38,6 +38,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.ObjectWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -74,7 +75,7 @@ public class Cipex {
      * Reducer class.
      */
     public static class ContainerItemIdentificationReducer
-            extends Reducer<Text, Text, Text, Object> {
+            extends Reducer<Text, Text, Text, ObjectWritable> {
 
         private MultipleOutputs mos;
 
@@ -91,8 +92,8 @@ public class Cipex {
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             for (Text val : values) {
-                mos.write("identification",key, val);
-                mos.write("characterisation",key, val);
+                mos.write("idtab",key, val);
+                mos.write("fitsc",key, val);
             }
         }
     }
@@ -101,7 +102,7 @@ public class Cipex {
      * Mapper class.
      */
     public static class ContainerItemIdentificationMapper
-            extends Mapper<LongWritable, Text, Text, Text> {
+            extends Mapper<LongWritable, Text, Text, ObjectWritable> {
 
         private MultipleOutputs mos;
 
@@ -165,7 +166,7 @@ public class Cipex {
         }
     }
 
-    public static void startApplication() throws FileNotFoundException, IOException {
+    public static void startApplication() throws FileNotFoundException, IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
         Cipex wai = new Cipex();
         wai.traverseDir(new File(config.getDirStr()));
@@ -178,10 +179,9 @@ public class Cipex {
         try {
             Job job = new Job(conf, "cipex");
 
-
             // local debugging (pseudo-distributed)
-            // job.getConfiguration().set("mapred.job.tracker", "local");
-            // job.getConfiguration().set("fs.default.name", "file:///");
+             job.getConfiguration().set("mapred.job.tracker", "local");
+             job.getConfiguration().set("fs.default.name", "file:///");
 
             job.setJarByClass(Cipex.class);
 
@@ -189,18 +189,19 @@ public class Cipex {
             job.setReducerClass(Cipex.ContainerItemIdentificationReducer.class);
 
             job.setInputFormatClass(TextInputFormat.class);
-//            job.setOutputFormatClass(TextOutputFormat.class);
-
-            MultipleOutputs.addNamedOutput(job, "identification", TextOutputFormat.class, Text.class, Text.class);
-            MultipleOutputs.addNamedOutput(job, "characterisation", SequenceFileOutputFormat.class, Text.class, BytesWritable.class);
+            
+            // tabular output of identification results
+            MultipleOutputs.addNamedOutput(job, "idtab", TextOutputFormat.class, Text.class, Text.class);
+            // fits output aggregated in sequence file
+            MultipleOutputs.addNamedOutput(job, "fitsc", SequenceFileOutputFormat.class, Text.class, BytesWritable.class);
 
             job.setMapOutputKeyClass(Text.class);
-            job.setMapOutputValueClass(Object.class);
+            job.setMapOutputValueClass(ObjectWritable.class);
 
             job.setOutputKeyClass(Text.class);
-            job.setOutputValueClass(Object.class);
+            job.setOutputValueClass(ObjectWritable.class);
 
-            SequenceFileInputFormat.addInputPath(job, new Path(config.getDirStr()));
+            TextInputFormat.addInputPath(job, new Path(config.getDirStr()));
             String outpath = "output/" + System.currentTimeMillis();
             FileOutputFormat.setOutputPath(job, new Path(outpath));
             job.waitForCompletion(true);
@@ -221,17 +222,24 @@ public class Cipex {
      * found
      * @throws IOException I/O Exception
      */
-    private void executeIdentificationStack(InputStream containerFileStream, String containerFileName, MultipleOutputs mos) throws FileNotFoundException, IOException {
-        Container containerFilesMap = null; //= (Container) ctx.getBean("containerBean");
+    private void executeIdentificationStack(InputStream containerFileStream, String containerFileName, MultipleOutputs mos) throws FileNotFoundException, IOException, InterruptedException {
+        Container container; //= (Container) ctx.getBean("containerBean");
         if (containerFileName.endsWith(".arc.gz")) {
-            containerFilesMap = new ArcContainer();
+            container = new ArcContainer();
         } else if (containerFileName.endsWith(".zip")) {
-            containerFilesMap = new ZipContainer();
+            container = new ZipContainer();
         } else {
             logger.warn("Unsupported file skipped: " + containerFileName);
             return;
         }
-        containerFilesMap.init(containerFileName, containerFileStream);
+        container.init(containerFileName, containerFileStream);
+        
+        
+        String extrDir = container.getExtractDirectoryName();
+        // TODO: fits
+        BytesWritable b = new BytesWritable(extrDir.getBytes());
+        mos.write("fitsc", new Text(extrDir), b);
+        
         if (ctx == null) {
             ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG_RESOURCE_PATH);
         }
@@ -240,9 +248,9 @@ public class Cipex {
             Identification fli = (Identification) identifierItem;
             Reportable rep = (Reportable) ctx.getBean("reporterBean");
             if (mos != null) {
-                rep.report(fli.identifyFileList(containerFilesMap.getBidiIdentifierFilenameMap()), mos);
+                rep.report(fli.identifyFileList(container.getBidiIdentifierFilenameMap()), mos);
             } else {
-                rep.report(fli.identifyFileList(containerFilesMap.getBidiIdentifierFilenameMap()));
+                rep.report(fli.identifyFileList(container.getBidiIdentifierFilenameMap()));
             }
         }
     }
@@ -254,7 +262,7 @@ public class Cipex {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private void traverseDir(File dirStructItem) throws FileNotFoundException, IOException {
+    private void traverseDir(File dirStructItem) throws FileNotFoundException, IOException, InterruptedException {
         if (dirStructItem.isDirectory()) {
             String[] children = dirStructItem.list();
             for (String child : children) {

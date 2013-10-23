@@ -79,7 +79,7 @@ public class SimpleKeyValueReporter implements Reportable {
             List<String> valueList = resultMap.get(key);
             try {
                 for (String value : valueList) {
-                    mos.write("identification",new Text(key), new Text(value));
+                    mos.write("idtab",new Text(key), new Text(value));
                 }
             } catch (IOException ex) {
                 logger.error("I/O Error", ex);
