@@ -1,25 +1,30 @@
-Cipex -  [![Build Status](https://api.travis-ci.org/shsdev/cipex.png)](https://travis-ci.org/shsdev/cipex) 
-=====
+Archiventory -  [![Build Status](https://api.travis-ci.org/shsdev/archiventory.png)](https://travis-ci.org/shsdev/archiventory) 
+============
 
-Cipex is a tool to identify and/or characterise files packaged in container 
-files using as standalone java application or as a Hadoop job.
+Archiventory is a tool to identify and/or characterise files packaged in 
+container files using as standalone java application or using a Hadoop job.
 
 Introduction
 ------------
 
-Cipex can be executed as a command line application or as a hadoop job 
-(Hadoop 0.20 API) and provides a stack of identification tools which is 
-executed on a set of container files (ZIP, ARC) in order to
-determine properties. Each tool can output a specific identification
-property (e.g. Tika - mime type: image/png) or a list of properties
-(e.g. Droid - mime type: image/png, droid puid: fmt/11). The output is in 
-tabular form which allows importing the result as a comma separated file (CSV)
-in spreadsheet applications or for large data sets in a HIVE table.
+Archiventory can be executed as a command line application or as a hadoop job 
+(Hadoop 0.20.2 API) and provides a stack of identification tools which is 
+executed on a set of container files (ZIP, ARC) in order to determine file
+format identification properties.
 
-The number of elements packaged in a container file should not bee too high,
-i.e. rather hundreds of thousands than millions, because, firstly, the file lists 
-are internally managed as ArrayList and HashMap objects and, secondly, in the
-Hadoop job, one container is processed in a map task.
+Identification tools can provide different identifiers. For example, Apache Tika 
+(http://tika.apache.org) can be used only to determine the mime type 
+(e.g. image/png) and Droid (http://digital-preservation.github.com/droid/) 
+to give mime type and pronom identifier information (e.g. image/png, 
+droid puid: fmt/11). The output of the identification results is in tabular form 
+which allows to import the result as a comma separated file (CSV) in spreadsheet 
+applications or for large data sets in a Hive (http://hive.apache.org) table.
+
+In the current implementation, the number of elements packaged in a single 
+container file should not bee too high, i.e. rather hundreds of thousands than 
+millions, because, firstly, the file lists are internally managed as ArrayList 
+and HashMap objects and, secondly, in the Hadoop job, one container is processed 
+in a map task and the container items are extracted to one single directory.
 
 The spring-based application configuration allows easily adding new 
 identification tools by extending the abstract class 'Identification' and
@@ -27,7 +32,7 @@ adapting the spring configuration file accordingly.
 
 Also the output of the application can be adapted by either changing the 
 output syntax as documented in the spring configuration or by writing a custom 
-class which has to implement the 'Reportable' interface where the command line 
+class which has to implement the 'OutWritable' interface where the command line 
 application output and the hadoop job key-value pair output have to be
 defined separately.
 
@@ -59,7 +64,7 @@ the other tools only return the mime type of the file.
 Installation
 ------------
 
-    cd cipex
+    cd archiventory
     mvn install
 
 Configuration
@@ -67,7 +72,7 @@ Configuration
 
 The spring configuration is added as a classpath resource at
 
-    src/main/resources/eu/scape_project/tb/cipex/spring-config.xml
+    src/main/resources/eu/scape_project/archiventory/spring-config.xml
 
 and a copy is available locally in the project root directory.
 
@@ -77,7 +82,7 @@ Usage
 The command line application is executed by typing
 
     java -jar
-      target/cipex-1.0-SNAPSHOT-jar-with-dependencies.jar 
+      target/archiventory-1.0-SNAPSHOT-jar-with-dependencies.jar 
       -d /path/to/local/filesystem/directory/
 
 where
@@ -87,7 +92,7 @@ where
 and the hadoop job is be executed by typing
 
     hadoop jar
-      target/cipex-1.0-SNAPSHOT-jar-with-dependencies.jar 
+      target/archiventory-1.0-SNAPSHOT-jar-with-dependencies.jar 
       -d /path/to/hdfs/directory/
 
 where
@@ -137,6 +142,6 @@ Additional hadoop parameters must be defined after the jar parameter, e.g.
 setting the maximum number of tasks that should run in parallel:
 
     hadoop jar
-      target/cipex-1.0-SNAPSHOT-jar-with-dependencies.jar
+      target/archiventory-1.0-SNAPSHOT-jar-with-dependencies.jar
       -Dmapred.tasktracker.map.tasks.maximum=2
       -d /path/to/hdfs/input/directory

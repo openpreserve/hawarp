@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.scape-project.tb</groupId>
-    <artifactId>cipex</artifactId>
+    <artifactId>archiventory</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>cipex</name>
+    <name>archiventory</name>
     <url>http://maven.apache.org</url>
     
     <repositories>
@@ -42,7 +42,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>eu.scape_project.tb.cipex.Cipex</mainClass>
+                            <mainClass>eu.scape_project.archiventory.Archiventory</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
