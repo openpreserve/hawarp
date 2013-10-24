@@ -99,7 +99,8 @@ where
 
     -d,--dir <arg>    HDFS directory containing (the) text file(s) listing HDFS 
                       paths to container files. Attention: Not the container 
-                      files directory like in local mode execution!
+                      files directory like in local java application execution 
+                      mode!
 
 The HDFS directory must point to a directory containing (the) text file(s)
 listing HDFS paths to container files. If the file size is smaller than the
