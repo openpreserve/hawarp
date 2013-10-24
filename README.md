@@ -1,4 +1,4 @@
-Archiventory -  [![Build Status](https://api.travis-ci.org/shsdev/archiventory.png)](https://travis-ci.org/shsdev/archiventory) 
+Archiventory [![Build Status](https://api.travis-ci.org/shsdev/archiventory.png)](https://travis-ci.org/shsdev/archiventory) 
 ============
 
 Archiventory is a tool to identify and/or characterise files packaged in 
