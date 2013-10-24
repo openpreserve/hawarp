@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.PosixParser;
@@ -92,8 +93,8 @@ public class Archiventory {
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             for (Text val : values) {
-                mos.write("idtab",key, val);
-                mos.write("fitsc",key, val);
+                mos.write("idtab", key, val);
+                mos.write("fitsc", key, val);
             }
         }
     }
@@ -189,7 +190,7 @@ public class Archiventory {
             job.setReducerClass(Archiventory.ContainerItemIdentificationReducer.class);
 
             job.setInputFormatClass(TextInputFormat.class);
-            
+
             // tabular output of identification results
             MultipleOutputs.addNamedOutput(job, "idtab", TextOutputFormat.class, Text.class, Text.class);
             // fits output aggregated in sequence file
@@ -223,7 +224,7 @@ public class Archiventory {
      * @throws IOException I/O Exception
      */
     private void executeIdentificationStack(InputStream containerFileStream, String containerFileName, MultipleOutputs mos) throws FileNotFoundException, IOException, InterruptedException {
-        Container container; //= (Container) ctx.getBean("containerBean");
+        Container container;
         if (containerFileName.endsWith(".arc.gz")) {
             container = new ArcContainer();
         } else if (containerFileName.endsWith(".zip")) {
@@ -233,24 +234,28 @@ public class Archiventory {
             return;
         }
         container.init(containerFileName, containerFileStream);
-        
-        
-        String extrDir = container.getExtractDirectoryName();
-        // TODO: fits
-        BytesWritable b = new BytesWritable(extrDir.getBytes());
-        mos.write("fitsc", new Text(extrDir), b);
-        
+
+        if (mos != null) {
+            
+            // TODO: Use characterise HashMap<String, String> characterise and write
+            // key-value pairs (K: identifier, V: byte-array of file content to
+            // sequence file fitsc
+            String extrDir = container.getExtractDirectoryName();
+            BytesWritable b = new BytesWritable(extrDir.getBytes());
+            mos.write("fitsc", new Text(extrDir), b);
+        }
+
         if (ctx == null) {
             ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG_RESOURCE_PATH);
         }
         IdentifierCollection identificationStack = (IdentifierCollection) ctx.getBean("identificationStack");
         for (Identification identifierItem : identificationStack.getIdentifiers()) {
             Identification fli = (Identification) identifierItem;
-            OutWritable rep = (OutWritable) ctx.getBean("reporterBean");
+            OutWritable outWriter = (OutWritable) ctx.getBean("outWriterBean");
             if (mos != null) {
-                rep.report(fli.identifyFileList(container.getBidiIdentifierFilenameMap()), mos);
+                outWriter.write(fli.identifyFileList(container.getBidiIdentifierFilenameMap()), mos);
             } else {
-                rep.report(fli.identifyFileList(container.getBidiIdentifierFilenameMap()));
+                outWriter.write(fli.identifyFileList(container.getBidiIdentifierFilenameMap()));
             }
         }
     }

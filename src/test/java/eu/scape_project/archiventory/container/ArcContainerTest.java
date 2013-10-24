@@ -39,18 +39,19 @@ public class ArcContainerTest {
     @Before
     public void setUp() throws IOException {
         InputStream testFileStream = ZipContainer.class.getResourceAsStream("test.arc.gz");
-        if(testFileStream == null)
+        if (testFileStream == null) {
             fail();
-        
-            File tmpTestFile = File.createTempFile("test", ".arc.gz");
-            FileOutputStream fos = new FileOutputStream(tmpTestFile);
-            IOUtils.copy(testFileStream, fos);
-            fos.close();
-            String containerFileName = "test.arc.gz";
-            InputStream containerFileStream = new FileInputStream(tmpTestFile);
-            instance = new ArcContainer();
-            instance.init(containerFileName, containerFileStream);
-            bidiIdentifierFilenameMap = instance.getBidiIdentifierFilenameMap();
+        }
+
+        File tmpTestFile = File.createTempFile("test", ".arc.gz");
+        FileOutputStream fos = new FileOutputStream(tmpTestFile);
+        IOUtils.copy(testFileStream, fos);
+        fos.close();
+        String containerFileName = "test.arc.gz";
+        InputStream containerFileStream = new FileInputStream(tmpTestFile);
+        instance = new ArcContainer();
+        instance.init(containerFileName, containerFileStream);
+        bidiIdentifierFilenameMap = instance.getBidiIdentifierFilenameMap();
         
     }
     

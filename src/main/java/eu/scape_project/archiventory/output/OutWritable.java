@@ -37,7 +37,7 @@ public interface OutWritable {
      *
      * @param resultMap { "recordkey": [ "tool/property/value" ] }
      */
-    public void report(HashMap<String, List<String>> resultMap);
+    public void write(HashMap<String, List<String>> resultMap);
 
     /**
      * Reporting method for hadoop job. Input is a single value or
@@ -48,5 +48,5 @@ public interface OutWritable {
      * tool identificationtype identificationresult)
      * @param context Mapper context for creating the key-value output.
      */ // HashMap<Integer, List<String>> myMap = new HashMap<Integer, List<String>>();
-    public void report(HashMap<String, List<String>> resultMap, MultipleOutputs mos);
+    public void write(HashMap<String, List<String>> resultMap, MultipleOutputs mos);
 }

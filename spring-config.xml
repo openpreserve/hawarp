@@ -33,7 +33,7 @@
     </bean>-->
     
     <!-- Using &#x9; as tab delimiter, for example. -->
-    <bean id="reporterBean" class="eu.scape_project.archiventory.output.SimpleKeyValueOutputWriter">
+    <bean id="outWriterBean" class="eu.scape_project.archiventory.output.SimpleKeyValueOutputWriter">
         <constructor-arg value="&#x9;"/>
     </bean>
     

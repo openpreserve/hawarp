@@ -53,7 +53,7 @@ public class SimpleKeyValueOutputWriter implements OutWritable {
      * tool identificationtype identificationresult)
      */
     @Override
-    public void report(HashMap<String, List<String>> resultMap) {
+    public void write(HashMap<String, List<String>> resultMap) {
         Iterator iter = resultMap.keySet().iterator();
         while (iter.hasNext()) {
             String key = (String) iter.next();
@@ -72,7 +72,7 @@ public class SimpleKeyValueOutputWriter implements OutWritable {
      * @param context Mapper context for creating the key-value output.
      */
     @Override
-    public void report(HashMap<String, List<String>> resultMap, MultipleOutputs mos) {
+    public void write(HashMap<String, List<String>> resultMap, MultipleOutputs mos) {
         Iterator iter = resultMap.keySet().iterator();
         while (iter.hasNext()) {
             String key = (String) iter.next();
