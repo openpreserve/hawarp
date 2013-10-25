@@ -16,7 +16,6 @@
  */
 package eu.scape_project.archiventory;
 
-import eu.scape_project.archiventory.characterisers.FitsDirectoryCharacterisation;
 import eu.scape_project.archiventory.cli.CliConfig;
 import eu.scape_project.archiventory.cli.Options;
 import eu.scape_project.archiventory.container.ArcContainer;
@@ -24,7 +23,6 @@ import eu.scape_project.archiventory.container.Container;
 import eu.scape_project.archiventory.container.ZipContainer;
 import eu.scape_project.archiventory.identifiers.Identification;
 import eu.scape_project.archiventory.identifiers.IdentifierCollection;
-import eu.scape_project.archiventory.output.FileOutput;
 import eu.scape_project.archiventory.output.OutWritable;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -95,7 +93,6 @@ public class Archiventory {
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             for (Text val : values) {
                 mos.write("idtab", key, val);
-                mos.write("fitsc", key, val);
             }
         }
     }
@@ -125,7 +122,6 @@ public class Archiventory {
             FileSystem fs = FileSystem.get(new Configuration());
             Container container = wai.createContainer(fs.open(pt), pt.getName());
             wai.performIdentification(container, mos);
-            wai.performCharacterisation(container, mos);
         }
     }
 
@@ -196,8 +192,6 @@ public class Archiventory {
 
             // tabular output of identification results
             MultipleOutputs.addNamedOutput(job, "idtab", TextOutputFormat.class, Text.class, Text.class);
-            // fits output aggregated in sequence file
-            MultipleOutputs.addNamedOutput(job, "fitsc", SequenceFileOutputFormat.class, Text.class, BytesWritable.class);
 
             job.setMapOutputKeyClass(Text.class);
             job.setMapOutputValueClass(ObjectWritable.class);
@@ -228,23 +222,6 @@ public class Archiventory {
         }
         container.init(containerFileName, containerFileStream);
         return container;
-    }
-
-    private void performCharacterisation(Container container, MultipleOutputs mos) throws IOException, InterruptedException {
-
-        // TODO: Use characterise HashMap<String, String> characterise and write
-        // key-value pairs (K: identifier, V: byte-array of file content to
-        // sequence file fitsc
-        FitsDirectoryCharacterisation fdc = new FitsDirectoryCharacterisation();
-        fdc.setContainer(container);
-        DualHashBidiMap result = fdc.characterise();
-        FileOutput fo = new FileOutput(result);
-        if (mos != null) {
-            fo.createSequenceFileOutput("fitsc", mos);
-        } else {
-            fo.createFileOutput("outpath");
-        }
-
     }
 
     /**

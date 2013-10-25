@@ -16,7 +16,6 @@
  */
 package eu.scape_project.archiventory.container;
 
-import eu.scape_project.archiventory.characterisers.FitsDirectoryCharacterisationTest;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
