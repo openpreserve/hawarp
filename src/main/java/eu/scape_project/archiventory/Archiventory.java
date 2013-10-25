@@ -16,6 +16,7 @@
  */
 package eu.scape_project.archiventory;
 
+import eu.scape_project.archiventory.characterisers.FitsDirectoryCharacterisation;
 import eu.scape_project.archiventory.cli.CliConfig;
 import eu.scape_project.archiventory.cli.Options;
 import eu.scape_project.archiventory.container.ArcContainer;
@@ -23,6 +24,7 @@ import eu.scape_project.archiventory.container.Container;
 import eu.scape_project.archiventory.container.ZipContainer;
 import eu.scape_project.archiventory.identifiers.Identification;
 import eu.scape_project.archiventory.identifiers.IdentifierCollection;
+import eu.scape_project.archiventory.output.FileOutput;
 import eu.scape_project.archiventory.output.OutWritable;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,12 +32,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -44,7 +47,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
@@ -55,7 +57,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
-
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 /**
@@ -122,7 +123,9 @@ public class Archiventory {
             Archiventory wai = new Archiventory();
             Path pt = new Path("hdfs://" + value);
             FileSystem fs = FileSystem.get(new Configuration());
-            wai.executeIdentificationStack(fs.open(pt), pt.getName(), mos);
+            Container container = wai.createContainer(fs.open(pt), pt.getName());
+            wai.performIdentification(container, mos);
+            wai.performCharacterisation(container, mos);
         }
     }
 
@@ -213,6 +216,37 @@ public class Archiventory {
         }
     }
 
+    private Container createContainer(InputStream containerFileStream, String containerFileName) throws IOException {
+        Container container;
+        if (containerFileName.endsWith(".arc.gz")) {
+            container = new ArcContainer();
+        } else if (containerFileName.endsWith(".zip")) {
+            container = new ZipContainer();
+        } else {
+            logger.warn("Unsupported file skipped: " + containerFileName);
+            return null;
+        }
+        container.init(containerFileName, containerFileStream);
+        return container;
+    }
+
+    private void performCharacterisation(Container container, MultipleOutputs mos) throws IOException, InterruptedException {
+
+        // TODO: Use characterise HashMap<String, String> characterise and write
+        // key-value pairs (K: identifier, V: byte-array of file content to
+        // sequence file fitsc
+        FitsDirectoryCharacterisation fdc = new FitsDirectoryCharacterisation();
+        fdc.setContainer(container);
+        DualHashBidiMap result = fdc.characterise();
+        FileOutput fo = new FileOutput(result);
+        if (mos != null) {
+            fo.createSequenceFileOutput("fitsc", mos);
+        } else {
+            fo.createFileOutput("outpath");
+        }
+
+    }
+
     /**
      * Apply identification stack
      *
@@ -223,28 +257,7 @@ public class Archiventory {
      * found
      * @throws IOException I/O Exception
      */
-    private void executeIdentificationStack(InputStream containerFileStream, String containerFileName, MultipleOutputs mos) throws FileNotFoundException, IOException, InterruptedException {
-        Container container;
-        if (containerFileName.endsWith(".arc.gz")) {
-            container = new ArcContainer();
-        } else if (containerFileName.endsWith(".zip")) {
-            container = new ZipContainer();
-        } else {
-            logger.warn("Unsupported file skipped: " + containerFileName);
-            return;
-        }
-        container.init(containerFileName, containerFileStream);
-
-        if (mos != null) {
-            
-            // TODO: Use characterise HashMap<String, String> characterise and write
-            // key-value pairs (K: identifier, V: byte-array of file content to
-            // sequence file fitsc
-            String extrDir = container.getExtractDirectoryName();
-            BytesWritable b = new BytesWritable(extrDir.getBytes());
-            mos.write("fitsc", new Text(extrDir), b);
-        }
-
+    private void performIdentification(Container container, MultipleOutputs mos) throws FileNotFoundException, IOException, InterruptedException {
         if (ctx == null) {
             ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG_RESOURCE_PATH);
         }
@@ -252,10 +265,11 @@ public class Archiventory {
         for (Identification identifierItem : identificationStack.getIdentifiers()) {
             Identification fli = (Identification) identifierItem;
             OutWritable outWriter = (OutWritable) ctx.getBean("outWriterBean");
+            HashMap<String, List<String>> identifyFileList = fli.identifyFileList(container.getBidiIdentifierFilenameMap());
             if (mos != null) {
-                outWriter.write(fli.identifyFileList(container.getBidiIdentifierFilenameMap()), mos);
+                outWriter.write(identifyFileList, mos);
             } else {
-                outWriter.write(fli.identifyFileList(container.getBidiIdentifierFilenameMap()));
+                outWriter.write(identifyFileList);
             }
         }
     }
@@ -276,9 +290,9 @@ public class Archiventory {
         } else if (!dirStructItem.isDirectory()) {
             File arcFile = new File(dirStructItem.getAbsolutePath());
             FileInputStream fileInputStream = new FileInputStream(arcFile);
-
-            executeIdentificationStack(fileInputStream, arcFile.getName(), null);
-
+            Container container = createContainer(fileInputStream, arcFile.getName());
+            performIdentification(container, null);
+            // TODO: Add characterisation
         }
     }
 }

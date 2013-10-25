@@ -79,14 +79,14 @@ public class IOUtils {
      * @return Temporary file
      */
     public static File copyByteArrayToTempFileInDir(byte[] barray, String dir, String ext) {
-        String filename = System.currentTimeMillis()+RandomStringUtils.randomAlphabetic(5)+ext;
-        if(!dir.endsWith("/")) {
+        String filename = System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(5) + ext;
+        if (!dir.endsWith("/")) {
             dir += "/";
         }
         FileOutputStream fos = null;
         File tmpFile = null;
         try {
-            tmpFile = new File(dir+filename);
+            tmpFile = new File(dir + filename);
             fos = new FileOutputStream(tmpFile);
             org.apache.commons.io.IOUtils.write(barray, fos);
             fos.flush();
@@ -106,7 +106,7 @@ public class IOUtils {
         }
         return tmpFile;
     }
-    
+
     /**
      * Copy byte array to temporary file
      *
@@ -156,5 +156,40 @@ public class IOUtils {
             }
         }
         return strContent;
+    }
+
+    public static byte[] getBytesFromFile(String filePath) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new FileNotFoundException("File not available");
+        }
+        InputStream is = null;
+        byte[] bytes = null;
+        try {
+            is = new FileInputStream(file);
+            long length = file.length();
+            if (length > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("File object is too large");
+            }
+            bytes = new byte[(int) length];
+            int offset = 0;
+            int numRead = 0;
+            while (offset < bytes.length
+                    && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+                offset += numRead;
+            }
+        } catch (IOException ex) {
+            logger.error("I/O Error", ex);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException _) {
+                    // ignore
+                }
+            }
+        }
+        return bytes;
+
     }
 }

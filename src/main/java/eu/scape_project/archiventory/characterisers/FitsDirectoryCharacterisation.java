@@ -27,20 +27,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Fits directory characterisation
  *
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
  */
 public class FitsDirectoryCharacterisation extends DualHashBidiMap implements DirectoryCharacterisation {
 
-    public static final String OUTPUT_DIR_SUFFIX = "-out";
+    
     public static final String FITS_XML_EXT = ".fits.xml";
     private Container container;
     String command;
+    private String outDirStr;
 //    private String stdOut;
 //    private String stdErr;
 
@@ -69,26 +72,26 @@ public class FitsDirectoryCharacterisation extends DualHashBidiMap implements Di
 
     @Override
     public DualHashBidiMap characterise() throws FileNotFoundException, IOException {
-
-        String outDirStr = container.getExtractDirectoryName() + OUTPUT_DIR_SUFFIX;
+        
+        outDirStr = "/tmp/archiventory_fitsout_"+RandomStringUtils.randomAlphabetic(10);
         File outDir = new File(outDirStr);
         outDir.mkdir();
 
-        String cmd = "fits.sh -r ";
+        String cmd = "/usr/local/java/fits-0.6.2/fits.sh -r ";
         cmd += "-i " + container.getExtractDirectoryName() + " ";
         cmd += "-o " + outDir.getAbsolutePath();
         this.command = cmd;
-        
+
 //        InputStream stdIs = p.getInputStream();
 //        stdOut = IOUtils.copyInputStreamToString(stdIs);
 //        InputStream errIs = p.getErrorStream();
 //        stdErr = IOUtils.copyInputStreamToString(errIs);
-       
+
         try {
             Process p = this.executeProcess(cmd);
             p.waitFor();
         } catch (Exception e) {
-            throw new RuntimeException("Error executing fits command line");
+            throw new RuntimeException("Error executing fits command: "+command);
         }
         collectCharacterisationResult();
 
@@ -130,8 +133,7 @@ public class FitsDirectoryCharacterisation extends DualHashBidiMap implements Di
         for (String key : keys) {
             String fileName = (String) bidiIdentifierFilenameMap.get(key);
             File origFile = new File(fileName);
-            String fitsFileName = container.getExtractDirectoryName()
-                    + OUTPUT_DIR_SUFFIX + File.separator
+            String fitsFileName = outDirStr + File.separator
                     + origFile.getName() + FITS_XML_EXT;
             File fitsFile = new File(fitsFileName);
             if (fitsFile.exists()) {
