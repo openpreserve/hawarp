@@ -10,10 +10,19 @@ the SCAPE PT-Mapred application for processing the files on a cluster.
 Dependency
 ----------
 
+This application is using the Cloudera CDH3u5 Hadoop distribution,
+see the corresponding dependendy in the maven file:
+
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-core</artifactId>
+        <version>0.20.2-cdh3u5</version>
+    </dependency>
+
 The application produces an input file for the SCAPE Platform tool
 PT-Mapred which can be downloaded here:
 
-https://github.com/openplanets/scape/tree/master/pt-mapred
+    https://github.com/openplanets/scape/tree/master/pt-mapred
 
 Installation
 ------------
@@ -29,7 +38,7 @@ Usage
 Invoke the application using hadoop without parameters to get the help
 output with parameters that can be used: 
 
-    hadoop jar ./ target/spacip-1.0-SNAPSHOT-jar-with-dependencies.jar  
+    hadoop jar ./target/spacip-1.0-SNAPSHOT-jar-with-dependencies.jar  
 
 The following parameters can be used in any order:
 
