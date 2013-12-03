@@ -150,11 +150,13 @@ public class ContainerItemPreparation {
                 Text ptmrkey = new Text(scapePlatformInvoke);
                 // for the configured number of items per invokation, add the 
                 // files to the input and output list of the command.
-                if (numItemCounter > 0) {
+                if (numItemCounter > 1 && recordIterator.hasNext()) {
                     inliststr += "," + fs.getHomeDirectory() + File.separator + hdfsPathStr;
                     outliststr += "," + fs.getHomeDirectory() + File.separator + hdfsOutPathStr;
                     numItemCounter--;
-                } else if (numItemCounter == 0) {
+                } else if (numItemCounter == 1 || !recordIterator.hasNext()) {
+                    inliststr += "," + fs.getHomeDirectory() + File.separator + hdfsPathStr;
+                    outliststr += "," + fs.getHomeDirectory() + File.separator + hdfsOutPathStr;
                     inliststr = inliststr.substring(1);
                     outliststr = outliststr.substring(1);
                     String ptMrStr = "--input=\"hdfs:///./\" "

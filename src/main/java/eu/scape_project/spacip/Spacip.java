@@ -56,7 +56,7 @@ public class Spacip {
     
     // Default parameters
     public static final int DEFAULT_ITEMS_PER_INVOCATION = 50;
-    public static final String DEFAULT_SCAPE_PLATFORM_INVOKE = "tool operation";
+    public static final String DEFAULT_SCAPE_PLATFORM_INVOKE = "fits dirxml";
     public static final String DEFAULT_OUTPUT_FILE_SUFFIX = ".fits.xml";
     public static final String DEFAULT_UNPACK_HDFS_PATH = "spacip_unpacked";
     public static final String DEFAULT_TOOLOUTPUT_HDFS_PATH = "spacip_tooloutput";
@@ -201,7 +201,6 @@ public class Spacip {
             String outpath = StrUt.normdir(config.getJoboutputHdfsPath()) + System.currentTimeMillis();
             FileOutputFormat.setOutputPath(job, new Path(outpath));
             job.waitForCompletion(true);
-            System.out.print(outpath);
             System.exit(0);
         } catch (Exception e) {
             logger.error("I/O error", e);
