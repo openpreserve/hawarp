@@ -16,12 +16,6 @@
  */
 package eu.scape_project.spacip.cli;
 
-import static eu.scape_project.spacip.Spacip.DEFAULT_ITEMS_PER_INVOCATION;
-import static eu.scape_project.spacip.Spacip.DEFAULT_OUTPUT_FILE_SUFFIX;
-import static eu.scape_project.spacip.Spacip.DEFAULT_SCAPE_PLATFORM_INVOKE;
-import static eu.scape_project.spacip.Spacip.DEFAULT_UNPACK_HDFS_PATH;
-import static eu.scape_project.spacip.Spacip.DEFAULT_JOBOUTPUT_HDFS_PATH;
-import static eu.scape_project.spacip.Spacip.DEFAULT_TOOLOUTPUT_HDFS_PATH;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.slf4j.Logger;
@@ -47,27 +41,7 @@ public class Options {
 
     public static final String NPT_FLG = "n";
     public static final String NPT_OPT = "npt";
-    public static final String NPT_OPT_DESC = "Number of items to be processed per task (e.g. 50). [optional, default: " + DEFAULT_ITEMS_PER_INVOCATION + "].";
-
-    public static final String SPI_FLG = "i";
-    public static final String SPI_OPT = "sci";
-    public static final String SPI_OPT_DESC = "Scape platform invocation command (e.g. 'fits dirxml'). [optional, default: '" + DEFAULT_SCAPE_PLATFORM_INVOKE + "'].";
-
-    public static final String OFS_FLG = "e";
-    public static final String OFS_OPT = "ofs";
-    public static final String OFS_OPT_DESC = "output file suffix (e.g. '.fits.xml'). [optional, default: '" + DEFAULT_OUTPUT_FILE_SUFFIX + "'].";
-
-    public static final String UHP_FLG = "u";
-    public static final String UHP_OPT = "ofs";
-    public static final String UHP_OPT_DESC = "Unpack hdfs path (e.g. '/user/name/unpacked/'). [optional, default '" + DEFAULT_UNPACK_HDFS_PATH + "'].";
-    
-    public static final String THP_FLG = "t";
-    public static final String THP_OPT = "thp";
-    public static final String THP_OPT_DESC = "Tool output hdfs path (e.g. '/user/name/tooloutput/'). [optional, default '" + DEFAULT_TOOLOUTPUT_HDFS_PATH + "'].";
-
-    public static final String JOP_FLG = "o";
-    public static final String JOP_OPT = "jop";
-    public static final String JOP_OPT_DESC = "Job output hdfs path (e.g. '/user/name/joboutput/'). [optional, default: '" + DEFAULT_JOBOUTPUT_HDFS_PATH + "'].";
+    public static final String NPT_OPT_DESC = "Number of items to be processed per task (e.g. 50). [optional, default: " + 50 + "].";
 
     public static org.apache.commons.cli.Options OPTIONS = new org.apache.commons.cli.Options();
     public static final String USAGE = "java jar "
@@ -78,11 +52,6 @@ public class Options {
         OPTIONS.addOption(HELP_FLG, HELP_OPT, false, HELP_OPT_DESC);
         OPTIONS.addOption(DIR_FLG, DIR_OPT, true, DIR_OPT_DESC);
         OPTIONS.addOption(NPT_FLG, NPT_OPT, true, NPT_OPT_DESC);
-        OPTIONS.addOption(SPI_FLG, SPI_OPT, true, SPI_OPT_DESC);
-        OPTIONS.addOption(OFS_FLG, OFS_OPT, true, OFS_OPT_DESC);
-        OPTIONS.addOption(UHP_FLG, UHP_OPT, true, UHP_OPT_DESC);
-        OPTIONS.addOption(JOP_FLG, JOP_OPT, true, JOP_OPT_DESC);
-        OPTIONS.addOption(THP_FLG, THP_OPT, true, THP_OPT_DESC);
     }
 
     public static void initOptions(CommandLine cmd, CliConfig pc) {
@@ -100,7 +69,7 @@ public class Options {
         // num items per invokation
         int numItemsPerInvokation;
         if (!(cmd.hasOption(NPT_OPT) && cmd.getOptionValue(NPT_OPT) != null)) {
-            pc.setNumItemsPerInvokation(DEFAULT_ITEMS_PER_INVOCATION);
+            pc.setNumItemsPerInvokation(0);
         } else {
             try {
                 numItemsPerInvokation = Integer.parseInt(cmd.getOptionValue(NPT_OPT));
@@ -111,57 +80,6 @@ public class Options {
             
         }
         logger.debug("Number of items to be processed per invocation: " + pc.getNumItemsPerInvokation());
-
-        // scape platform invoke
-        String scapePlatformInvoke;
-        if (!(cmd.hasOption(SPI_OPT) && cmd.getOptionValue(SPI_OPT) != null)) {
-            pc.setScapePlatformInvoke(DEFAULT_SCAPE_PLATFORM_INVOKE);
-        } else {
-            scapePlatformInvoke = cmd.getOptionValue(SPI_OPT);
-            pc.setScapePlatformInvoke(scapePlatformInvoke);
-        }
-        logger.debug("Scape platform invoke: " + pc.getScapePlatformInvoke());
-
-        // output file suffix
-        String outputFileSuffix;
-        if (!(cmd.hasOption(OFS_OPT) && cmd.getOptionValue(OFS_OPT) != null)) {
-            pc.setOutputFileSuffix(DEFAULT_OUTPUT_FILE_SUFFIX);
-        } else {
-            outputFileSuffix = cmd.getOptionValue(OFS_OPT);
-            pc.setOutputFileSuffix(outputFileSuffix);
-        }
-        logger.debug("Ouput file suffix: " + pc.getOutputFileSuffix());
-
-        // unpack hdfs path
-        String unpackHdfsPath;
-        if (!(cmd.hasOption(UHP_OPT) && cmd.getOptionValue(UHP_OPT) != null)) {
-            pc.setUnpackHdfsPath(DEFAULT_UNPACK_HDFS_PATH);
-        } else {
-            unpackHdfsPath = cmd.getOptionValue(UHP_OPT);
-            pc.setUnpackHdfsPath(unpackHdfsPath);
-        }
-        logger.debug("Unpack hdfs path: " + pc.getUnpackHdfsPath());
-        
-        
-        // joboutput hdfs path
-        String joboutputHdfsPath;
-        if (!(cmd.hasOption(JOP_OPT) && cmd.getOptionValue(JOP_OPT) != null)) {
-            pc.setJoboutputHdfsPath(DEFAULT_JOBOUTPUT_HDFS_PATH);
-        } else {
-            joboutputHdfsPath = cmd.getOptionValue(JOP_OPT);
-            pc.setJoboutputHdfsPath(joboutputHdfsPath);
-        }
-        logger.debug("Joboutput hdfs path: " + pc.getJoboutputHdfsPath());
-
-        // tooloutput hdfs path
-        String tooloutputHdfsPath;
-        if (!(cmd.hasOption(THP_OPT) && cmd.getOptionValue(THP_OPT) != null)) {
-            pc.setTooloputHdfsPath(DEFAULT_TOOLOUTPUT_HDFS_PATH);
-        } else {
-            tooloutputHdfsPath = cmd.getOptionValue(THP_OPT);
-            pc.setTooloputHdfsPath(tooloutputHdfsPath);
-        }
-        logger.debug("Joboutput hdfs path: " + pc.getTooloputHdfsPath());
 
     }
 

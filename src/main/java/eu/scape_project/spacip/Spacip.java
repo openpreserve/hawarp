@@ -18,7 +18,7 @@ package eu.scape_project.spacip;
 
 import eu.scape_project.spacip.cli.CliConfig;
 import eu.scape_project.spacip.cli.Options;
-import eu.scape_project.spacip.unpacker.ContainerItemPreparation;
+import eu.scape_project.spacip.utils.PropertyUtil;
 import eu.scape_project.spacip.utils.StrUt;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -54,15 +54,8 @@ public class Spacip {
     // Logger instance
     private static Logger logger = LoggerFactory.getLogger(Spacip.class.getName());
     
-    // Default parameters
-    public static final int DEFAULT_ITEMS_PER_INVOCATION = 50;
-    public static final String DEFAULT_SCAPE_PLATFORM_INVOKE = "fits dirxml";
-    public static final String DEFAULT_OUTPUT_FILE_SUFFIX = ".fits.xml";
-    public static final String DEFAULT_UNPACK_HDFS_PATH = "spacip_unpacked";
-    public static final String DEFAULT_TOOLOUTPUT_HDFS_PATH = "spacip_tooloutput";
-    public static final String DEFAULT_JOBOUTPUT_HDFS_PATH = "spacip_joboutput";
-    public static final String CONTAINER_FILE_SUFFIX = ".arc.gz";
-
+    private static PropertyUtil pu;
+    
     /**
      * Reducer class.
      */
@@ -114,10 +107,10 @@ public class Spacip {
             Configuration conf = context.getConfiguration();
             
             String containerFileName = pt.getName();
-            if (containerFileName.endsWith(CONTAINER_FILE_SUFFIX)) {
-                ContainerItemPreparation hau = new ContainerItemPreparation(mos, context, conf);
+            if (containerFileName.endsWith(conf.get("containerfilesuffix", ".arc.gz"))) {
+                ContainerProcessing contProc = new ContainerProcessing(mos, context, conf);
                 
-                hau.prepareInput(pt);
+                contProc.prepareInput(pt);
             } else {
                 throw new IllegalArgumentException("Unsupported input format");
             }
@@ -146,24 +139,32 @@ public class Spacip {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        Configuration conf = new Configuration();
+        
+        pu = new PropertyUtil("/eu/scape_project/spacip/config.properties");
+        
+        Configuration hadoopConf = new Configuration();
         // Command line interface
         config = new CliConfig();
         CommandLineParser cmdParser = new PosixParser();
-        GenericOptionsParser gop = new GenericOptionsParser(conf, args);
+        GenericOptionsParser gop = new GenericOptionsParser(hadoopConf, args);
         CommandLine cmd = cmdParser.parse(Options.OPTIONS, gop.getRemainingArgs());
         if ((args.length == 0) || (cmd.hasOption(Options.HELP_OPT))) {
             Options.exit("Usage", 0);
         } else {
             Options.initOptions(cmd, config);
         }
-        conf.setInt("num_items_per_task", config.getNumItemsPerInvokation());
-        conf.set("scape_platform_invoke", config.getScapePlatformInvoke());
-        conf.set("output_file_suffix", config.getOutputFileSuffix());
-        conf.set("unpack_hdfs_path", config.getUnpackHdfsPath());
-        conf.set("joboutput_hdfs_path", config.getJoboutputHdfsPath());
-        conf.set("tooloutput_hdfs_path", config.getTooloputHdfsPath());
-        startHadoopJob(conf);
+        // cli parameter has priority over default configuration
+        int cliParamNumPerInv = config.getNumItemsPerInvokation();
+        int defaultNumPerInv = Integer.parseInt(pu.getProp("default.itemsperinvokation"));
+        int numPerInv = (cliParamNumPerInv != 0)?cliParamNumPerInv:defaultNumPerInv;
+        hadoopConf.setInt("num_items_per_task", numPerInv);
+        hadoopConf.set("output_file_suffix", pu.getProp("default.outputfilesuffix"));
+        hadoopConf.set("scape_platform_invoke", pu.getProp("default.scapeplatforminvoke"));
+        hadoopConf.set("unpack_hdfs_path", pu.getProp("default.hdfsdir.unpacked"));
+        hadoopConf.set("joboutput_hdfs_path", pu.getProp("default.hdfsdir.joboutput"));
+        hadoopConf.set("tooloutput_hdfs_path", pu.getProp("default.hdfsdir.toolout"));
+        hadoopConf.set("container_file_suffix", pu.getProp("containerfilesuffix"));
+        startHadoopJob(hadoopConf);
 
     }
 
@@ -198,7 +199,7 @@ public class Spacip {
             job.setOutputValueClass(ObjectWritable.class);
 
             TextInputFormat.addInputPath(job, new Path(config.getDirStr()));
-            String outpath = StrUt.normdir(config.getJoboutputHdfsPath()) + System.currentTimeMillis();
+            String outpath = StrUt.normdir(conf.get("joboutput_hdfs_path","spacip_joboutput")) + System.currentTimeMillis();
             FileOutputFormat.setOutputPath(job, new Path(outpath));
             job.waitForCompletion(true);
             System.exit(0);

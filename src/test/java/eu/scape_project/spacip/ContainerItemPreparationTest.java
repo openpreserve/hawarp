@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.scape_project.spacip.unpacker;
+package eu.scape_project.spacip;
 
-import eu.scape_project.spacip.unpacker.ContainerItemPreparation;
+import eu.scape_project.spacip.ContainerProcessing;
 import java.io.*;
 import java.util.Iterator;
 import org.apache.commons.io.IOUtils;
@@ -80,7 +80,7 @@ public class ContainerItemPreparationTest {
             File tmpOutFile = File.createTempFile("arcrecord", mimeSuffix, tmpDir);
             assertTrue("Record file not created",tmpOutFile.exists());
             FileOutputStream fos = new FileOutputStream(tmpOutFile);
-            ContainerItemPreparation.arcToOutputStream(arcRecord, fos);
+            ContainerProcessing.arcToOutputStream(arcRecord, fos);
             tmpDir.deleteOnExit();
             tmpOutFile.deleteOnExit();
         }

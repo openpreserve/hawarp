@@ -32,5 +32,10 @@ public class StrUt {
     public static String normdir(String dir) {
         return (dir.endsWith("/")) ? dir : dir + "/";
     }
+    
+    public static String formatCommandOutput(String pattern, String inlist, String outlist) {
+        String ptmapred_cmd = String.format(pattern,inlist,outlist);
+        return ptmapred_cmd;
+    }
 
 }

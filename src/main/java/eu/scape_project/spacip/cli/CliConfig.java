@@ -28,12 +28,6 @@ public class CliConfig implements Cloneable {
 
     private String dirStr;
     private int numItemsPerInvokation;
-    
-    private String scapePlatformInvoke;
-    private String outputFileSuffix;
-    private String unpackHdfsPath;
-    private String tooloputHdfsPath;
-    private String joboutputHdfsPath;
   
     /**
      * Empty constructor
@@ -52,14 +46,6 @@ public class CliConfig implements Cloneable {
         return dirStr;
     }
 
-    public String getTooloputHdfsPath() {
-        return tooloputHdfsPath;
-    }
-
-    public void setTooloputHdfsPath(String tooloputHdfsPath) {
-        this.tooloputHdfsPath = tooloputHdfsPath;
-    }
-
     /**
      * Setter for the directories parameter
      * @param dirsStr
@@ -75,39 +61,6 @@ public class CliConfig implements Cloneable {
     public void setNumItemsPerInvokation(int numItemsPerTask) {
         this.numItemsPerInvokation = numItemsPerTask;
     }
-
-    public String getScapePlatformInvoke() {
-        return scapePlatformInvoke;
-    }
-
-    public void setScapePlatformInvoke(String scapePlatformInvoke) {
-        this.scapePlatformInvoke = scapePlatformInvoke;
-    }
-
-    public String getOutputFileSuffix() {
-        return outputFileSuffix;
-    }
-
-    public void setOutputFileSuffix(String outputFileSuffix) {
-        this.outputFileSuffix = outputFileSuffix;
-    }
-
-    public String getUnpackHdfsPath() {
-        return unpackHdfsPath;
-    }
-
-    public void setUnpackHdfsPath(String unpackHdfsPath) {
-        this.unpackHdfsPath = unpackHdfsPath;
-    }
-
-    public String getJoboutputHdfsPath() {
-        return joboutputHdfsPath;
-    }
-
-    public void setJoboutputHdfsPath(String joboutputHdfsPath) {
-        this.joboutputHdfsPath = joboutputHdfsPath;
-    }
-
     
     
     /**

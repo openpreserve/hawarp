@@ -13,13 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License. under the License.
  */
-package eu.scape_project.spacip.unpacker;
+package eu.scape_project.spacip;
 
-import static eu.scape_project.spacip.Spacip.DEFAULT_ITEMS_PER_INVOCATION;
-import static eu.scape_project.spacip.Spacip.DEFAULT_OUTPUT_FILE_SUFFIX;
-import static eu.scape_project.spacip.Spacip.DEFAULT_SCAPE_PLATFORM_INVOKE;
-import static eu.scape_project.spacip.Spacip.DEFAULT_UNPACK_HDFS_PATH;
-import static eu.scape_project.spacip.Spacip.DEFAULT_TOOLOUTPUT_HDFS_PATH;
 import eu.scape_project.spacip.utils.IOUtils;
 import eu.scape_project.spacip.utils.StrUt;
 import java.io.*;
@@ -50,9 +45,9 @@ import org.slf4j.LoggerFactory;
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
  */
-public class ContainerItemPreparation {
+public class ContainerProcessing {
 
-    private static Logger logger = LoggerFactory.getLogger(ContainerItemPreparation.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(ContainerProcessing.class.getName());
     public static final int BUFFER_SIZE = 8192;
 
     private MultipleOutputs mos;
@@ -65,7 +60,7 @@ public class ContainerItemPreparation {
      * @param mos
      * @param context
      */
-    public ContainerItemPreparation(MultipleOutputs mos, Mapper.Context context, Configuration conf) {
+    public ContainerProcessing(MultipleOutputs mos, Mapper.Context context, Configuration conf) {
         this.mos = mos;
         this.context = context;
         this.conf = conf;
@@ -74,7 +69,7 @@ public class ContainerItemPreparation {
     /**
      * Constructor
      */
-    private ContainerItemPreparation() {
+    private ContainerProcessing() {
 
     }
 
@@ -105,9 +100,6 @@ public class ContainerItemPreparation {
      * Prepare input
      *
      * @param pt
-     * @param fs
-     * @param mos
-     * @param itemsPerInvocation
      * @throws IOException IO Error
      * @throws java.lang.InterruptedException
      */
@@ -117,12 +109,12 @@ public class ContainerItemPreparation {
         String containerFileName = pt.getName();
         ArchiveReader reader = ArchiveReaderFactory.get(containerFileName, containerFileStream, true);
         long currTM = System.currentTimeMillis();
-        String unpackHdfsPath = conf.get("unpack_hdfs_path", DEFAULT_UNPACK_HDFS_PATH);
+        String unpackHdfsPath = conf.get("unpack_hdfs_path", "spacip_unpacked");
         String hdfsUnpackDirStr = StrUt.normdir(unpackHdfsPath) + currTM + "/";
-        String hdfsJoboutputPath = conf.get("tooloutput_hdfs_path", DEFAULT_TOOLOUTPUT_HDFS_PATH);
+        String hdfsJoboutputPath = conf.get("tooloutput_hdfs_path", "spacip_tooloutput");
         String hdfsOutputDirStr = StrUt.normdir(hdfsJoboutputPath) + currTM + "/";
         Iterator<ArchiveRecord> recordIterator = reader.iterator();
-        int numItemsPerInvocation = conf.getInt("num_items_per_task", DEFAULT_ITEMS_PER_INVOCATION);
+        int numItemsPerInvocation = conf.getInt("num_items_per_task", 50);
         int numItemCounter = numItemsPerInvocation;
         String inliststr = "";
         String outliststr = "";
@@ -139,14 +131,14 @@ public class ContainerItemPreparation {
                 String fileName = RandomStringUtils.randomAlphabetic(20) + "." + mimeSuffix;
                 String hdfsPathStr = hdfsUnpackDirStr + fileName;
                 Path hdfsPath = new Path(hdfsPathStr);
-                String outputFileSuffix = conf.get("output_file_suffix", DEFAULT_OUTPUT_FILE_SUFFIX);
+                String outputFileSuffix = conf.get("output_file_suffix", ".fits.xml");
                 String hdfsOutPathStr = hdfsOutputDirStr + fileName + outputFileSuffix;
                 FSDataOutputStream hdfsOutStream = fs.create(hdfsPath);
-                ContainerItemPreparation.arcToOutputStream(arcRecord, hdfsOutStream);
+                ContainerProcessing.arcToOutputStream(arcRecord, hdfsOutStream);
                 Text key = new Text(recordKey);
                 Text value = new Text(fs.getHomeDirectory() + File.separator + hdfsPath.toString());
                 mos.write("keyfilmapping", key, value);
-                String scapePlatformInvoke = conf.get("scape_platform_invoke", DEFAULT_SCAPE_PLATFORM_INVOKE);
+                String scapePlatformInvoke = conf.get("scape_platform_invoke", "fits dirxml");
                 Text ptmrkey = new Text(scapePlatformInvoke);
                 // for the configured number of items per invokation, add the 
                 // files to the input and output list of the command.
@@ -154,15 +146,18 @@ public class ContainerItemPreparation {
                     inliststr += "," + fs.getHomeDirectory() + File.separator + hdfsPathStr;
                     outliststr += "," + fs.getHomeDirectory() + File.separator + hdfsOutPathStr;
                     numItemCounter--;
+                // limit of files per invokation or last file of the container reached
                 } else if (numItemCounter == 1 || !recordIterator.hasNext()) {
                     inliststr += "," + fs.getHomeDirectory() + File.separator + hdfsPathStr;
                     outliststr += "," + fs.getHomeDirectory() + File.separator + hdfsOutPathStr;
                     inliststr = inliststr.substring(1);
                     outliststr = outliststr.substring(1);
-                    String ptMrStr = "--input=\"hdfs:///./\" "
-                            + "--inputlist=\"" + inliststr + "\" "
-                            + "--output=\"hdfs:///./\" "
-                            + "--outputlist=\"" + outliststr + "\"";
+//                    String ptMrStr = "--input=\"hdfs:///./\" "
+//                            + "--inputlist=\"" + inliststr + "\" "
+//                            + "--output=\"hdfs:///./\" "
+//                            + "--outputlist=\"" + outliststr + "\"";
+                    String pattern = conf.get("commandpattern","--input=\"hdfs:///./\" --inputlist=\"%1$s\" --output=\"hdfs:///./\" --outputlist=\"%2$s\"");
+                    String ptMrStr = StrUt.formatCommandOutput(pattern,inliststr,outliststr);
                     Text ptmrvalue = new Text(ptMrStr);
                     mos.write("ptmapredinput", ptmrkey, ptmrvalue);
                     numItemCounter = numItemsPerInvocation;
