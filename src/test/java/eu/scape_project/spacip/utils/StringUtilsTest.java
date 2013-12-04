@@ -17,11 +17,11 @@ import static org.junit.Assert.*;
  *
  * @author onbscs
  */
-public class StrUtTest {
+public class StringUtilsTest {
     
     private static PropertyUtil pu;
     
-    public StrUtTest() {
+    public StringUtilsTest() {
     }
     
     @BeforeClass

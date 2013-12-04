@@ -26,11 +26,11 @@ import static org.junit.Assert.*;
  *
  * @author onbscs
  */
-public class ContainerItemPreparationTest {
+public class ContainerProcessingTest {
 
     private File tmpTestFile;
 
-    public ContainerItemPreparationTest() {
+    public ContainerProcessingTest() {
     }
 
     @BeforeClass
@@ -43,7 +43,7 @@ public class ContainerItemPreparationTest {
 
     @Before
     public void setUp() throws IOException {
-        InputStream in = ContainerItemPreparationTest.class.getResourceAsStream("test.arc.gz");
+        InputStream in = ContainerProcessingTest.class.getResourceAsStream("test.arc.gz");
         if (in == null) {
             fail();
         }
