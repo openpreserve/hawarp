@@ -19,7 +19,7 @@ package eu.scape_project.spacip;
 import eu.scape_project.spacip.cli.CliConfig;
 import eu.scape_project.spacip.cli.Options;
 import eu.scape_project.spacip.utils.PropertyUtil;
-import eu.scape_project.spacip.utils.StrUt;
+import eu.scape_project.spacip.utils.StringUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
@@ -59,7 +59,7 @@ public class Spacip {
     /**
      * Reducer class.
      */
-    public static class InputPreparationReducer
+    public static class ContainerProcessingReducer
             extends Reducer<Text, Text, Text, ObjectWritable> {
 
         private MultipleOutputs mos;
@@ -78,7 +78,7 @@ public class Spacip {
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             for (Text val : values) {
                 mos.write("keyfilmapping", key, val);
-                mos.write("ptmapredinput", key, val);
+                mos.write("tomarinput", key, val);
             }
         }
     }
@@ -86,7 +86,7 @@ public class Spacip {
     /**
      * Mapper class.
      */
-    public static class InputPreparationMapper
+    public static class ContainerProcessingMapper
             extends Mapper<LongWritable, Text, Text, ObjectWritable> {
 
         private MultipleOutputs mos;
@@ -139,9 +139,11 @@ public class Spacip {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        
+      
+        // configuration properties
         pu = new PropertyUtil("/eu/scape_project/spacip/config.properties");
         
+        // hadoop configuration
         Configuration hadoopConf = new Configuration();
         // Command line interface
         config = new CliConfig();
@@ -157,6 +159,8 @@ public class Spacip {
         int cliParamNumPerInv = config.getNumItemsPerInvokation();
         int defaultNumPerInv = Integer.parseInt(pu.getProp("default.itemsperinvokation"));
         int numPerInv = (cliParamNumPerInv != 0)?cliParamNumPerInv:defaultNumPerInv;
+        // setting hadoop configuration parameters so that they can be used
+        // during MapReduce
         hadoopConf.setInt("num_items_per_task", numPerInv);
         hadoopConf.set("output_file_suffix", pu.getProp("default.outputfilesuffix"));
         hadoopConf.set("scape_platform_invoke", pu.getProp("default.scapeplatforminvoke"));
@@ -183,14 +187,13 @@ public class Spacip {
 
             job.setJarByClass(Spacip.class);
 
-            job.setMapperClass(Spacip.InputPreparationMapper.class);
-            job.setReducerClass(Spacip.InputPreparationReducer.class);
+            job.setMapperClass(Spacip.ContainerProcessingMapper.class);
+            job.setReducerClass(Spacip.ContainerProcessingReducer.class);
 
             job.setInputFormatClass(TextInputFormat.class);
-
-            // tabular output of identification results
+            
             MultipleOutputs.addNamedOutput(job, "keyfilmapping", TextOutputFormat.class, Text.class, Text.class);
-            MultipleOutputs.addNamedOutput(job, "ptmapredinput", TextOutputFormat.class, Text.class, Text.class);
+            MultipleOutputs.addNamedOutput(job, "tomarinput", TextOutputFormat.class, Text.class, Text.class);
 
             job.setMapOutputKeyClass(Text.class);
             job.setMapOutputValueClass(ObjectWritable.class);
@@ -199,7 +202,7 @@ public class Spacip {
             job.setOutputValueClass(ObjectWritable.class);
 
             TextInputFormat.addInputPath(job, new Path(config.getDirStr()));
-            String outpath = StrUt.normdir(conf.get("joboutput_hdfs_path","spacip_joboutput")) + System.currentTimeMillis();
+            String outpath = StringUtils.normdir(conf.get("joboutput_hdfs_path","spacip_joboutput")) + System.currentTimeMillis();
             FileOutputFormat.setOutputPath(job, new Path(outpath));
             job.waitForCompletion(true);
             System.exit(0);

@@ -50,10 +50,10 @@ public class StrUtTest {
         System.out.println("normdir");
         String dir = "test";
         String expResult = "test/";
-        String result = StrUt.normdir(dir);
+        String result = StringUtils.normdir(dir);
         assertEquals(expResult, result);
         dir = "test/";
-        result = StrUt.normdir(dir);
+        result = StringUtils.normdir(dir);
         assertEquals(expResult, result);
         
     }
@@ -68,7 +68,7 @@ public class StrUtTest {
         String outlist = "hdfs:///user/out1.txt,hdfs:///user/out2.txt";
         String expResult = "--input=\"hdfs:///./\" --inputlist=\"hdfs:///user/in1.txt,hdfs:///user/in2.txt\" --output=\"hdfs:///./\" --outputlist=\"hdfs:///user/out1.txt,hdfs:///user/out2.txt\"";
         String pattern = pu.getProp("commandpattern");
-        String result = StrUt.formatCommandOutput(pattern, inlist, outlist);
+        String result = StringUtils.formatCommandOutput(pattern, inlist, outlist);
         assertEquals(expResult, result);
     }
     

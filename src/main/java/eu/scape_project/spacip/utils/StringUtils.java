@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
  */
-public class StrUt {
+public class StringUtils {
 
-    private static Logger logger = LoggerFactory.getLogger(StrUt.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(StringUtils.class.getName());
 
     public static String normdir(String dir) {
         return (dir.endsWith("/")) ? dir : dir + "/";

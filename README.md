@@ -26,33 +26,19 @@ The following parameters can be used in any order:
     -d,--dir <arg>   HDFS directory containing (the) text file(s) with HDFS
                      paths to container files (e.g. '/user/name/inputdir/').
                      [required].
-    -e,--ofs <arg>   output file suffix (e.g. '.fits.xml'). [optional,
-                     default: '.fits.xml'].
-    -h,--help        print this message [optional].
-    -i,--sci <arg>   Scape platform invocation command (e.g. 'fits dirxml').
-                     [optional, default: 'tool operation'].
-    -n,--npt <arg>   Number of items to be processed per task (e.g. 50).
+    -n,--npt <arg>   Number of items to be processed per invokation (e.g. 50).
                      [optional, default: 50].
-    -o,--jop <arg>   Job output hdfs path (e.g. '/user/name/spacip_joboutput/').
-                     [optional, default: 'spacip_joboutput'].
-    -t,--thp <arg>   Tool output hdfs path (e.g. '/user/name/spacip_tooloutput/').
-                     [optional, default 'spacip_tooloutput'].
-    -u,--ofs <arg>   Unpack hdfs path (e.g. '/user/name/spacip_unpacked/').
-                     [optional, default 'spacip_unpacked'].
 
-Only the input files directory is required, all other parameters have 
-default values.
-
-The input directory (parameter -d) must contain (a) text file(s) which 
-contains absolute HDFS paths to the ARC container files, for example:
+Important: The input directory (parameter -d) should not contain the ARC files, 
+but it must contain (a) text file(s) with absolute HDFS paths to the ARC container 
+files, for example:
 
 hadoop jar ./target/spacip-1.0-SNAPSHOT-jar-with-dependencies.jar  -d /user/name/inputpaths/
  
-If the hadoop job runs successfully, various files are created in different
+If the hadoop job runs successfully, various files are created in separate output 
 directories.
 
-First there is the directory where the files contained in the ARC file are
-unpackaged to:
+First there is the directory where the unpacked files are copied:
 
     /user/name/spacip_unpacked/
 
@@ -69,8 +55,8 @@ The 'keyfilemapping-*' file contains the container/record-identifier as
 key and the file name as value so that each unpacked file in HDFS can 
 be clearly assigned to the corresponding record and the ARC container.
 
-The 'ptmapredinput-*' file contains the input file which can be used
-by the PT-Mapred application by providing it as value of the -i parameter.
+The 'tomarinput-*' file contains the input file which can be used as input
+by [Tomar](https://github.com/openplanets/tomar) (-i parameter).
 
 The 'part-r-00000' is an empty reducer file which can be ignored.
 

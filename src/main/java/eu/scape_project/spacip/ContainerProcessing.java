@@ -16,7 +16,7 @@
 package eu.scape_project.spacip;
 
 import eu.scape_project.spacip.utils.IOUtils;
-import eu.scape_project.spacip.utils.StrUt;
+import eu.scape_project.spacip.utils.StringUtils;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -110,9 +110,9 @@ public class ContainerProcessing {
         ArchiveReader reader = ArchiveReaderFactory.get(containerFileName, containerFileStream, true);
         long currTM = System.currentTimeMillis();
         String unpackHdfsPath = conf.get("unpack_hdfs_path", "spacip_unpacked");
-        String hdfsUnpackDirStr = StrUt.normdir(unpackHdfsPath) + currTM + "/";
+        String hdfsUnpackDirStr = StringUtils.normdir(unpackHdfsPath) + currTM + "/";
         String hdfsJoboutputPath = conf.get("tooloutput_hdfs_path", "spacip_tooloutput");
-        String hdfsOutputDirStr = StrUt.normdir(hdfsJoboutputPath) + currTM + "/";
+        String hdfsOutputDirStr = StringUtils.normdir(hdfsJoboutputPath) + currTM + "/";
         Iterator<ArchiveRecord> recordIterator = reader.iterator();
         int numItemsPerInvocation = conf.getInt("num_items_per_task", 50);
         int numItemCounter = numItemsPerInvocation;
@@ -136,7 +136,7 @@ public class ContainerProcessing {
                 FSDataOutputStream hdfsOutStream = fs.create(hdfsPath);
                 ContainerProcessing.arcToOutputStream(arcRecord, hdfsOutStream);
                 Text key = new Text(recordKey);
-                Text value = new Text(fs.getHomeDirectory() + File.separator + hdfsPath.toString());
+                Text value = new Text(fs.getHomeDirectory() + File.separator + hdfsOutPathStr);
                 mos.write("keyfilmapping", key, value);
                 String scapePlatformInvoke = conf.get("scape_platform_invoke", "fits dirxml");
                 Text ptmrkey = new Text(scapePlatformInvoke);
@@ -152,14 +152,10 @@ public class ContainerProcessing {
                     outliststr += "," + fs.getHomeDirectory() + File.separator + hdfsOutPathStr;
                     inliststr = inliststr.substring(1);
                     outliststr = outliststr.substring(1);
-//                    String ptMrStr = "--input=\"hdfs:///./\" "
-//                            + "--inputlist=\"" + inliststr + "\" "
-//                            + "--output=\"hdfs:///./\" "
-//                            + "--outputlist=\"" + outliststr + "\"";
-                    String pattern = conf.get("commandpattern","--input=\"hdfs:///./\" --inputlist=\"%1$s\" --output=\"hdfs:///./\" --outputlist=\"%2$s\"");
-                    String ptMrStr = StrUt.formatCommandOutput(pattern,inliststr,outliststr);
+                    String pattern = conf.get("commandpattern","%1$s %2$s");
+                    String ptMrStr = StringUtils.formatCommandOutput(pattern,inliststr,outliststr);
                     Text ptmrvalue = new Text(ptMrStr);
-                    mos.write("ptmapredinput", ptmrkey, ptmrvalue);
+                    mos.write("tomarinput", ptmrkey, ptmrvalue);
                     numItemCounter = numItemsPerInvocation;
                     inliststr = "";
                     outliststr = "";
