@@ -67,7 +67,7 @@ public class StringUtilsTest {
         String inlist = "hdfs:///user/in1.txt,hdfs:///user/in2.txt";
         String outlist = "hdfs:///user/out1.txt,hdfs:///user/out2.txt";
         String expResult = "--input=\"hdfs:///./\" --inputlist=\"hdfs:///user/in1.txt,hdfs:///user/in2.txt\" --output=\"hdfs:///./\" --outputlist=\"hdfs:///user/out1.txt,hdfs:///user/out2.txt\"";
-        String pattern = pu.getProp("commandpattern");
+        String pattern = pu.getProp("tomar.param.pattern");
         String result = StringUtils.formatCommandOutput(pattern, inlist, outlist);
         assertEquals(expResult, result);
     }

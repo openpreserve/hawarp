@@ -163,11 +163,12 @@ public class Spacip {
         // during MapReduce
         hadoopConf.setInt("num_items_per_task", numPerInv);
         hadoopConf.set("output_file_suffix", pu.getProp("default.outputfilesuffix"));
-        hadoopConf.set("scape_platform_invoke", pu.getProp("default.scapeplatforminvoke"));
+        hadoopConf.set("scape_platform_invoke", pu.getProp("tomar.invoke.command"));
         hadoopConf.set("unpack_hdfs_path", pu.getProp("default.hdfsdir.unpacked"));
         hadoopConf.set("joboutput_hdfs_path", pu.getProp("default.hdfsdir.joboutput"));
         hadoopConf.set("tooloutput_hdfs_path", pu.getProp("default.hdfsdir.toolout"));
         hadoopConf.set("container_file_suffix", pu.getProp("containerfilesuffix"));
+        hadoopConf.set("tomar_param_pattern", pu.getProp("tomar.param.pattern"));
         startHadoopJob(hadoopConf);
 
     }

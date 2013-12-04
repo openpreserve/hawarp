@@ -152,7 +152,7 @@ public class ContainerProcessing {
                     outliststr += "," + fs.getHomeDirectory() + File.separator + hdfsOutPathStr;
                     inliststr = inliststr.substring(1);
                     outliststr = outliststr.substring(1);
-                    String pattern = conf.get("commandpattern","%1$s %2$s");
+                    String pattern = conf.get("tomar.param.pattern","%1$s %2$s");
                     String ptMrStr = StringUtils.formatCommandOutput(pattern,inliststr,outliststr);
                     Text ptmrvalue = new Text(ptMrStr);
                     mos.write("tomarinput", ptmrkey, ptmrvalue);
