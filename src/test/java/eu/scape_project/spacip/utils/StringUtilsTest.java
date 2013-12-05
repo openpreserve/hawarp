@@ -55,8 +55,18 @@ public class StringUtilsTest {
         dir = "test/";
         result = StringUtils.normdir(dir);
         assertEquals(expResult, result);
+        expResult = "test/test2/test3/";
+        result = StringUtils.normdir("test","test2","test3");
+        assertEquals(expResult, result);
+        result = StringUtils.normdir("test/","test2/","test3/");
+        assertEquals(expResult, result);
+        result = StringUtils.normdir("test","test2/","/test3");
+        assertEquals(expResult, result);
+        result = StringUtils.normdir("test","/test2/","/test3/");
+        assertEquals(expResult, result);
         
     }
+    
 
     /**
      * Test of formatCommandOutput method, of class StrUt.

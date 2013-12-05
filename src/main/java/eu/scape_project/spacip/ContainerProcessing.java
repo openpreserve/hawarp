@@ -110,9 +110,9 @@ public class ContainerProcessing {
         ArchiveReader reader = ArchiveReaderFactory.get(containerFileName, containerFileStream, true);
         long currTM = System.currentTimeMillis();
         String unpackHdfsPath = conf.get("unpack_hdfs_path", "spacip_unpacked");
-        String hdfsUnpackDirStr = StringUtils.normdir(unpackHdfsPath) + currTM + "/";
+        String hdfsUnpackDirStr = StringUtils.normdir(unpackHdfsPath, Long.toString(currTM));
         String hdfsJoboutputPath = conf.get("tooloutput_hdfs_path", "spacip_tooloutput");
-        String hdfsOutputDirStr = StringUtils.normdir(hdfsJoboutputPath) + currTM + "/";
+        String hdfsOutputDirStr = StringUtils.normdir(hdfsJoboutputPath, Long.toString(currTM));
         Iterator<ArchiveRecord> recordIterator = reader.iterator();
         int numItemsPerInvocation = conf.getInt("num_items_per_task", 50);
         int numItemCounter = numItemsPerInvocation;
@@ -150,11 +150,14 @@ public class ContainerProcessing {
                 } else if (numItemCounter == 1 || !recordIterator.hasNext()) {
                     inliststr += "," + fs.getHomeDirectory() + File.separator + hdfsPathStr;
                     outliststr += "," + fs.getHomeDirectory() + File.separator + hdfsOutPathStr;
-                    inliststr = inliststr.substring(1);
-                    outliststr = outliststr.substring(1);
+                    inliststr = inliststr.substring(1); // cut off leading comma 
+                    outliststr = outliststr.substring(1); // cut off leading comma 
                     String pattern = conf.get("tomar_param_pattern","%1$s %2$s");
                     String ptMrStr = StringUtils.formatCommandOutput(pattern,inliststr,outliststr);
                     Text ptmrvalue = new Text(ptMrStr);
+                    // emit tomar input line where the key is the tool invokation
+                    // (tool + operation) and the value is the parameter list
+                    // where input and output strings contain file lists.
                     mos.write("tomarinput", ptmrkey, ptmrvalue);
                     numItemCounter = numItemsPerInvocation;
                     inliststr = "";

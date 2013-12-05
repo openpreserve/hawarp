@@ -6,7 +6,7 @@ Introduction
 
 Spacip is a tool to prepare web archive container files in the ARC format which 
 are stored in a Hadoop Distributed File System (HDFS) in order to allow 
-processing the individual files by means of the SCAPE Platform tool 
+processing of the individual files by means of the SCAPE Platform tool 
 [Tomar](https://github.com/openplanets/tomar).
 
 It unpackages flat ARC container files to HDFS, creates a map that allows
@@ -38,12 +38,12 @@ hadoop jar ./target/spacip-1.0-SNAPSHOT-jar-with-dependencies.jar  -d /user/name
 If the hadoop job runs successfully, various files are created in separate output 
 directories.
 
-First there is the directory where the unpacked files are copied:
+First there is the directory where unpacked files are copied to:
 
     /user/name/spacip_unpacked/
 
 Second, there is the job output directory (default: spacip_joboutput) which
-contains different output files inside a timestamp directory:
+contains different output files wrapped in a timestamp directory:
 
     ./spacip_joboutput/1385143157862/_SUCCESS
     ./spacip_joboutput/1385143157862/_logs
