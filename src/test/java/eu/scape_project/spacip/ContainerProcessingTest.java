@@ -78,12 +78,50 @@ public class ContainerProcessingTest {
             File tmpDir = new File("/tmp/arcrecords");
             tmpDir.mkdir();
             File tmpOutFile = File.createTempFile("arcrecord", mimeSuffix, tmpDir);
-            assertTrue("Record file not created",tmpOutFile.exists());
+            assertTrue("Record file not created", tmpOutFile.exists());
             FileOutputStream fos = new FileOutputStream(tmpOutFile);
-            ContainerProcessing.arcToOutputStream(arcRecord, fos);
+            ContainerProcessing.recordToOutputStream(arcRecord, fos);
             tmpDir.deleteOnExit();
             tmpOutFile.deleteOnExit();
         }
 
     }
+
+    /**
+     * Local ARC container file iteration test
+     */
+//    @Test
+//    public void testIterateOverContainerRecords() throws Exception {
+//        
+//        String path = "";
+//        int expected = 0;
+//        int result = 0;
+//        
+//        path = "/home/onbscs/5arcs/2791-10-20090916153253-00000-webcrawler04.onb.ac.at.arc.gz";
+//        expected = 8589;
+//        result = ContainerProcessing.iterateOverContainerRecords(path);
+//        assertEquals(expected, result);
+//        
+//        path = "/home/onbscs/5arcs/2791-10-20090916153253-00002-webcrawler04.onb.ac.at.arc.gz";
+//        expected = 10256;
+//        result = ContainerProcessing.iterateOverContainerRecords(path);
+//        assertEquals(expected,result);
+//        
+//        path = "/home/onbscs/5arcs/2791-10-20090916155516-00006-webcrawler04.onb.ac.at.arc.gz";
+//        expected = 7559;
+//        result = ContainerProcessing.iterateOverContainerRecords(path);
+//        assertEquals(expected,result);
+//        
+//        path = "/home/onbscs/5arcs/2791-10-20090916155809-00008-webcrawler04.onb.ac.at.arc.gz";
+//        expected = 6239;
+//        result = ContainerProcessing.iterateOverContainerRecords(path);
+//        assertEquals(expected,result);
+//        
+//        path = "/home/onbscs/5arcs/2791-10-20090916161807-00013-webcrawler04.onb.ac.at.arc.gz";
+//        expected = 9580;
+//        result = ContainerProcessing.iterateOverContainerRecords(path);
+//        assertEquals(expected,result);
+//
+//    }
+
 }

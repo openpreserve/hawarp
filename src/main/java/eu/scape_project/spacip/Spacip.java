@@ -109,7 +109,6 @@ public class Spacip {
             String containerFileName = pt.getName();
             if (containerFileName.endsWith(conf.get("containerfilesuffix", ".arc.gz"))) {
                 ContainerProcessing contProc = new ContainerProcessing(mos, context, conf);
-                
                 contProc.prepareInput(pt);
             } else {
                 throw new IllegalArgumentException("Unsupported input format");
@@ -195,6 +194,7 @@ public class Spacip {
             
             MultipleOutputs.addNamedOutput(job, "keyfilmapping", TextOutputFormat.class, Text.class, Text.class);
             MultipleOutputs.addNamedOutput(job, "tomarinput", TextOutputFormat.class, Text.class, Text.class);
+            MultipleOutputs.addNamedOutput(job, "error", TextOutputFormat.class, Text.class, Text.class);
 
             job.setMapOutputKeyClass(Text.class);
             job.setMapOutputValueClass(ObjectWritable.class);

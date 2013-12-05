@@ -60,6 +60,14 @@ by [Tomar](https://github.com/openplanets/tomar) (-i parameter).
 
 The 'part-r-00000' is an empty reducer file which can be ignored.
 
+Note that, depending on the Hadoop configuration, failed hadoop tasks might be
+re-scheduled to run on another node. This can lead to a higher number of 
+unpacked files than there are records in the container because Hadoop does not 
+take care of cleaning up files which have been created by the failed task. The 
+output files listed above keep track of the generated files, but any additional 
+files caused by task failures will be ignored. It just means that in case of
+task failures some additional storage is required.
+
 Dependencies
 ------------
 
