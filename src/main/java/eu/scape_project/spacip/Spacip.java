@@ -36,6 +36,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
@@ -55,33 +56,6 @@ public class Spacip {
     private static Logger logger = LoggerFactory.getLogger(Spacip.class.getName());
     
     private static PropertyUtil pu;
-    
-    /**
-     * Reducer class.
-     */
-    public static class ContainerProcessingReducer
-            extends Reducer<Text, Text, Text, ObjectWritable> {
-
-        private MultipleOutputs mos;
-
-        @Override
-        public void setup(Context context) {
-            mos = new MultipleOutputs(context);
-        }
-
-        @Override
-        public void cleanup(Context context) throws IOException, InterruptedException {
-            mos.close();
-        }
-
-        @Override
-        public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-            for (Text val : values) {
-                mos.write("keyfilmapping", key, val);
-                mos.write("tomarinput", key, val);
-            }
-        }
-    }
 
     /**
      * Mapper class.
@@ -188,7 +162,8 @@ public class Spacip {
             job.setJarByClass(Spacip.class);
 
             job.setMapperClass(Spacip.ContainerProcessingMapper.class);
-            job.setReducerClass(Spacip.ContainerProcessingReducer.class);
+            // No reducer needed
+            job.setNumReduceTasks(0);
 
             job.setInputFormatClass(TextInputFormat.class);
             
@@ -205,6 +180,7 @@ public class Spacip {
             TextInputFormat.addInputPath(job, new Path(config.getDirStr()));
             String outpath = StringUtils.normdir(conf.get("joboutput_hdfs_path","spacip_joboutput")) + System.currentTimeMillis();
             FileOutputFormat.setOutputPath(job, new Path(outpath));
+            LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class);
             job.waitForCompletion(true);
             System.exit(0);
         } catch (Exception e) {

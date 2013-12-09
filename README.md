@@ -49,7 +49,7 @@ contains different output files wrapped in a timestamp directory:
     ./spacip_joboutput/1385143157862/_logs
     ./spacip_joboutput/1385143157862/keyfilmapping-m-00000
     ./spacip_joboutput/1385143157862/part-r-00000
-    ./spacip_joboutput/1385143157862/ptmapredinput-m-00000
+    ./spacip_joboutput/1385143157862/tomarinput-m-00000
 
 The 'keyfilemapping-*' file contains the container/record-identifier as 
 key and the file name as value so that each unpacked file in HDFS can 
@@ -67,6 +67,28 @@ take care of cleaning up files which have been created by the failed task. The
 output files listed above keep track of the generated files, but any additional 
 files caused by task failures will be ignored. It just means that in case of
 task failures some additional storage is required.
+
+The job produces one output file per map task for the 'keyfilemapping' and
+'tomarinput' output types. 
+
+These files can be easily merged, e.g. for the 'keyfilemapping' using the 
+following command:
+
+    hadoop fs -cat ./spacip_joboutput/1385143157862/keyfilmapping-m-* | hadoop fs -put - ./spacip_joboutput/1385143157862/keyfilmapping-aggregated.txt
+
+And for the [Tomar](https://github.com/openplanets/tomar) input file 
+correspondingly:
+
+    hadoop fs -cat ./spacip_joboutput/1385143157862/tomarinput-m-* | hadoop fs -put - ./spacip_joboutput/1385143157862/tomarinput-aggregated.txt
+
+By that way [Tomar](https://github.com/openplanets/tomar) can be invoked using
+the aggregated input file: 
+
+    hadoop jar tomar.jar -i /user/onbfue/spacip_joboutput/1385143157862/tomarinput-aggregated.txt -r /user/name/scape-toolspecs
+
+where the value of the parameter -i is the aggregated [Tomar](https://github.com/openplanets/tomar) 
+input file and the value of the -r parameter indicates the directory where the 
+tool specification files for [Tomar](https://github.com/openplanets/tomar) can be found.
 
 Dependencies
 ------------
