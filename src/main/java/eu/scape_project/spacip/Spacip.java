@@ -182,6 +182,8 @@ public class Spacip {
             FileOutputFormat.setOutputPath(job, new Path(outpath));
             LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class);
             job.waitForCompletion(true);
+            // print output path (taverna integration)
+            System.out.print(outpath);
             System.exit(0);
         } catch (Exception e) {
             logger.error("I/O error", e);

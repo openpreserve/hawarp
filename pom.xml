@@ -70,7 +70,7 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>wagon-maven-plugin</artifactId>
                 <version>1.0-beta-4</version>
@@ -96,7 +96,7 @@
                         <version>2.3</version>
                     </dependency>
                 </dependencies>
-            </plugin>
+            </plugin>-->
 
         </plugins>
     </build>
