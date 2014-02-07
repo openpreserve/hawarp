@@ -42,6 +42,10 @@ public class Options {
     public static final String CONTENTTYPEID_OPT = "identification";
     public static final String CONTENTTYPEID_OPT_DESC = "Apply content type identification. [optional].";
     
+    public static final String PAYLOADDIGEST_FLG = "d";
+    public static final String PAYLOADDIGEST_OPT = "digest";
+    public static final String PAYLOADDIGEST_OPT_DESC = "Calculate sha1 payload digest. [optional].";
+    
     public static final String LOCAL_FLG = "l";
     public static final String LOCAL_OPT = "local";
     public static final String LOCAL_OPT_DESC = "Use local file system instead of HDFS (debugging). [optional].";
@@ -56,6 +60,7 @@ public class Options {
         OPTIONS.addOption(INPUT_FLG, INPUT_OPT, true, INPUT_OPT_DESC);
         OPTIONS.addOption(OUTPUT_FLG, OUTPUT_OPT, true, OUTPUT_OPT_DESC);
         OPTIONS.addOption(CONTENTTYPEID_FLG, CONTENTTYPEID_OPT, false, CONTENTTYPEID_OPT_DESC);
+        OPTIONS.addOption(PAYLOADDIGEST_FLG, PAYLOADDIGEST_OPT, false, PAYLOADDIGEST_OPT_DESC);
         OPTIONS.addOption(LOCAL_FLG, LOCAL_OPT, false, LOCAL_OPT_DESC);
     }
 
@@ -85,6 +90,12 @@ public class Options {
         if (cmd.hasOption(CONTENTTYPEID_OPT)) {
             pc.setContentTypeIdentification(true);
             System.out.println("Content type identification is active");
+        }
+        
+        // payload digest
+        if (cmd.hasOption(PAYLOADDIGEST_OPT)) {
+            pc.setPayloadDigestCalculation(true);
+            System.out.println("Payload digest calculation is active");
         }
         
         // local mode

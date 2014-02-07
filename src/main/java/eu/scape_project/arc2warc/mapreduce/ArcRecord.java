@@ -45,6 +45,7 @@ public class ArcRecord implements Writable {
     private String type;
     private int contentLength;
     private byte[] contents;
+    private String payloadDigestStr;
 
     /**
      * Reset the properties
@@ -58,6 +59,7 @@ public class ArcRecord implements Writable {
         httpReturnCode = -1;
         type = "";
         contentLength = 0;
+        payloadDigestStr = "";
     }
 
     public String getReaderIdentifier() {
@@ -148,6 +150,17 @@ public class ArcRecord implements Writable {
         this.contents = contents;
     }
 
+    public String getPayloadDigestStr() {
+        if(payloadDigestStr == null) {
+            return "";
+        }
+        return payloadDigestStr;
+    }
+
+    public void setPayloadDigestStr(String payloadDigestStr) {
+        this.payloadDigestStr = payloadDigestStr;
+    }
+
     @Override
     public void write(DataOutput out) throws IOException {
         out.writeUTF(readerIdentifier);
@@ -161,6 +174,7 @@ public class ArcRecord implements Writable {
         out.writeUTF(type);
         out.write(contentLength);
         out.write(contents, 0, contentLength);
+        out.writeUTF(payloadDigestStr);
     }
 
     @Override
@@ -176,6 +190,7 @@ public class ArcRecord implements Writable {
         type = in.readUTF();
         contentLength = in.readInt();
         in.readFully(contents, 0, contentLength);
+        payloadDigestStr = in.readUTF();
     }
 
 }

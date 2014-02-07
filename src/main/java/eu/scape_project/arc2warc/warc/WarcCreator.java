@@ -92,8 +92,9 @@ public class WarcCreator {
         String mimeType = (arcRecordMime != null) ? arcRecordMime : MIME_UNKNOWN;
         record.header.addHeader("Content-Type", mimeType);
         byte[] contents = arcRecord.getContents();
-        record.header.addHeader("Content-Length", Long.toString(contents.length));
+        record.header.addHeader("WARC-Payload-Digest", arcRecord.getPayloadDigestStr());
         record.header.addHeader("WARC-Identified-Payload-Type", arcRecord.getIdentifiedPayloadType());
+        record.header.addHeader("Content-Length", Long.toString(contents.length));
         writer.writeHeader(record);
         ByteArrayInputStream inBytes = new ByteArrayInputStream(contents);
         writer.streamPayload(inBytes);

@@ -40,6 +40,8 @@ import eu.scape_project.arc2warc.identification.PayloadContent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import eu.scape_project.arc2warc.utils.DigestUtils;
+
 import static eu.scape_project.arc2warc.identification.IdentificationConstants.*;
 
 /**
@@ -70,7 +72,7 @@ public class Arc2WarcHadoopJob {
         public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws IOException, InterruptedException {
 
             ArcRecord hRecord = new ArcRecord();
-            
+
             String filePathString = ((FileSplit) context.getInputSplit()).getPath().toString();
             hRecord.setReaderIdentifier(filePathString);
             hRecord.setUrl(jwatArcRecord.getUrlStr());
@@ -84,15 +86,20 @@ public class Arc2WarcHadoopJob {
                 boolean identify = context.getConfiguration().getBoolean("content_type_identification", false);
                 InputStream is = jwatArcRecord.getPayloadContent();
                 PayloadContent payloadContent = new PayloadContent(is);
-                if(identify) {
+                if (identify) {
                     TikaIdentification ti = TikaIdentification.getInstance();
                     payloadContent.setIdentifier(ti);
                     payloadContent.setApplyIdentification(true);
                 }
+
                 payloadContent.readPayloadContent();
                 byte[] payLoadBytes = payloadContent.getPayloadBytes();
+                boolean doDigest = context.getConfiguration().getBoolean("payload_digest_calculation", false);
+                if (doDigest) {
+                    hRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
+                }
                 hRecord.setContents(payLoadBytes);
-                if(identify) {
+                if (identify) {
                     hRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
                 }
             }
@@ -153,6 +160,9 @@ public class Arc2WarcHadoopJob {
         }
         if (config.isContentTypeIdentification()) {
             job.getConfiguration().setBoolean("content_type_identification", true);
+        }
+        if (config.isPayloadDigestCalculation()) {
+            job.getConfiguration().setBoolean("payload_digest_calculation", true);
         }
         job.setJarByClass(Arc2WarcHadoopJob.class);
 
