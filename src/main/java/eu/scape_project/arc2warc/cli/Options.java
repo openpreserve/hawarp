@@ -50,6 +50,7 @@ public class Options {
     static {
         OPTIONS.addOption(HELP_FLG, HELP_OPT, false, HELP_OPT_DESC);
         OPTIONS.addOption(INPUT_FLG, INPUT_OPT, true, INPUT_OPT_DESC);
+        OPTIONS.addOption(OUTPUT_FLG, OUTPUT_OPT, true, OUTPUT_OPT_DESC);
         OPTIONS.addOption(LOCAL_FLG, LOCAL_OPT, false, LOCAL_OPT_DESC);
     }
 
