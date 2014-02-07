@@ -27,6 +27,7 @@ public class CliConfig implements Cloneable {
     private String outputDirStr;
     
     private boolean local;
+    private boolean contentTypeIdentification;
 
     /**
      * Empty constructor
@@ -70,6 +71,14 @@ public class CliConfig implements Cloneable {
     public void setOutputDirStr(String outputDirStr) {
         this.outputDirStr = outputDirStr;
     }
+
+    public boolean isContentTypeIdentification() {
+        return contentTypeIdentification;
+    }
+
+    public void setContentTypeIdentification(boolean contentTypeIdentification) {
+        this.contentTypeIdentification = contentTypeIdentification;
+    }    
 
     public boolean isLocal() {
         return local;

@@ -38,6 +38,10 @@ public class Options {
     public static final String OUTPUT_OPT = "output";
     public static final String OUTPUT_OPT_DESC = "HDFS Output directory where the WARC files will be stored. [required].";
     
+    public static final String CONTENTTYPEID_FLG = "c";
+    public static final String CONTENTTYPEID_OPT = "identification";
+    public static final String CONTENTTYPEID_OPT_DESC = "Apply content type identification. [optional].";
+    
     public static final String LOCAL_FLG = "l";
     public static final String LOCAL_OPT = "local";
     public static final String LOCAL_OPT_DESC = "Use local file system instead of HDFS (debugging). [optional].";
@@ -51,6 +55,7 @@ public class Options {
         OPTIONS.addOption(HELP_FLG, HELP_OPT, false, HELP_OPT_DESC);
         OPTIONS.addOption(INPUT_FLG, INPUT_OPT, true, INPUT_OPT_DESC);
         OPTIONS.addOption(OUTPUT_FLG, OUTPUT_OPT, true, OUTPUT_OPT_DESC);
+        OPTIONS.addOption(CONTENTTYPEID_FLG, CONTENTTYPEID_OPT, false, CONTENTTYPEID_OPT_DESC);
         OPTIONS.addOption(LOCAL_FLG, LOCAL_OPT, false, LOCAL_OPT_DESC);
     }
 
@@ -74,6 +79,12 @@ public class Options {
             outputDirStr = cmd.getOptionValue(OUTPUT_OPT);
             pc.setOutputDirStr(outputDirStr);
             System.out.println("Output directory: " + outputDirStr);
+        }
+        
+        // content type identification
+        if (cmd.hasOption(CONTENTTYPEID_OPT)) {
+            pc.setContentTypeIdentification(true);
+            System.out.println("Content type identification is active");
         }
         
         // local mode

@@ -38,6 +38,7 @@ public class ArcRecord implements Writable {
     private String recordIdentifier;
     private String url = null;
     private String mimeType = null;
+    private String identifiedPayloadType;
     private Date date = null;
     private int httpReturnCode = -1;
     private String ipAddress;
@@ -91,6 +92,14 @@ public class ArcRecord implements Writable {
         this.mimeType = mimeType;
     }
 
+    public String getIdentifiedPayloadType() {
+        return identifiedPayloadType;
+    }
+
+    public void setIdentifiedPayloadType(String identifiedPayloadType) {
+        this.identifiedPayloadType = identifiedPayloadType;
+    }
+    
     public Date getDate() {
         return date;
     }
@@ -145,6 +154,7 @@ public class ArcRecord implements Writable {
         out.writeUTF(recordIdentifier);
         out.writeUTF(url);
         out.writeUTF(mimeType);
+        out.writeUTF(identifiedPayloadType);
         out.writeLong(date.getTime());
         out.writeInt(httpReturnCode);
         out.writeUTF(ipAddress);
@@ -159,6 +169,7 @@ public class ArcRecord implements Writable {
         recordIdentifier = in.readUTF();
         url = in.readUTF();
         mimeType = in.readUTF();
+        identifiedPayloadType = in.readUTF();
         date = new Date(in.readLong());
         httpReturnCode = in.readInt();
         ipAddress = in.readUTF();

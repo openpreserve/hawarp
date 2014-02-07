@@ -33,7 +33,7 @@
         </developer>
     </developers>
     
-     <repositories>
+    <repositories>
         <repository>
             <id>libs-release-local</id>
             <name>CDH3u5</name>
@@ -56,13 +56,14 @@
             <layout>default</layout>
         </repository>
     </repositories>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cdh.version>0.20.2-cdh3u5</cdh.version>
         <pig.version>0.10.0-cdh3u4</pig.version>
         <jwat.version>1.0.0</jwat.version>
+        <tika.version>1.4</tika.version>
     </properties>
-   
    
     <build>
         <plugins>
@@ -128,7 +129,7 @@
             <version>4.10</version>
             <scope>test</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.2</version>
@@ -148,6 +149,13 @@
             <groupId>org.archive.heritrix</groupId>
             <artifactId>heritrix-commons</artifactId>
             <version>3.1.0</version>
+            <!-- heritrix poi conflicts with tika poi -->
+            <exclusions>
+                <exclusion>
+                    <artifactId>poi</artifactId>
+                    <groupId>poi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>
@@ -174,6 +182,17 @@
             <groupId>org.jwat</groupId>
             <artifactId>jwat-tools</artifactId>
             <version>0.5.6-SNAPSHOT</version>
+        </dependency>
+        <!-- Tika dependencies -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>${tika.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>${tika.version}</version>
         </dependency>
         
     </dependencies>
