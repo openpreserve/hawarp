@@ -68,10 +68,10 @@ public class Options {
         
         // output directory
         String outputDirStr;
-        if (!(cmd.hasOption(INPUT_OPT) && cmd.getOptionValue(INPUT_OPT) != null)) {
+        if (!(cmd.hasOption(OUTPUT_OPT) && cmd.getOptionValue(OUTPUT_OPT) != null)) {
             exit("No output directory given.", 1);
         } else {
-            outputDirStr = cmd.getOptionValue(INPUT_OPT);
+            outputDirStr = cmd.getOptionValue(OUTPUT_OPT);
             pc.setOutputDirStr(outputDirStr);
             System.out.println("Output directory: " + outputDirStr);
         }
