@@ -107,29 +107,28 @@ public class TikaIdentification implements Identifier {
     @Override
     public String identify(byte[] prefix) {
 
-        try {
-            Metadata metadata = new Metadata();
-            ByteArrayInputStream bis = new ByteArrayInputStream(prefix);
-            TikaInputStream tis = TikaInputStream.get(bis);
-
-            MimeTypes mimeTypes
-                    = TikaConfig.getDefaultConfig().getMimeRepository();
-            MediaType mediaType = mimeTypes.detect(tis, metadata);
-            return mediaType.toString();
-
-        } catch (Exception e) {
-            LOG.warn("Tika identification failed.", e);
-            return MIME_UNKNOWN;
-        }
-
 //        try {
-//            String mimetype = tika.detect(prefix);
-//            LOG.info("Tika says: " + mimetype);
-//            return mimetype;
-//        } catch (java.lang.Exception e) {
-//            LOG.warn("Tika identification failed.");
+//            Metadata metadata = new Metadata();
+//            ByteArrayInputStream bis = new ByteArrayInputStream(prefix);
+//            TikaInputStream tis = TikaInputStream.get(bis);
+//
+//            MimeTypes mimeTypes
+//                    = TikaConfig.getDefaultConfig().getMimeRepository();
+//            MediaType mediaType = mimeTypes.detect(tis, metadata);
+//            return mediaType.toString();
+//
+//        } catch (IOException e) {
+//            LOG.warn("Tika identification failed.", e);
 //            return MIME_UNKNOWN;
 //        }
+
+        try {
+            String mimetype = tika.detect(prefix);
+            return mimetype;
+        } catch (java.lang.Exception e) {
+            LOG.warn("Tika identification failed.");
+            return MIME_UNKNOWN;
+        }
     }
 
 }

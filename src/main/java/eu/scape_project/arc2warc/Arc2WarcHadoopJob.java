@@ -22,7 +22,6 @@ import eu.scape_project.arc2warc.identification.tika.TikaIdentification;
 import eu.scape_project.arc2warc.mapreduce.ArcInputFormat;
 import eu.scape_project.arc2warc.mapreduce.ArcRecord;
 import eu.scape_project.arc2warc.mapreduce.WarcOutputFormat;
-import eu.scape_project.arc2warc.utils.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.cli.CommandLine;
@@ -38,7 +37,6 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import org.jwat.arc.ArcRecordBase;
 
 import eu.scape_project.arc2warc.identification.PayloadContent;
-import eu.scape_project.arc2warc.warc.WarcCreator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -65,14 +63,14 @@ public class Arc2WarcHadoopJob {
      */
     public static class Arc2WarcConversionMapper
             extends Mapper<LongWritable, ArcRecordBase, LongWritable, ArcRecord> {
-        
+
         private static final Log LOG = LogFactory.getLog(Arc2WarcConversionMapper.class);
 
         @Override
         public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws IOException, InterruptedException {
-            
-            ArcRecord hRecord = new ArcRecord();
 
+            ArcRecord hRecord = new ArcRecord();
+            
             String filePathString = ((FileSplit) context.getInputSplit()).getPath().toString();
             hRecord.setReaderIdentifier(filePathString);
             hRecord.setUrl(jwatArcRecord.getUrlStr());
@@ -153,7 +151,7 @@ public class Arc2WarcHadoopJob {
             job.getConfiguration().set("mapred.job.tracker", "local");
             job.getConfiguration().set("fs.default.name", "file:///");
         }
-        if(config.isContentTypeIdentification()) {
+        if (config.isContentTypeIdentification()) {
             job.getConfiguration().setBoolean("content_type_identification", true);
         }
         job.setJarByClass(Arc2WarcHadoopJob.class);
