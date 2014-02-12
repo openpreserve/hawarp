@@ -20,16 +20,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveReaderFactory;
 import org.archive.io.ArchiveRecord;
 import org.archive.io.arc.ARCRecord;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.jwat.arc.ArcReader;
+import org.jwat.arc.ArcReaderFactory;
+import org.jwat.arc.ArcRecordBase;
+import org.jwat.common.Diagnosis;
+import org.jwat.tools.core.ManagedPayload;
+import org.jwat.tools.tasks.test.TestFileResult;
+import org.jwat.tools.tasks.test.TestFileResultItemDiagnosis;
 
 /**
  * Test class for ARC utility methods.
@@ -37,6 +48,8 @@ import static org.junit.Assert.*;
  * @author Sven Schlarb https://github.com/shsdev
  */
 public class ArcUtilsTest {
+
+    private static final Log LOG = LogFactory.getLog(ArcUtilsTest.class);
 
     public ArcUtilsTest() {
     }
@@ -107,5 +120,71 @@ public class ArcUtilsTest {
 
             recordCounter++;
         }
+    }
+    /**
+     * Test reading ARC record payload into byte array.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testJwatAnalyseArc() throws IOException {
+        InputStream arcFileStream = Resources.getResource("arc/example.arc.gz").openStream();
+        ArcRecordBase jwatArcRecord = null;
+        ArcReader arcReader = null;
+        try {
+            arcReader = ArcReaderFactory.getReaderCompressed(arcFileStream);
+        } catch (IOException ex) {
+            LOG.error("I/O error while trying to read from ARC input stream ", ex);
+        }
+        Iterator<ArcRecordBase> arcIterator = arcReader.iterator();
+        long count = 0;
+        while (arcIterator.hasNext()) {
+            jwatArcRecord = arcIterator.next();
+            if (jwatArcRecord != null) {
+                long offset = jwatArcRecord.getStartOffset();
+                boolean compressed = true;
+                checkArcRecord(jwatArcRecord, offset, compressed);
+            }
+            count++;
+        }
+        System.out.println("Processed "+count+" archive records");
+    }
+
+    private void checkArcRecord(ArcRecordBase arcRecord, long startOffset, boolean compressed) throws IOException {
+        ManagedPayload managedPayload = ManagedPayload.checkout();
+        TestFileResult result = new TestFileResult();
+        TestFileResultItemDiagnosis itemDiagnosis = new TestFileResultItemDiagnosis();
+        itemDiagnosis.offset = startOffset;
+        switch (arcRecord.recordType) {
+            case ArcRecordBase.RT_VERSION_BLOCK:
+                managedPayload.manageVersionBlock(arcRecord, false);
+                break;
+            case ArcRecordBase.RT_ARC_RECORD:
+                managedPayload.manageVersionBlock(arcRecord, false);
+                break;
+            default:
+                throw new IllegalStateException();
+        }
+        arcRecord.close();
+        if (arcRecord.diagnostics.hasErrors() || arcRecord.diagnostics.hasWarnings()) {
+            List<Diagnosis> errList = arcRecord.diagnostics.getErrors();
+            for(Diagnosis d : errList) {
+                System.out.println("Error: "+d.entity + " ("+d.type.toString()+")");
+                for(String info : d.information) {
+                    System.out.println("- Err-Info: "+info);
+                }
+            }
+            List<Diagnosis> warnList = arcRecord.diagnostics.getWarnings();
+            for(Diagnosis d : warnList) {
+                System.out.println("Warning: "+d.entity + " ("+d.type.toString()+")");
+                for(String info : d.information) {
+                    System.out.println("- Warn-Info: "+info);
+                }
+            }
+        }
+        if (arcRecord.hasPayload() && !arcRecord.hasPseudoEmptyPayload()) {
+//	    	validate_payload(arcRecord, arcRecord.header.contentType, itemDiagnosis);
+        }
+        
     }
 }
