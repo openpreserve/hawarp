@@ -1,4 +1,4 @@
 hawarp
 ======
 
-Hadoop based Web Archive record processing
+Hadoop-based Web Archive Record Processing
