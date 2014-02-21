@@ -16,11 +16,14 @@
 package eu.scape_project.arc2warc.utils;
 
 import com.google.common.io.Resources;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.archive.io.ArchiveReader;
@@ -186,5 +189,37 @@ public class ArcUtilsTest {
 //	    	validate_payload(arcRecord, arcRecord.header.contentType, itemDiagnosis);
         }
         
+    }
+    
+    /**
+     * Test reading ARC record payload into byte array.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testArcMetadataDeduplicationParser() throws IOException {
+        InputStream arcFileStream = Resources.getResource("arc-dedup/2-metadata-1.arc").openStream();
+        BufferedReader br = new BufferedReader(new InputStreamReader(arcFileStream));
+        String arcMetadataLine = null;
+        while((arcMetadataLine = br.readLine()) != null) {
+            if(arcMetadataLine.matches("[0-9]{4,4}-[0-9]{2,2}-[0-9]{2,2}T[0-9]{2,2}:[0-9]{2,2}:[0-9]{2,2}.[0-9]{3,3}Z.*"))
+            {
+                int count = 0;
+                StringTokenizer mdTokens = new StringTokenizer(arcMetadataLine);
+                while(mdTokens.hasMoreTokens()) {
+                    String currToken = mdTokens.nextToken();
+                    
+                    if(count == 11) {
+                        //duplicate:"1-1-20130522081727-00000-prepc2.arc,2548",content-size:862
+                        if(currToken.contains("duplicate:")) {
+                            System.out.println("- "+currToken);
+                            currToken.
+                        }
+                    }
+                        
+                    count++;
+                }
+            }
+        }
     }
 }
