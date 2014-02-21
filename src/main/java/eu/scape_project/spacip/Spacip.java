@@ -153,7 +153,7 @@ public class Spacip {
      */
     public static void startHadoopJob(Configuration conf) {
         try {
-            Job job = new Job(conf, "spacip");
+            Job job = new Job(conf, "spacip_"+conf.getInt("num_items_per_task", 0));
 
             // local debugging (pseudo-distributed)
 //             job.getConfiguration().set("mapred.job.tracker", "local");
