@@ -42,7 +42,7 @@ public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArc
     }
     
     private static WarcCreator warcCreator;
-    
+
     @Override
     public RecordWriter<LongWritable, FlatListArcRecord> getRecordWriter(TaskAttemptContext tac) throws IOException, InterruptedException {
 
@@ -52,7 +52,7 @@ public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArc
         //create the full path with the output directory plus our filename
         String filename = "result" + System.currentTimeMillis() + ".warc";
         Path fullPath = new Path(path, filename);
-        
+
         //create the file in the file system
         FileSystem fs = path.getFileSystem(tac.getConfiguration());
 
@@ -73,6 +73,7 @@ public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArc
             this.warcCreator = warcCreator;
             warcCreator.setFilename(filename);
             warcCreator.setWriter(writer);
+            //warcCreator = new WarcCreator(writer, filename);
             warcCreator.createWarcInfoRecord();
         }
 
@@ -85,8 +86,8 @@ public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArc
         }
 
         @Override
-        public void write(LongWritable k, FlatListArcRecord flArcRecord) throws IOException, InterruptedException {
-            warcCreator.createContentRecord(flArcRecord);
+        public void write(LongWritable k, FlatListArcRecord arcRecord) throws IOException, InterruptedException {
+            warcCreator.createContentRecord(arcRecord);
         }
 
     }
