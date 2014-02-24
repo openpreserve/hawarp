@@ -14,8 +14,15 @@ same path, for example by using the same mount points on all worker nodes.
 Installation
 ------------
 
+Install artifact in your local repository:
+
     cd droid-identify
     mvn install
+
+Create executable jar with dependencies:
+
+    cd droid-identify
+    mvn assembly:single
 
 Usage
 -----

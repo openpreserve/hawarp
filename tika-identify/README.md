@@ -13,8 +13,15 @@ same path, for example by using the same mount points on all worker nodes.
 Installation
 ------------
 
+Install artifact in your local repository:
+
     cd tika-identify
     mvn install
+
+Create executable jar with dependencies:
+
+    cd tika-identify
+    mvn assembly:single
 
 Usage
 -----

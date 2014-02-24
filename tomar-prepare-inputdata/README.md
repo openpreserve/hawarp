@@ -13,6 +13,19 @@ It unpackages flat ARC container files to HDFS, creates a map that allows
 identifying which file corresponds to which ARC record, and creates an
 input file to be used with [Tomar](https://github.com/openplanets/tomar).
 
+Install
+-------
+
+Install artifact in your local repository:
+
+    cd tomar-prepare-inputdata
+    mvn install
+
+Create executable jar with dependencies:
+
+    cd tomar-prepare-inputdata
+    mvn assembly:single
+
 Usage
 -----
 
@@ -104,11 +117,3 @@ see the corresponding dependendy in the maven file:
 
 The application produces an input file for the SCAPE Platform tool
 [Tomar](https://github.com/openplanets/tomar).
-
-Installation
-------------
-
-Maven is used to build the application, change to the directory of the
-application and type
-
-    mvn install

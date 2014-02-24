@@ -17,7 +17,7 @@
         <module>./arc2warc-migration</module>
         <module>./droid-identify</module>
         <module>./hawarp-core</module>
-        <module>./mapunpack2temp-identify</module>
+        <module>./unpack2temp-identify</module>
         <module>./tika-identify</module>
         <module>./tomar-prepare-inputdata</module>
     </modules>

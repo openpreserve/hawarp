@@ -6,8 +6,15 @@ Convert ARC files to WARC files using Hadoop
 Installation
 ------------
 
+Install artifact in your local repository:
+
     cd arc2warc-migration
     mvn install
+
+Create executable jar with dependencies:
+
+    cd arc2warc-migration
+    mvn assembly:single
 
 Usage
 -----
