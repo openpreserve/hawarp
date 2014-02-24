@@ -96,7 +96,7 @@ public class ArcInputFormat extends FileInputFormat<LongWritable, ArcRecordBase>
         public void initialize(InputSplit genericSplit, TaskAttemptContext context) throws IOException {
             FileSplit split = (FileSplit) genericSplit;
             Configuration job = context.getConfiguration();
-
+            
             final Path file = split.getPath();
 
             FileSystem fs = file.getFileSystem(job);
