@@ -44,7 +44,6 @@ import org.apache.commons.logging.LogFactory;
 import eu.scape_project.hawarp.utils.DigestUtils;
 
 import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
-import java.io.File;
 
 /**
  * ARC to WARC conversion using Hadoop. This class defines a Hadoop job that can
@@ -69,7 +68,7 @@ public class Arc2WarcHadoopJob {
             extends Mapper<LongWritable, ArcRecordBase, LongWritable, FlatListArcRecord> {
 
         private static final Log LOG = LogFactory.getLog(Arc2WarcConversionMapper.class);
-        
+
         @Override
         public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws IOException, InterruptedException {
 
@@ -190,11 +189,11 @@ public class Arc2WarcHadoopJob {
 
         ArcInputFormat.addInputPath(job, new Path(config.getInputDirStr()));
         WarcOutputFormat.setOutputPath(job, new Path(config.getOutputDirStr()));
-
+        
         MigrationWarcCreator mwc = new MigrationWarcCreator();
-
+        
         WarcOutputFormat.setWarcCreator(mwc);
-
+        
         job.waitForCompletion(true);
         System.exit(0);
 
