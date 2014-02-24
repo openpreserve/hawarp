@@ -64,14 +64,20 @@ the other tools only return the mime type of the file.
 Installation 
 ------------
 
+Run install on the wrapper project hawarp before building individual 
+components:
+
+    cd hawarp
+    mvn install
+
 Install artifact in your local repository:
 
-    cd unpack2temp-identify
+    cd hawarp/unpack2temp-identify
     mvn install
 
 Create executable jar with dependencies:
 
-    cd unpack2temp-identify
+    cd hawarp/unpack2temp-identify
     mvn assembly:single
 
 Configuration 

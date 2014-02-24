@@ -18,10 +18,11 @@ package eu.scape_project.arc2warc;
 
 import eu.scape_project.arc2warc.cli.CliConfig;
 import eu.scape_project.arc2warc.cli.Options;
-import eu.scape_project.arc2warc.warc.WarcOutputFormat;
+import eu.scape_project.arc2warc.warc.MigrationWarcCreator;
 import eu.scape_project.tika_identify.tika.TikaIdentification;
 import eu.scape_project.hawarp.mapreduce.ArcInputFormat;
 import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
+import eu.scape_project.hawarp.mapreduce.WarcOutputFormat;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.cli.CommandLine;
@@ -71,17 +72,17 @@ public class Arc2WarcHadoopJob {
         @Override
         public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws IOException, InterruptedException {
 
-            FlatListArcRecord hRecord = new FlatListArcRecord();
+            FlatListArcRecord flArcRecord = new FlatListArcRecord();
 
             String filePathString = ((FileSplit) context.getInputSplit()).getPath().toString();
-            hRecord.setReaderIdentifier(filePathString);
-            hRecord.setUrl(jwatArcRecord.getUrlStr());
-            hRecord.setDate(jwatArcRecord.getArchiveDate());
+            flArcRecord.setReaderIdentifier(filePathString);
+            flArcRecord.setUrl(jwatArcRecord.getUrlStr());
+            flArcRecord.setDate(jwatArcRecord.getArchiveDate());
             String mime = (jwatArcRecord.getContentType() != null) ? jwatArcRecord.getContentType().toString() : MIME_UNKNOWN;
-            hRecord.setMimeType(mime);
-            hRecord.setType("response");
+            flArcRecord.setMimeType(mime);
+            flArcRecord.setType("response");
             long remaining = jwatArcRecord.getPayload().getRemaining();
-            hRecord.setContentLength((int) remaining);
+            flArcRecord.setContentLength((int) remaining);
             if (remaining < Integer.MAX_VALUE) {
                 boolean identify = context.getConfiguration().getBoolean("content_type_identification", false);
                 InputStream is = jwatArcRecord.getPayloadContent();
@@ -96,18 +97,18 @@ public class Arc2WarcHadoopJob {
                 byte[] payLoadBytes = payloadContent.getPayloadBytes();
                 boolean doDigest = context.getConfiguration().getBoolean("payload_digest_calculation", false);
                 if (doDigest) {
-                    hRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
+                    flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
                 }
-                hRecord.setContents(payLoadBytes);
+                flArcRecord.setContents(payLoadBytes);
                 if (identify) {
-                    hRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
+                    flArcRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
                 }
             }
             if (jwatArcRecord.getIpAddress() != null) {
-                hRecord.setIpAddress(jwatArcRecord.getIpAddress());
+                flArcRecord.setIpAddress(jwatArcRecord.getIpAddress());
             }
-            hRecord.setHttpReturnCode(200);
-            context.write(key, hRecord);
+            flArcRecord.setHttpReturnCode(200);
+            context.write(key, flArcRecord);
         }
     }
 
@@ -188,6 +189,11 @@ public class Arc2WarcHadoopJob {
 
         ArcInputFormat.addInputPath(job, new Path(config.getInputDirStr()));
         WarcOutputFormat.setOutputPath(job, new Path(config.getOutputDirStr()));
+        
+        MigrationWarcCreator mwc = new MigrationWarcCreator();
+        
+        WarcOutputFormat.setWarcCreator(mwc);
+        
         job.waitForCompletion(true);
         System.exit(0);
 

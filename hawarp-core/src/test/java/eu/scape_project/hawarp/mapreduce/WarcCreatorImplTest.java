@@ -14,7 +14,7 @@
  * limitations under the License.
  * under the License.
  */
-package eu.scape_project.arc2warc.warc;
+package eu.scape_project.hawarp.mapreduce;
 
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -55,12 +55,12 @@ import org.jwat.warc.WarcWriterFactory;
  *
  * @author Sven Schlarb https://github.com/shsdev
  */
-public class WarcCreatorTest {
+public class WarcCreatorImplTest {
 
-    private static final Log LOG = LogFactory.getLog(WarcCreatorTest.class);
+    private static final Log LOG = LogFactory.getLog(WarcCreatorImplTest.class);
     private File tempDir;
 
-    public WarcCreatorTest() {
+    public WarcCreatorImplTest() {
     }
 
     @BeforeClass
@@ -93,7 +93,9 @@ public class WarcCreatorTest {
         assertNotNull(fos);
         WarcWriter writer = WarcWriterFactory.getWriter(fos, false);
         assertNotNull(writer);
-        WarcCreator warcCreator = new WarcCreator(writer, warcFileName);
+        WarcCreatorImpl warcCreator = new WarcCreatorImpl();
+        warcCreator.setFilename(warcFileName);
+        warcCreator.setWriter(writer);
         warcCreator.createWarcInfoRecord();
         List<FlatListArcRecord> hadoopArcRecords = getHadoopArcRecords();
         assertEquals(5,hadoopArcRecords.size());
@@ -101,7 +103,7 @@ public class WarcCreatorTest {
             warcCreator.createContentRecord(ar);
         }
         warcCreator.close();
-        
+
         validateWarcFile(tmpWarcFile);
     }
 
@@ -151,7 +153,6 @@ public class WarcCreatorTest {
         }
         return hadoopArcRecords;
     }
-
     private void validateWarcFile(File tmpWarcFile) throws FileNotFoundException, IOException {
         // Validate warc records using jwat
         InputStream is = new FileInputStream(tmpWarcFile);

@@ -14,7 +14,7 @@
  * limitations under the License.
  * under the License.
  */
-package eu.scape_project.arc2warc.warc;
+package eu.scape_project.hawarp.mapreduce;
 
 import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
 import java.io.DataOutputStream;
@@ -36,6 +36,12 @@ import org.jwat.warc.WarcWriterFactory;
  * @author Sven Schlarb <https://github.com/shsdev>
  */
 public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArcRecord> {
+    
+    public static void setWarcCreator(WarcCreator warcCreator) {
+        WarcOutputFormat.warcCreator = warcCreator;
+    }
+    
+    private static WarcCreator warcCreator;
 
     @Override
     public RecordWriter<LongWritable, FlatListArcRecord> getRecordWriter(TaskAttemptContext tac) throws IOException, InterruptedException {
@@ -53,7 +59,7 @@ public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArc
         FSDataOutputStream fileOut = fs.create(fullPath, true);
 
         //create our record writer with the new file
-        return new WarcOutputFormat.WarcRecordWriter(filename, fileOut);
+        return new WarcOutputFormat.WarcRecordWriter(warcCreator, filename, fileOut);
     }
 
     public class WarcRecordWriter extends RecordWriter<LongWritable, FlatListArcRecord> {
@@ -62,9 +68,12 @@ public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArc
 
         WarcCreator warcCreator;
 
-        public WarcRecordWriter(String filename, DataOutputStream stream) throws IOException {
+        public WarcRecordWriter(WarcCreator warcCreator, String filename, DataOutputStream stream) throws IOException {
             writer = WarcWriterFactory.getWriter(stream, false);
-            warcCreator = new WarcCreator(writer, filename);
+            this.warcCreator = warcCreator;
+            warcCreator.setFilename(filename);
+            warcCreator.setWriter(writer);
+            //warcCreator = new WarcCreator(writer, filename);
             warcCreator.createWarcInfoRecord();
         }
 

@@ -16,14 +16,20 @@ input file to be used with [Tomar](https://github.com/openplanets/tomar).
 Install
 -------
 
+Run install on the wrapper project hawarp before building individual 
+components:
+
+    cd hawarp
+    mvn install
+
 Install artifact in your local repository:
 
-    cd tomar-prepare-inputdata
+    cd hawarp/tomar-prepare-inputdata
     mvn install
 
 Create executable jar with dependencies:
 
-    cd tomar-prepare-inputdata
+    cd hawarp/tomar-prepare-inputdata
     mvn assembly:single
 
 Usage
