@@ -13,20 +13,14 @@ same path, for example by using the same mount points on all worker nodes.
 Installation
 ------------
 
-Run install on the wrapper project hawarp before building individual 
-components:
-
-    cd hawarp
-    mvn install
-
 Install artifact in your local repository:
 
-    cd hawarp/tika-identify
+    cd tika-identify
     mvn install
 
 Create executable jar with dependencies:
 
-    cd hawarp/tika-identify
+    cd tika-identify
     mvn assembly:single
 
 Usage
