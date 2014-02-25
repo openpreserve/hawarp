@@ -54,6 +54,10 @@ public class Options {
     public static final String INPUTPATHREGEX_OPT = "iregex";
     public static final String INPUTPATHREGEX_OPT_DESC = "Only input paths matching the regular expression will be processed. [optional].";
     
+    public static final String WARCCOMPRESSED_FLG = "c";
+    public static final String WARCCOMPRESSED_OPT = "comprwarc";
+    public static final String WARCCOMPRESSED_OPT_DESC = "Create compressed WARC file. [optional].";
+    
     public static org.apache.commons.cli.Options OPTIONS = new org.apache.commons.cli.Options();
     public static final String USAGE = "hadoop jar "
             + "target/arc2warc-migration-1.0-SNAPSHOT-jar-with-dependencies.jar";
@@ -66,6 +70,7 @@ public class Options {
         OPTIONS.addOption(PAYLOADDIGEST_FLG, PAYLOADDIGEST_OPT, false, PAYLOADDIGEST_OPT_DESC);
         OPTIONS.addOption(LOCAL_FLG, LOCAL_OPT, false, LOCAL_OPT_DESC);
         OPTIONS.addOption(INPUTPATHREGEX_FLG, INPUTPATHREGEX_OPT, true, INPUTPATHREGEX_OPT_DESC);
+        OPTIONS.addOption(WARCCOMPRESSED_FLG, WARCCOMPRESSED_OPT, false, WARCCOMPRESSED_OPT_DESC);
     }
 
     public static void initOptions(CommandLine cmd, CliConfig pc) {
@@ -116,6 +121,12 @@ public class Options {
             inputPathRegexFilter = cmd.getOptionValue(INPUTPATHREGEX_OPT);
             pc.setInputPathRegexFilter(inputPathRegexFilter);
             System.out.println("Input path regex filter: " + inputPathRegexFilter);
+        }
+        
+        // create compressed warc
+        if (cmd.hasOption(WARCCOMPRESSED_OPT)) {
+            pc.setCreateCompressedWarc(true);
+            System.out.println("Create compressed WARC file output");
         }
         
     }

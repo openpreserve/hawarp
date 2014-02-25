@@ -88,9 +88,14 @@ public class WarcOutputFormat extends FileOutputFormat<Text, FlatListArcRecord> 
             Path path = FileOutputFormat.getOutputPath(tac);
             String inputFilePath = k.toString();
             String inputFileName = inputFilePath.substring(inputFilePath.lastIndexOf(File.separatorChar) + 1);
+            
+            // create compressed warc?
+            boolean createCompressedWarc = tac.getConfiguration().getBoolean("warc_compressed", false);
 
             //create the full path with the output directory plus filename
-            String warcFileName = inputFileName + ".warc";
+            
+            String warcExt = createCompressedWarc?".warc.gz":".warc";
+            String warcFileName = inputFileName + warcExt;
             Path fullPath = new Path(path, warcFileName);
 
             //create the file in the file system
@@ -98,8 +103,7 @@ public class WarcOutputFormat extends FileOutputFormat<Text, FlatListArcRecord> 
 
             FSDataOutputStream outputStream = fs.create(fullPath, true);
 
-            // compressed/uncompressed WARC files
-            writer = WarcWriterFactory.getWriter(outputStream, false);
+            writer = WarcWriterFactory.getWriter(outputStream, createCompressedWarc);
             warcCreator = new WarcCreator(writer, warcFileName);
             warcCreator.createWarcInfoRecord();
         }

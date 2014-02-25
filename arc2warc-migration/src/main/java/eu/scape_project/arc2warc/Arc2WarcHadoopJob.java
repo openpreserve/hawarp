@@ -168,6 +168,10 @@ public class Arc2WarcHadoopJob {
         }
 
         job.getConfiguration().set("input_path_regex_filter", config.getInputPathRegexFilter());
+        
+        if (config.createCompressedWarc()) {
+            job.getConfiguration().setBoolean("warc_compressed", true);
+        }
 
         job.setJarByClass(Arc2WarcHadoopJob.class);
 

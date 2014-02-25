@@ -30,6 +30,8 @@ public class CliConfig implements Cloneable {
     private boolean contentTypeIdentification;
     private boolean payloadDigestCalculation;
     private String inputPathRegexFilter;
+    
+    private boolean createCompressedWarc;
 
     /**
      * Empty constructor
@@ -104,6 +106,14 @@ public class CliConfig implements Cloneable {
 
     public void setInputPathRegexFilter(String inputPathRegexFilter) {
         this.inputPathRegexFilter = inputPathRegexFilter;
+    }
+
+    public boolean createCompressedWarc() {
+        return createCompressedWarc;
+    }
+
+    public void setCreateCompressedWarc(boolean createCompressedWarc) {
+        this.createCompressedWarc = createCompressedWarc;
     }
 
     /**

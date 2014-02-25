@@ -31,15 +31,19 @@ with the following options:
      -o,--output <arg>   HDFS Output directory where the WARC files will be
                          stored. [required].
      -x,--iregex <arg>   Only input paths matching the regular expression will
-                         be processed. [optional].
+                         be processed (default: ".*"). [optional].
      -p,--payloadid      Do payload mime type identification. [optional].
      -d,--digest         Calculate sha1 payload digest. [optional].
+     -c,--comprwarc      Create compressed WARC file. [optional].
      -l,--local          Use local file system instead of HDFS (debugging).
                          [optional].
      -h,--help           print this message [optional].
 
-For example, to process all files which end by the extension ".arc.gz", the 
+For example, to process all files which have an ".arc.gz" extension, the 
 following command would be used:
 
     hadoop jar hawarp/arc2warc-migration/target/arc2warc-migration-1.0-jar-with-dependencies.jar 
     -i /hdfs/input/directory/ -o /hdfs/output/directory/ -x ".*\.arc\.gz"
+
+Note that it is possible to use local file sytem inputs and outputs by using the
+-l flag, reading/writing from/to HDFS is the default.
