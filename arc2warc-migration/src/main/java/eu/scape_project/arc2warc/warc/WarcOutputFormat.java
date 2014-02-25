@@ -19,6 +19,8 @@ package eu.scape_project.arc2warc.warc;
 import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -36,10 +38,14 @@ import org.jwat.warc.WarcWriterFactory;
  * @author Sven Schlarb <https://github.com/shsdev>
  */
 public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArcRecord> {
+    
+    private static final Log LOG = LogFactory.getLog(WarcOutputFormat.class);
 
     @Override
     public RecordWriter<LongWritable, FlatListArcRecord> getRecordWriter(TaskAttemptContext tac) throws IOException, InterruptedException {
 
+        LOG.info(tac.getConfiguration().get("map.input.file"));
+        
         //get the current path
         Path path = FileOutputFormat.getOutputPath(tac);
 
