@@ -20,6 +20,12 @@ import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorOutputStream;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -27,6 +33,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.CompressionOutputStream;
+import org.apache.hadoop.io.compress.CompressorStream;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -53,6 +61,8 @@ public class WarcOutputFormat extends FileOutputFormat<Text, FlatListArcRecord> 
 
         private WarcWriter writer = null;
 
+        private OutputStream outputStream;
+
         private final TaskAttemptContext tac;
 
         WarcCreator warcCreator;
@@ -69,7 +79,11 @@ public class WarcOutputFormat extends FileOutputFormat<Text, FlatListArcRecord> 
                 if (writer != null) {
                     writer.close();
                 }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
             } catch (IOException e) {
+                LOG.error("I/O Exception",e);
             }
         }
 
@@ -84,25 +98,16 @@ public class WarcOutputFormat extends FileOutputFormat<Text, FlatListArcRecord> 
         }
 
         private void initialiseWriter(Text k) throws IOException {
-            //get the current path
             Path path = FileOutputFormat.getOutputPath(tac);
             String inputFilePath = k.toString();
             String inputFileName = inputFilePath.substring(inputFilePath.lastIndexOf(File.separatorChar) + 1);
-            
-            // create compressed warc?
             boolean createCompressedWarc = tac.getConfiguration().getBoolean("warc_compressed", false);
-
-            //create the full path with the output directory plus filename
-            
-            String warcExt = createCompressedWarc?".warc.gz":".warc";
+            String warcExt = createCompressedWarc ? ".warc.gz" : ".warc";
             String warcFileName = inputFileName + warcExt;
             Path fullPath = new Path(path, warcFileName);
-
-            //create the file in the file system
             FileSystem fs = path.getFileSystem(tac.getConfiguration());
-
-            FSDataOutputStream outputStream = fs.create(fullPath, true);
-
+            FSDataOutputStream fsDataOutputStream = fs.create(fullPath, true);
+            outputStream = fsDataOutputStream;
             writer = WarcWriterFactory.getWriter(outputStream, createCompressedWarc);
             warcCreator = new WarcCreator(writer, warcFileName);
             warcCreator.createWarcInfoRecord();

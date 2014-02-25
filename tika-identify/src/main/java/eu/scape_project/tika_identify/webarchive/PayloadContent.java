@@ -46,14 +46,14 @@ public class PayloadContent {
 
     private Identifier identifier;
 
-    private boolean applyIdentification;
+    private boolean doPayloadIdentification;
 
     private PayloadContent() {
         identifiedPayLoadType = MIME_UNKNOWN;
         identified = false;
         consumed = false;
         identifier = null;
-        applyIdentification = false;
+        doPayloadIdentification = false;
     }
 
     public PayloadContent(InputStream inputStream) {
@@ -91,7 +91,7 @@ public class PayloadContent {
         boolean firstByteArray = true;
         while ((bytesRead = buffis.read(tempBuffer)) != -1) {
             buffos.write(tempBuffer, 0, bytesRead);
-            if (applyIdentification && firstByteArray && tempBuffer != null && bytesRead > 0) {
+            if (doPayloadIdentification && firstByteArray && tempBuffer != null && bytesRead > 0) {
                 identified = identifyPayloadType(tempBuffer);
             }
             firstByteArray = false;
@@ -127,12 +127,12 @@ public class PayloadContent {
         return consumed;
     }
 
-    public boolean isApplyIdentification() {
-        return applyIdentification;
+    public boolean doPayloadIdentification() {
+        return doPayloadIdentification;
     }
 
-    public void setApplyIdentification(boolean applyIdentification) {
-        this.applyIdentification = applyIdentification;
+    public void doPayloadIdentification(boolean doPayloadIdentification) {
+        this.doPayloadIdentification = doPayloadIdentification;
     }
 
 }

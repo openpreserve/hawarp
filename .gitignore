@@ -5,3 +5,4 @@
 *.war
 *.ear
 /hawarp-core/target/
+nbactions.xml
