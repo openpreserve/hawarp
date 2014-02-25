@@ -18,6 +18,7 @@ package eu.scape_project.arc2warc.warc;
 
 import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -37,54 +39,69 @@ import org.jwat.warc.WarcWriterFactory;
  *
  * @author Sven Schlarb <https://github.com/shsdev>
  */
-public class WarcOutputFormat extends FileOutputFormat<LongWritable, FlatListArcRecord> {
-    
+public class WarcOutputFormat extends FileOutputFormat<Text, FlatListArcRecord> {
+
     private static final Log LOG = LogFactory.getLog(WarcOutputFormat.class);
 
     @Override
-    public RecordWriter<LongWritable, FlatListArcRecord> getRecordWriter(TaskAttemptContext tac) throws IOException, InterruptedException {
-
-        LOG.info(tac.getConfiguration().get("map.input.file"));
-        
-        //get the current path
-        Path path = FileOutputFormat.getOutputPath(tac);
-
-        //create the full path with the output directory plus our filename
-        String filename = "result" + System.currentTimeMillis() + ".warc";
-        Path fullPath = new Path(path, filename);
-
-        //create the file in the file system
-        FileSystem fs = path.getFileSystem(tac.getConfiguration());
-
-        FSDataOutputStream fileOut = fs.create(fullPath, true);
-
+    public RecordWriter<Text, FlatListArcRecord> getRecordWriter(TaskAttemptContext tac) throws IOException, InterruptedException {
         //create our record writer with the new file
-        return new WarcOutputFormat.WarcRecordWriter(filename, fileOut);
+        return new WarcOutputFormat.WarcRecordWriter(tac);
     }
 
-    public class WarcRecordWriter extends RecordWriter<LongWritable, FlatListArcRecord> {
+    public class WarcRecordWriter extends RecordWriter<Text, FlatListArcRecord> {
 
-        private final WarcWriter writer;
+        private WarcWriter writer = null;
+
+        private final TaskAttemptContext tac;
 
         WarcCreator warcCreator;
 
-        public WarcRecordWriter(String filename, DataOutputStream stream) throws IOException {
-            writer = WarcWriterFactory.getWriter(stream, false);
-            warcCreator = new WarcCreator(writer, filename);
-            warcCreator.createWarcInfoRecord();
+        public WarcRecordWriter(TaskAttemptContext tac) {
+            this.tac = tac;
+            // writer is initialised when writing first record
+            writer = null;
         }
 
         @Override
         public void close(TaskAttemptContext tac) throws IOException, InterruptedException {
             try {
-                writer.close();
+                if (writer != null) {
+                    writer.close();
+                }
             } catch (IOException e) {
             }
         }
 
         @Override
-        public void write(LongWritable k, FlatListArcRecord arcRecord) throws IOException, InterruptedException {
+        public void write(Text k, FlatListArcRecord arcRecord) throws IOException, InterruptedException {
+            // writer is initialised at the first record because only at this
+            // point the input filename is known by the hadoop record key
+            if (writer == null) {
+                initialiseWriter(k);
+            }
             warcCreator.createContentRecord(arcRecord);
+        }
+
+        private void initialiseWriter(Text k) throws IOException {
+            //get the current path
+            Path path = FileOutputFormat.getOutputPath(tac);
+            String inputFilePath = k.toString();
+            String inputFileName = inputFilePath.substring(inputFilePath.lastIndexOf(File.separatorChar) + 1);
+
+            //create the full path with the output directory plus filename
+            String warcFileName = inputFileName + ".warc";
+            Path fullPath = new Path(path, warcFileName);
+
+            //create the file in the file system
+            FileSystem fs = path.getFileSystem(tac.getConfiguration());
+
+            FSDataOutputStream outputStream = fs.create(fullPath, true);
+
+            // compressed/uncompressed WARC files
+            writer = WarcWriterFactory.getWriter(outputStream, false);
+            warcCreator = new WarcCreator(writer, warcFileName);
+            warcCreator.createWarcInfoRecord();
         }
 
     }

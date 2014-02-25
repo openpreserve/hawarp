@@ -29,6 +29,7 @@ public class CliConfig implements Cloneable {
     private boolean local;
     private boolean contentTypeIdentification;
     private boolean payloadDigestCalculation;
+    private String inputPathRegexFilter;
 
     /**
      * Empty constructor
@@ -95,6 +96,14 @@ public class CliConfig implements Cloneable {
 
     public void setLocal(boolean local) {
         this.local = local;
+    }
+
+    public String getInputPathRegexFilter() {
+        return inputPathRegexFilter;
+    }
+
+    public void setInputPathRegexFilter(String inputPathRegexFilter) {
+        this.inputPathRegexFilter = inputPathRegexFilter;
     }
 
     /**

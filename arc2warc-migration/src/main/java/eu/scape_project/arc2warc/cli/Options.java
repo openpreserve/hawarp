@@ -38,9 +38,9 @@ public class Options {
     public static final String OUTPUT_OPT = "output";
     public static final String OUTPUT_OPT_DESC = "HDFS Output directory where the WARC files will be stored. [required].";
     
-    public static final String CONTENTTYPEID_FLG = "c";
-    public static final String CONTENTTYPEID_OPT = "identification";
-    public static final String CONTENTTYPEID_OPT_DESC = "Apply content type identification. [optional].";
+    public static final String CONTENTTYPEID_FLG = "p";
+    public static final String CONTENTTYPEID_OPT = "payloadid";
+    public static final String CONTENTTYPEID_OPT_DESC = "Do payload mime type identification. [optional].";
     
     public static final String PAYLOADDIGEST_FLG = "d";
     public static final String PAYLOADDIGEST_OPT = "digest";
@@ -50,10 +50,13 @@ public class Options {
     public static final String LOCAL_OPT = "local";
     public static final String LOCAL_OPT_DESC = "Use local file system instead of HDFS (debugging). [optional].";
     
+    public static final String INPUTPATHREGEX_FLG = "x";
+    public static final String INPUTPATHREGEX_OPT = "iregex";
+    public static final String INPUTPATHREGEX_OPT_DESC = "Only input paths matching the regular expression will be processed. [optional].";
+    
     public static org.apache.commons.cli.Options OPTIONS = new org.apache.commons.cli.Options();
     public static final String USAGE = "hadoop jar "
-            + "target/arc2warc-hadoop-1.0-SNAPSHOT-jar-with-dependencies.jar "
-            + "-i <directory> -o <directory>";
+            + "target/arc2warc-migration-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
     static {
         OPTIONS.addOption(HELP_FLG, HELP_OPT, false, HELP_OPT_DESC);
@@ -62,6 +65,7 @@ public class Options {
         OPTIONS.addOption(CONTENTTYPEID_FLG, CONTENTTYPEID_OPT, false, CONTENTTYPEID_OPT_DESC);
         OPTIONS.addOption(PAYLOADDIGEST_FLG, PAYLOADDIGEST_OPT, false, PAYLOADDIGEST_OPT_DESC);
         OPTIONS.addOption(LOCAL_FLG, LOCAL_OPT, false, LOCAL_OPT_DESC);
+        OPTIONS.addOption(INPUTPATHREGEX_FLG, INPUTPATHREGEX_OPT, true, INPUTPATHREGEX_OPT_DESC);
     }
 
     public static void initOptions(CommandLine cmd, CliConfig pc) {
@@ -89,7 +93,7 @@ public class Options {
         // content type identification
         if (cmd.hasOption(CONTENTTYPEID_OPT)) {
             pc.setContentTypeIdentification(true);
-            System.out.println("Content type identification is active");
+            System.out.println("Payload mime type identification is active");
         }
         
         // payload digest
@@ -102,6 +106,16 @@ public class Options {
         if (cmd.hasOption(LOCAL_OPT)) {
             pc.setLocal(true);
             System.out.println("Local mode, reading/writing from/to local file system (debugging)");
+        }
+        
+        // input path regex filter
+        String inputPathRegexFilter;
+        if (!(cmd.hasOption(INPUTPATHREGEX_OPT) && cmd.getOptionValue(INPUTPATHREGEX_OPT) != null)) {
+            pc.setInputPathRegexFilter(".*");
+        } else {
+            inputPathRegexFilter = cmd.getOptionValue(INPUTPATHREGEX_OPT);
+            pc.setInputPathRegexFilter(inputPathRegexFilter);
+            System.out.println("Input path regex filter: " + inputPathRegexFilter);
         }
         
     }

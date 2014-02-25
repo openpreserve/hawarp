@@ -40,10 +40,17 @@ public class WarcCreator {
 
     private static final Log LOG = LogFactory.getLog(WarcCreator.class);
 
-
     protected WarcWriter writer;
     
     protected String fileName;
+
+    static protected RecordIDGenerator generator = new UUIDGenerator();
+
+    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd'T'HH:mm:ss'Z'");
+    
+    private boolean isFirstRecord;
+
+    private boolean payloadIdentification;
 
     private WarcCreator() {
     }
@@ -57,18 +64,6 @@ public class WarcCreator {
         writer.close();
     }
     
-
-    static protected RecordIDGenerator generator = new UUIDGenerator();
-
-    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd'T'HH:mm:ss'Z'");
-    
-
-    private boolean isFirstRecord;
-
-    private boolean payloadIdentification;
-
-
-   
     public void createWarcInfoRecord() throws IOException {
         WarcRecord record = WarcRecord.createRecord(writer);
         record.header.addHeader("WARC-Type", "warcinfo");
@@ -87,7 +82,6 @@ public class WarcCreator {
         writer.closeRecord();
     }
 
-  
     public void createContentRecord(FlatListArcRecord arcRecord) throws IOException {
         WarcRecord record = WarcRecord.createRecord(writer);
         String recordId = generator.getRecordID().toString();

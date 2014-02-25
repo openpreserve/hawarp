@@ -41,8 +41,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import eu.scape_project.hawarp.utils.DigestUtils;
+import eu.scape_project.hawarp.utils.RegexUtils;
 
 import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
+import java.util.regex.Pattern;
+import org.apache.hadoop.io.Text;
 
 /**
  * ARC to WARC conversion using Hadoop. This class defines a Hadoop job that can
@@ -64,50 +67,49 @@ public class Arc2WarcHadoopJob {
      * Mapper class.
      */
     public static class Arc2WarcConversionMapper
-            extends Mapper<LongWritable, ArcRecordBase, LongWritable, FlatListArcRecord> {
+            extends Mapper<LongWritable, ArcRecordBase, Text, FlatListArcRecord> {
 
         private static final Log LOG = LogFactory.getLog(Arc2WarcConversionMapper.class);
 
         @Override
         public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws IOException, InterruptedException {
-
             FlatListArcRecord flArcRecord = new FlatListArcRecord();
-
             String filePathString = ((FileSplit) context.getInputSplit()).getPath().toString();
-            flArcRecord.setReaderIdentifier(filePathString);
-            flArcRecord.setUrl(jwatArcRecord.getUrlStr());
-            flArcRecord.setDate(jwatArcRecord.getArchiveDate());
-            String mime = (jwatArcRecord.getContentType() != null) ? jwatArcRecord.getContentType().toString() : MIME_UNKNOWN;
-            flArcRecord.setMimeType(mime);
-            flArcRecord.setType("response");
-            long remaining = jwatArcRecord.getPayload().getRemaining();
-            flArcRecord.setContentLength((int) remaining);
-            if (remaining < Integer.MAX_VALUE) {
-                boolean identify = context.getConfiguration().getBoolean("content_type_identification", false);
-                InputStream is = jwatArcRecord.getPayloadContent();
-                PayloadContent payloadContent = new PayloadContent(is);
-                if (identify) {
-                    TikaIdentification ti = TikaIdentification.getInstance();
-                    payloadContent.setIdentifier(ti);
-                    payloadContent.setApplyIdentification(true);
+            if (RegexUtils.pathMatchesRegexFilter(filePathString, context.getConfiguration().get("input_path_regex_filter"))) {
+                flArcRecord.setReaderIdentifier(filePathString);
+                flArcRecord.setUrl(jwatArcRecord.getUrlStr());
+                flArcRecord.setDate(jwatArcRecord.getArchiveDate());
+                String mime = (jwatArcRecord.getContentType() != null) ? jwatArcRecord.getContentType().toString() : MIME_UNKNOWN;
+                flArcRecord.setMimeType(mime);
+                flArcRecord.setType("response");
+                long remaining = jwatArcRecord.getPayload().getRemaining();
+                flArcRecord.setContentLength((int) remaining);
+                if (remaining < Integer.MAX_VALUE) {
+                    boolean identify = context.getConfiguration().getBoolean("content_type_identification", false);
+                    InputStream is = jwatArcRecord.getPayloadContent();
+                    PayloadContent payloadContent = new PayloadContent(is);
+                    if (identify) {
+                        TikaIdentification ti = TikaIdentification.getInstance();
+                        payloadContent.setIdentifier(ti);
+                        payloadContent.doPayloadIdentification(true);
+                    }
+                    payloadContent.readPayloadContent();
+                    byte[] payLoadBytes = payloadContent.getPayloadBytes();
+                    boolean doDigest = context.getConfiguration().getBoolean("payload_digest_calculation", false);
+                    if (doDigest) {
+                        flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
+                    }
+                    flArcRecord.setContents(payLoadBytes);
+                    if (identify) {
+                        flArcRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
+                    }
                 }
-
-                payloadContent.readPayloadContent();
-                byte[] payLoadBytes = payloadContent.getPayloadBytes();
-                boolean doDigest = context.getConfiguration().getBoolean("payload_digest_calculation", false);
-                if (doDigest) {
-                    flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
+                if (jwatArcRecord.getIpAddress() != null) {
+                    flArcRecord.setIpAddress(jwatArcRecord.getIpAddress());
                 }
-                flArcRecord.setContents(payLoadBytes);
-                if (identify) {
-                    flArcRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
-                }
+                flArcRecord.setHttpReturnCode(200);
+                context.write(new Text(filePathString), flArcRecord);
             }
-            if (jwatArcRecord.getIpAddress() != null) {
-                flArcRecord.setIpAddress(jwatArcRecord.getIpAddress());
-            }
-            flArcRecord.setHttpReturnCode(200);
-            context.write(key, flArcRecord);
         }
     }
 
@@ -164,6 +166,9 @@ public class Arc2WarcHadoopJob {
         if (config.isPayloadDigestCalculation()) {
             job.getConfiguration().setBoolean("payload_digest_calculation", true);
         }
+
+        job.getConfiguration().set("input_path_regex_filter", config.getInputPathRegexFilter());
+
         job.setJarByClass(Arc2WarcHadoopJob.class);
 
         job.setMapperClass(Arc2WarcHadoopJob.Arc2WarcConversionMapper.class);
@@ -173,10 +178,10 @@ public class Arc2WarcHadoopJob {
         // Custom output format for WARC files
         job.setOutputFormatClass(WarcOutputFormat.class);
 
-        job.setMapOutputKeyClass(LongWritable.class);
+        job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(FlatListArcRecord.class);
 
-        job.setOutputKeyClass(LongWritable.class);
+        job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(FlatListArcRecord.class);
 
         // Setting reducer to 0 means that one WARC file is created per ARC
