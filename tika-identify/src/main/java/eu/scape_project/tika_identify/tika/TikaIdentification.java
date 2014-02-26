@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tika.Tika;
@@ -98,6 +99,23 @@ public class TikaIdentification implements Identifier {
     }
 
     /**
+     * Run tika identification on file
+     *
+     * @param inStream Absolute file path
+     * @return Result list
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public String identify(InputStream inStream) {
+        try {
+            return tika.detect(inStream);
+        } catch (IOException ex) {
+            LOG.warn("Identification failed.", ex);
+            return MIME_UNKNOWN;
+        }
+    }
+
+    /**
      * Run tika identification using the begin of a byte array
      *
      * @param prefix Begin of byte array content
@@ -105,22 +123,6 @@ public class TikaIdentification implements Identifier {
      */
     @Override
     public String identify(byte[] prefix) {
-
-//        try {
-//            Metadata metadata = new Metadata();
-//            ByteArrayInputStream bis = new ByteArrayInputStream(prefix);
-//            TikaInputStream tis = TikaInputStream.get(bis);
-//
-//            MimeTypes mimeTypes
-//                    = TikaConfig.getDefaultConfig().getMimeRepository();
-//            MediaType mediaType = mimeTypes.detect(tis, metadata);
-//            return mediaType.toString();
-//
-//        } catch (IOException e) {
-//            LOG.warn("Tika identification failed.", e);
-//            return MIME_UNKNOWN;
-//        }
-
         try {
             String mimetype = tika.detect(prefix);
             return mimetype;
