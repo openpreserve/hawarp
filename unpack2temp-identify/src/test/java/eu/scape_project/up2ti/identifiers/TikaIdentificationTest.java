@@ -31,25 +31,25 @@ import static org.junit.Assert.*;
  * @version 0.1
  */
 public class TikaIdentificationTest {
-    
+
     private static ArcContainer arcFilesMap;
-    
+
     public TikaIdentificationTest() {
     }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-         arcFilesMap = ArcFilesTestMap.getInstance().getMap();
+        arcFilesMap = ArcFilesTestMap.getInstance().getMap();
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -65,14 +65,14 @@ public class TikaIdentificationTest {
         id.setOutputValueFormat("%1$s %2$s %3$s");
         HashMap<String, List<String>> result = id.identifyFileList(arcFilesMap);
         assertEquals(5, result.size());
-        for(String res : result.keySet()) {
+        for (String res : result.keySet()) {
             List<String> valueList = result.get(res);
-            for(String val : valueList) {
+            for (String val : valueList) {
                 System.out.println(val);
             }
         }
         String tmpTestFilePath = ArcFilesTestMap.getInstance().getTmpTestFile().getAbsolutePath();
-        List<String> vals = result.get(tmpTestFilePath+"/20130522085321/http://fue.onb.ac.at/test/image.png");
-        assertEquals(vals.get(0),"tika mime image/png");
+        List<String> vals = result.get(tmpTestFilePath + "/20130522085321/http://fue.onb.ac.at/test/image.png");
+        assertEquals(vals.get(0), "tika mime image/png");
     }
 }

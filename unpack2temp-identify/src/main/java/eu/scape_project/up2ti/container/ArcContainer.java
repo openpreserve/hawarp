@@ -15,10 +15,11 @@
  */
 package eu.scape_project.up2ti.container;
 
-import eu.scape_project.up2ti.utils.IOUtils;
+import eu.scape_project.hawarp.utils.IOUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -26,10 +27,9 @@ import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.archive.io.ArchiveReader;
-import org.archive.io.ArchiveReaderFactory;
-import org.archive.io.ArchiveRecord;
-import org.archive.io.arc.ARCRecord;
+import org.jwat.arc.ArcReader;
+import org.jwat.arc.ArcReaderFactory;
+import org.jwat.arc.ArcRecordBase;
 
 /**
  * ARC files map. Different Key-value pair maps for managing ARC file records.
@@ -41,10 +41,13 @@ import org.archive.io.arc.ARCRecord;
 public class ArcContainer extends DualHashBidiMap implements Container {
 
     private static final Log LOG = LogFactory.getLog(ArcContainer.class);
-    private static ArchiveReader reader;
-    private ArrayList<ArchiveRecord> archiveRecords;
-    
+    private ArrayList<ArcRecordBase> archiveRecords;
+
     private String extractDirectoryName;
+
+    private ArcReader reader;
+    
+    private String containerFileName;
 
     @Override
     public String getExtractDirectoryName() {
@@ -73,61 +76,38 @@ public class ArcContainer extends DualHashBidiMap implements Container {
      */
     public ArcContainer() {
     }
-    
+
     @Override
     public void init(String containerFileName, InputStream containerFileStream) throws IOException {
-        reader = ArchiveReaderFactory.get(containerFileName, containerFileStream, true);
-        //ArcFilesMap.reader = reader;
-        archiveRecords = new ArrayList<ArchiveRecord>();
+        this.containerFileName = containerFileName;
+        // Read first two bytes to check if we have a gzipped input stream
+        PushbackInputStream pb = new PushbackInputStream(containerFileStream, 2);
+        byte[] signature = new byte[2];
+        pb.read(signature);
+        pb.unread(signature);
+        // use compressed reader if gzip magic number is matched
+        if (signature[ 0] == (byte) 0x1f && signature[ 1] == (byte) 0x8b) {
+            reader = ArcReaderFactory.getReaderCompressed(pb);
+        } else {
+            reader = ArcReaderFactory.getReaderUncompressed(pb);
+        }
+        archiveRecords = new ArrayList<ArcRecordBase>();
         // initialise object by create temporary files and the bidirectional 
         // file-record map.
         arcRecContentsToTempFiles();
     }
-    
+
     @Override
     public DualHashBidiMap getBidiIdentifierFilenameMap() {
         return this;
     }
 
-    public ArrayList<ArchiveRecord> getArchiveRecords() {
+    public ArrayList<ArcRecordBase> getArchiveRecords() {
         return archiveRecords;
     }
 
-    public void setArchiveRecords(ArrayList<ArchiveRecord> archiveRecords) {
+    public void setArchiveRecords(ArrayList<ArcRecordBase> archiveRecords) {
         this.archiveRecords = archiveRecords;
-    }
-    
-    
-
-    /**
-     * Read the ARC record content into a byte array. Note that the record
-     * content can be only read once, it is "consumed" afterwards.
-     *
-     * @param arcRecord ARC record.
-     * @return Content byte array.
-     * @throws IOException If content is too large to be stored in a byte array.
-     */
-    private static byte[] readArcRecContentToByteArr(ARCRecord arcRecord) throws IOException {
-
-        if (arcRecord.getMetaData().getLength() > Integer.MAX_VALUE) {
-            throw new IOException("ARC Record content is too large");
-        }
-        // Length of the complete ARC record
-        int dataLength = (int) arcRecord.getMetaData().getLength();
-        // Byte point where the content of the ARC record begins
-        int contentBegin = (int) arcRecord.getMetaData().getContentBegin();
-        byte[] recordBuffer = new byte[dataLength];
-        byte[] tempBuffer = new byte[4096];
-        int bytesRead;
-        int totalBytes = 0;
-        while ((totalBytes < dataLength) && ((bytesRead = arcRecord.read(tempBuffer)) != -1)) {
-            System.arraycopy(tempBuffer, 0, recordBuffer, totalBytes, bytesRead);
-            totalBytes += bytesRead;
-        }
-        // Cutting off the record section at the beginning of the ARC record
-        byte[] contentByteArr = new byte[totalBytes - contentBegin];
-        System.arraycopy(recordBuffer, contentBegin, contentByteArr, 0, totalBytes - contentBegin);
-        return contentByteArr;
     }
 
     /**
@@ -136,23 +116,20 @@ public class ArcContainer extends DualHashBidiMap implements Container {
      * @throws IOException IO Error
      */
     private void arcRecContentsToTempFiles() throws IOException {
-        extractDirectoryName = "/tmp/up2ti_"+RandomStringUtils.randomAlphabetic(10)+"/";
+        extractDirectoryName = "/tmp/up2ti_" + RandomStringUtils.randomAlphabetic(10) + "/";
         File destDir = new File(extractDirectoryName);
         destDir.mkdir();
-        Iterator<ArchiveRecord> recordIterator = reader.iterator();
+        Iterator<ArcRecordBase> recordIterator = reader.iterator();
         try {
             // K: Record key V: Temporary file
             while (recordIterator.hasNext()) {
-                ArchiveRecord nativeArchiveRecord = recordIterator.next();
-                archiveRecords.add(nativeArchiveRecord);
-                String readerIdentifier = nativeArchiveRecord.getHeader().getReaderIdentifier();
-                String recordIdentifier = nativeArchiveRecord.getHeader().getRecordIdentifier();
-                ARCRecord arcRecord = (ARCRecord)nativeArchiveRecord;
-                byte[] content = ArcContainer.readArcRecContentToByteArr(arcRecord);
-                String recordKey = readerIdentifier+"/"+recordIdentifier;
-                if (nativeArchiveRecord.getHeader().getLength() < Integer.MAX_VALUE) {
-                    File tmpFile = IOUtils.copyByteArrayToTempFileInDir(content, extractDirectoryName, ".tmp");
-//                    tmpFile.deleteOnExit();
+                ArcRecordBase arcRecord = recordIterator.next();
+                String archiveDateStr = arcRecord.getArchiveDateStr();
+                archiveRecords.add(arcRecord);
+                String recordIdentifier = arcRecord.getUrlStr();
+                String recordKey = containerFileName + "/"+archiveDateStr+ "/" + recordIdentifier;
+                if (arcRecord.hasPayload() && arcRecord.getPayload().getRemaining()< Integer.MAX_VALUE) {
+                    File tmpFile = IOUtils.copyStreamToTempFileInDir(arcRecord.getPayloadContent(), extractDirectoryName, ".tmp");
                     this.put(recordKey, tmpFile.getAbsolutePath());
                 }
             }

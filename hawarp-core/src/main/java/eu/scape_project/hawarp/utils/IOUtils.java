@@ -18,8 +18,15 @@ package eu.scape_project.hawarp.utils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * I/O utility methods.
@@ -27,8 +34,10 @@ import java.io.InputStream;
  * @author Sven Schlarb https://github.com/shsdev
  */
 public class IOUtils {
-    
+
     public static final int BUFFER_SIZE = 8192;
+
+    private static final Log LOG = LogFactory.getLog(IOUtils.class);
 
     /**
      * Read the ARC record content into a byte array. Note that the record
@@ -51,6 +60,34 @@ public class IOUtils {
         buffos.flush();
         buffos.close();
         return baos.toByteArray();
+    }
+
+    public static File copyStreamToTempFileInDir(InputStream inStream, String dir, String ext) throws IOException {
+        String filename = System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(5) + ext;
+        if (!dir.endsWith("/")) {
+            dir += "/";
+        }
+        FileOutputStream fos = null;
+        File tmpFile = null;
+        try {
+            tmpFile = new File(dir + filename);
+            fos = new FileOutputStream(tmpFile);
+            org.apache.commons.io.IOUtils.copy(inStream, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException ex) {
+            LOG.error("Temporary file not available.", ex);
+        } catch (IOException ex) {
+            LOG.error("I/O Error", ex);
+        } finally {
+            if (inStream != null) {
+                inStream.close();
+            }
+            if (fos != null) {
+                fos.close();
+            }
+        }
+        return tmpFile;
     }
 
 }

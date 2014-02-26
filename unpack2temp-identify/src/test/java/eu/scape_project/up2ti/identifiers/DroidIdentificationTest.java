@@ -36,30 +36,30 @@ import org.springframework.core.io.InputStreamResource;
  * @version 0.1
  */
 public class DroidIdentificationTest {
-    
+
     private static ArcContainer arcFilesMap;
-    
+
     private static DroidIdentification id;
-    
+
     public DroidIdentificationTest() {
     }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         arcFilesMap = ArcFilesTestMap.getInstance().getMap();
-        InputStream odtTestFileStream = DroidIdentification.class.getResourceAsStream("DROID_SignatureFile_V67.xml");
-        Resource r = new InputStreamResource(odtTestFileStream);
+        InputStream droidSigFile = DroidIdentification.class.getResourceAsStream("DROID_SignatureFile_V67.xml");
+        Resource r = new InputStreamResource(droidSigFile);
         id = new DroidIdentification(r);
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -74,15 +74,15 @@ public class DroidIdentificationTest {
         id.setOutputValueFormat("%1$s %2$s %3$s");
         HashMap<String, List<String>> result = id.identifyFileList(arcFilesMap);
         assertEquals(5, result.size());
-        for(String res : result.keySet()) {
+        for (String res : result.keySet()) {
             List<String> valueList = result.get(res);
-            for(String val : valueList) {
+            for (String val : valueList) {
                 System.out.println(val);
             }
         }
         String tmpTestFilePath = ArcFilesTestMap.getInstance().getTmpTestFile().getAbsolutePath();
-        List<String> vals = result.get(tmpTestFilePath+"/20130522085321/http://fue.onb.ac.at/test/image.png");
-        assertEquals(vals.get(0),"droid mime image/png");
-        assertEquals(vals.get(1),"droid puid fmt/11");
+        List<String> vals = result.get(tmpTestFilePath + "/20130522085321/http://fue.onb.ac.at/test/image.png");
+        assertEquals(vals.get(0), "droid mime image/png");
+        assertEquals(vals.get(1), "droid puid fmt/11");
     }
 }

@@ -52,6 +52,13 @@
     </build>
     
     <dependencies>
+        
+        <dependency>
+            <groupId>eu.scape_project</groupId>
+            <artifactId>hawarp-core</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
         <dependency>
             <groupId>uk.gov.nationalarchives</groupId>
             <artifactId>droid-core</artifactId>
@@ -73,6 +80,7 @@
             <artifactId>spring-beans</artifactId>
             <version>${org.springframework.version}</version>
         </dependency>
+        
     </dependencies>
     
     <properties>

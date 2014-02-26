@@ -15,10 +15,10 @@ import static org.junit.Assert.*;
  * @author onbscs
  */
 public class ArcContainerTest {
-    
-    private  ArcContainer instance;
+
+    private ArcContainer instance;
     DualHashBidiMap bidiIdentifierFilenameMap;
-    
+
     public ArcContainerTest() {
     }
 
@@ -29,7 +29,7 @@ public class ArcContainerTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-    
+
     @Before
     public void setUp() throws IOException {
         InputStream testFileStream = ZipContainer.class.getResourceAsStream("test.arc.gz");
@@ -46,23 +46,24 @@ public class ArcContainerTest {
         instance = new ArcContainer();
         instance.init(containerFileName, containerFileStream);
         bidiIdentifierFilenameMap = instance.getBidiIdentifierFilenameMap();
-        
+
     }
-    
+
     @After
     public void tearDown() {
     }
+
     /**
      * Test of init method, of class ArcContainer.
      */
     @Test
     public void testInit() throws Exception {
-            String key = "test.arc.gz/20130522085321/http://fue.onb.ac.at/test/";
-            assertTrue(bidiIdentifierFilenameMap.containsKey(key));
-            String value = (String) bidiIdentifierFilenameMap.get(key);
-            assertNotNull(value);
-            File tmpFile = new File(value);
-            assertTrue("File does not exist: "+tmpFile.getAbsolutePath(),tmpFile.exists());
+        String key = "test.arc.gz/20130522085321/http://fue.onb.ac.at/test/";
+        assertTrue(bidiIdentifierFilenameMap.containsKey(key));
+        String value = (String) bidiIdentifierFilenameMap.get(key);
+        assertNotNull(value);
+        File tmpFile = new File(value);
+        assertTrue("File does not exist: " + tmpFile.getAbsolutePath(), tmpFile.exists());
     }
 
 }
