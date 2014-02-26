@@ -32,7 +32,7 @@ import static eu.scape_project.tika_identify.identification.IdentificationConsta
 
 /**
  * Creating WARC records using JWAT. This class creates WARC records using JWAT
- * ARC record reader, see https://sbforge.org/display/JWAT/JWAT-Tools.
+ * ARC record writer, see https://sbforge.org/display/JWAT/JWAT-Tools.
  *
  * @author Sven Schlarb <https://github.com/shsdev>
  */
@@ -48,9 +48,11 @@ public class WarcCreator {
 
     static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     
-    private boolean isFirstRecord;
+    private boolean isArcMetadataRecord;
 
     private boolean payloadIdentification;
+    
+    private String warcInfoId;
 
     private WarcCreator() {
     }
@@ -58,6 +60,7 @@ public class WarcCreator {
     public WarcCreator(WarcWriter writer, String fileName) {
         this.writer = writer;
         this.fileName = fileName;
+        isArcMetadataRecord = true;
     }
 
     public void close() throws IOException {
@@ -68,11 +71,12 @@ public class WarcCreator {
         WarcRecord record = WarcRecord.createRecord(writer);
         record.header.addHeader("WARC-Type", "warcinfo");
         record.header.addHeader("WARC-Date", sdf.format(Calendar.getInstance().getTime()));
-        record.header.addHeader("WARC-Record-ID", generator.getRecordID().toString());
+        warcInfoId = generator.getRecordID().toString();
+        record.header.addHeader("WARC-Record-ID", warcInfoId);
         record.header.addHeader("WARC-Filename", fileName);
         record.header.addHeader("Content-Type", "application/warc-fields");
         String description = "software: JWAT Version 1.0.0 https://sbforge.org/display/JWAT/JWAT-Tools\n"
-                + "description: migrated from ARC"
+                + "description: migrated from ARC "
                 + "format: WARC file version 1.0";
         byte[] descriptionBytes = description.getBytes();
         record.header.addHeader("Content-Length", Long.toString(descriptionBytes.length));
@@ -85,14 +89,21 @@ public class WarcCreator {
     public void createContentRecord(FlatListArcRecord arcRecord) throws IOException {
         WarcRecord record = WarcRecord.createRecord(writer);
         String recordId = generator.getRecordID().toString();
-        String type = (isFirstRecord) ? "metadata" : "response";
+        String arcRecordMime = arcRecord.getMimeType();
+        String mimeType = (arcRecordMime != null) ? arcRecordMime : MIME_UNKNOWN;
+        if(isArcMetadataRecord) mimeType = "text/xml";
+        String type = (isArcMetadataRecord) ? "metadata" : "response";
+        if(mimeType.equals("text/dns")) {
+            type = "resource";
+        }
         record.header.addHeader("WARC-Type", type);
         record.header.addHeader("WARC-Target-URI", arcRecord.getUrl());
         record.header.addHeader("WARC-Date", sdf.format(arcRecord.getDate()));
         record.header.addHeader("WARC-Record-ID", recordId);
+        if(isArcMetadataRecord) {
+            record.header.addHeader("WARC-Concurrent-To", warcInfoId);
+        }
         record.header.addHeader("WARC-IP-Address", arcRecord.getIpAddress());
-        String arcRecordMime = arcRecord.getMimeType();
-        String mimeType = (arcRecordMime != null) ? arcRecordMime : MIME_UNKNOWN;
         record.header.addHeader("Content-Type", mimeType);
         byte[] contents = arcRecord.getContents();
         record.header.addHeader("WARC-Payload-Digest", arcRecord.getPayloadDigestStr());
@@ -102,7 +113,7 @@ public class WarcCreator {
         ByteArrayInputStream inBytes = new ByteArrayInputStream(contents);
         writer.streamPayload(inBytes);
         writer.closeRecord();
-        isFirstRecord = false;
+        isArcMetadataRecord = false;
     }
 
     public boolean isPayloadIdentification() {
