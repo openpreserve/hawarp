@@ -46,7 +46,7 @@ public class WarcCreator {
 
     static protected RecordIDGenerator generator = new UUIDGenerator();
 
-    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-dd'T'HH:mm:ss'Z'");
+    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     
     private boolean isFirstRecord;
 
