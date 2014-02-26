@@ -31,6 +31,8 @@ public class CliConfig implements Cloneable {
     private String inputPathRegexFilter;
     
     private boolean createCompressedWarc;
+    
+    private boolean localTestJob;
 
     /**
      * Empty constructor
@@ -105,6 +107,14 @@ public class CliConfig implements Cloneable {
 
     public void setCreateCompressedWarc(boolean createCompressedWarc) {
         this.createCompressedWarc = createCompressedWarc;
+    }
+
+    public boolean isLocalTestJob() {
+        return localTestJob;
+    }
+
+    public void setLocalTestJob(boolean localTestJob) {
+        this.localTestJob = localTestJob;
     }
 
     /**

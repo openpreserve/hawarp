@@ -46,6 +46,10 @@ public class Options {
     public static final String LOCAL_OPT = "local";
     public static final String LOCAL_OPT_DESC = "Use local file system instead of HDFS (debugging). [optional].";
     
+    public static final String TEST_FLG = "t";
+    public static final String TEST_OPT = "localtest";
+    public static final String TEST_OPT_DESC = "Starting application as a local java application without hadoop (testing). [optional].";
+    
     public static final String INPUTPATHREGEX_FLG = "x";
     public static final String INPUTPATHREGEX_OPT = "iregex";
     public static final String INPUTPATHREGEX_OPT_DESC = "Only input paths matching the regular expression will be processed. [optional].";
@@ -64,6 +68,7 @@ public class Options {
         OPTIONS.addOption(OUTPUT_FLG, OUTPUT_OPT, true, OUTPUT_OPT_DESC);
         OPTIONS.addOption(CONTENTTYPEID_FLG, CONTENTTYPEID_OPT, false, CONTENTTYPEID_OPT_DESC);
         OPTIONS.addOption(LOCAL_FLG, LOCAL_OPT, false, LOCAL_OPT_DESC);
+        OPTIONS.addOption(TEST_FLG, TEST_OPT, false, TEST_OPT_DESC);
         OPTIONS.addOption(INPUTPATHREGEX_FLG, INPUTPATHREGEX_OPT, true, INPUTPATHREGEX_OPT_DESC);
         OPTIONS.addOption(WARCCOMPRESSED_FLG, WARCCOMPRESSED_OPT, false, WARCCOMPRESSED_OPT_DESC);
     }
@@ -100,6 +105,12 @@ public class Options {
         if (cmd.hasOption(LOCAL_OPT)) {
             pc.setLocal(true);
             System.out.println("Local mode, reading/writing from/to local file system (debugging)");
+        }
+        
+        // test mode
+        if (cmd.hasOption(TEST_OPT)) {
+            pc.setLocalTestJob(true);
+            System.out.println("Start application as a local java application without hadoop (testing)");
         }
         
         // input path regex filter

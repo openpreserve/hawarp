@@ -168,17 +168,17 @@ public class WarcCreatorTest {
                     // header
                     assertEquals("warcinfo", warcRecord.getHeader("WARC-Type").value);
                     assertEquals("application/warc-fields", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("132", warcRecord.getHeader("Content-Length").value);
+                    assertEquals("133", warcRecord.getHeader("Content-Length").value);
                     // payload
                     String arcHeader = new String(IOUtils.inputStreamToByteArray(payloadIs), Charset.forName("UTF-8"));
                     assertTrue("header start not as expected",arcHeader.startsWith("software: JWAT Version 1.0.0 https://sbforge.org/display/JWAT/JWAT-Tools\n"));
-                    assertTrue("header end not as expected",arcHeader.endsWith("description: migrated from ARCformat: WARC file version 1.0"));
+                    assertTrue("header end not as expected",arcHeader.endsWith("description: migrated from ARC format: WARC file version 1.0"));
                     break;
                 case 2:
                     // header
-                    assertEquals("response", warcRecord.getHeader("WARC-Type").value);
+                    assertEquals("metadata", warcRecord.getHeader("WARC-Type").value);
                     assertEquals("1190", warcRecord.getHeader("Content-Length").value);
-                    assertEquals("text/plain", warcRecord.getHeader("Content-Type").value);
+                    assertEquals("text/xml", warcRecord.getHeader("Content-Type").value);
                     // payload
                     String oldArcInfoRecord = new String(IOUtils.inputStreamToByteArray(payloadIs), Charset.forName("UTF-8"));
                     assertTrue(oldArcInfoRecord.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
@@ -186,7 +186,7 @@ public class WarcCreatorTest {
                     break;
                 case 3:
                     // header
-                    assertEquals("response", warcRecord.getHeader("WARC-Type").value);
+                    assertEquals("resource", warcRecord.getHeader("WARC-Type").value);
                     assertEquals("text/dns", warcRecord.getHeader("Content-Type").value);
                     assertEquals("57", warcRecord.getHeader("Content-Length").value);
                     // payload

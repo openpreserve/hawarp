@@ -103,18 +103,7 @@ public class ArcInputFormat extends FileInputFormat<LongWritable, ArcRecordBase>
             FileSystem fs = file.getFileSystem(job);
             FSDataInputStream fileIn = fs.open(split.getPath());
 
-            // Read first two bytes to check if we have a gzipped input stream
-            PushbackInputStream pb = new PushbackInputStream(fileIn, 2); 
-            byte[] signature = new byte[2];
-            pb.read(signature); 
-            pb.unread(signature); 
-            // use compressed reader if gzip magic number is matched
-            if (signature[ 0] == (byte) 0x1f && signature[ 1] == (byte) 0x8b)
-            {
-                reader = ArcReaderFactory.getReaderCompressed(pb);
-            } else {
-                reader = ArcReaderFactory.getReaderUncompressed(pb);
-            }
+            reader = JwatArcReaderFactory.getReader(fileIn);
             start = split.getStart();
             end = start + split.getLength();
             filePosition = fileIn;

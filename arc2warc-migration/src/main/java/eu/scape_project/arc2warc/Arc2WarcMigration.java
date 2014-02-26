@@ -18,10 +18,13 @@ package eu.scape_project.arc2warc;
 
 import eu.scape_project.arc2warc.cli.CliConfig;
 import eu.scape_project.arc2warc.cli.Options;
+import eu.scape_project.arc2warc.warc.FlatListArcRecordMapper;
+import eu.scape_project.arc2warc.warc.WarcCreator;
 import eu.scape_project.arc2warc.warc.WarcOutputFormat;
 import eu.scape_project.tika_identify.tika.TikaIdentification;
 import eu.scape_project.hawarp.mapreduce.ArcInputFormat;
 import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
+import eu.scape_project.hawarp.mapreduce.JwatArcReaderFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.cli.CommandLine;
@@ -42,10 +45,21 @@ import org.apache.commons.logging.LogFactory;
 
 import eu.scape_project.hawarp.utils.DigestUtils;
 import eu.scape_project.hawarp.utils.RegexUtils;
+import eu.scape_project.hawarp.utils.StringUtils;
 
 import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.apache.hadoop.io.Text;
+import org.jwat.arc.ArcReader;
+import org.jwat.warc.WarcWriter;
+import org.jwat.warc.WarcWriterFactory;
 
 /**
  * ARC to WARC conversion using Hadoop. This class defines a Hadoop job that can
@@ -59,7 +73,9 @@ import org.apache.hadoop.io.Text;
  *
  * @author Sven Schlarb <https://github.com/shsdev>
  */
-public class Arc2WarcHadoopJob {
+public class Arc2WarcMigration {
+
+    private static final Log LOG = LogFactory.getLog(Arc2WarcMigration.class);
 
     private static CliConfig config;
 
@@ -73,44 +89,18 @@ public class Arc2WarcHadoopJob {
 
         @Override
         public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws IOException, InterruptedException {
-            FlatListArcRecord flArcRecord = new FlatListArcRecord();
+
             String filePathString = ((FileSplit) context.getInputSplit()).getPath().toString();
+            boolean identify = context.getConfiguration().getBoolean("content_type_identification", false);
             if (RegexUtils.pathMatchesRegexFilter(filePathString, context.getConfiguration().get("input_path_regex_filter"))) {
-                flArcRecord.setReaderIdentifier(filePathString);
-                flArcRecord.setUrl(jwatArcRecord.getUrlStr());
-                flArcRecord.setDate(jwatArcRecord.getArchiveDate());
-                String mime = (jwatArcRecord.getContentType() != null) ? jwatArcRecord.getContentType().toString() : MIME_UNKNOWN;
-                flArcRecord.setMimeType(mime);
-                flArcRecord.setType("response");
-                long remaining = jwatArcRecord.getPayload().getRemaining();
-                flArcRecord.setContentLength((int) remaining);
-                if (remaining < Integer.MAX_VALUE) {
-                    boolean identify = context.getConfiguration().getBoolean("content_type_identification", false);
-                    InputStream is = jwatArcRecord.getPayloadContent();
-                    PayloadContent payloadContent = new PayloadContent(is);
-                    if (identify) {
-                        TikaIdentification ti = TikaIdentification.getInstance();
-                        payloadContent.setIdentifier(ti);
-                        payloadContent.doPayloadIdentification(true);
-                    }
-                    payloadContent.readPayloadContent();
-                    byte[] payLoadBytes = payloadContent.getPayloadBytes();
-                    flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
-                    flArcRecord.setContents(payLoadBytes);
-                    if (identify) {
-                        flArcRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
-                    }
-                }
-                if (jwatArcRecord.getIpAddress() != null) {
-                    flArcRecord.setIpAddress(jwatArcRecord.getIpAddress());
-                }
-                flArcRecord.setHttpReturnCode(200);
+                FlatListArcRecord flArcRecord = FlatListArcRecordMapper.map(filePathString, jwatArcRecord, identify);
                 context.write(new Text(filePathString), flArcRecord);
             }
         }
+
     }
 
-    public Arc2WarcHadoopJob() {
+    public Arc2WarcMigration() {
     }
 
     public static CliConfig getConfig() {
@@ -135,8 +125,11 @@ public class Arc2WarcHadoopJob {
         } else {
             Options.initOptions(cmd, config);
         }
-
-        startHadoopJob(conf);
+        if (config.isLocalTestJob()) {
+            startApplication();
+        } else {
+            startHadoopJob(conf);
+        }
 
     }
 
@@ -162,14 +155,14 @@ public class Arc2WarcHadoopJob {
         }
 
         job.getConfiguration().set("input_path_regex_filter", config.getInputPathRegexFilter());
-        
+
         if (config.createCompressedWarc()) {
             job.getConfiguration().setBoolean("warc_compressed", true);
         }
 
-        job.setJarByClass(Arc2WarcHadoopJob.class);
+        job.setJarByClass(Arc2WarcMigration.class);
 
-        job.setMapperClass(Arc2WarcHadoopJob.Arc2WarcConversionMapper.class);
+        job.setMapperClass(Arc2WarcMigration.Arc2WarcConversionMapper.class);
 
         // Custom input format for ARC files
         job.setInputFormatClass(ArcInputFormat.class);
@@ -194,5 +187,90 @@ public class Arc2WarcHadoopJob {
         job.waitForCompletion(true);
         System.exit(0);
 
+    }
+
+    public static void startApplication() throws FileNotFoundException, IOException, InterruptedException {
+        long startTime = System.currentTimeMillis();
+        File outDirectory = new File(config.getOutputDirStr());
+        outDirectory.mkdirs();
+        Arc2WarcMigration a2wm = new Arc2WarcMigration();
+        a2wm.traverseDir(new File(config.getInputDirStr()));
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        LOG.debug("Processing time (sec): " + elapsedTime / 1000F);
+        System.exit(0);
+    }
+
+    /**
+     * Traverse the root directory recursively
+     *
+     * @param dir Root directory
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    private void traverseDir(File dirStructItem) throws FileNotFoundException, IOException {
+        if (dirStructItem.isDirectory()) {
+            String[] children = dirStructItem.list();
+            for (String child : children) {
+                traverseDir(new File(dirStructItem, child));
+            }
+        } else if (!dirStructItem.isDirectory()) {
+            String filePath = dirStructItem.getAbsolutePath();
+            if (RegexUtils.pathMatchesRegexFilter(filePath, config.getInputPathRegexFilter())) {
+                migrate(dirStructItem);
+            }
+        }
+    }
+
+    private void migrate(File arcFile) {
+        FileInputStream fileInputStream = null;
+        ArcReader reader = null;
+        FileOutputStream outputStream = null;
+        WarcWriter writer = null;
+        try {
+            fileInputStream = new FileInputStream(arcFile);
+            String inputFileName = arcFile.getName();
+            reader = JwatArcReaderFactory.getReader(fileInputStream);
+            String warcExt = config.createCompressedWarc() ? ".warc.gz" : ".warc";
+            String warcFileName = inputFileName + warcExt;
+            String warcFilePath = StringUtils.normdir(config.getOutputDirStr(), warcFileName);
+            
+            outputStream = new FileOutputStream(new File(warcFilePath));
+            writer = WarcWriterFactory.getWriter(outputStream, config.createCompressedWarc());
+            WarcCreator warcCreator = new WarcCreator(writer, warcFileName);
+            warcCreator.createWarcInfoRecord();
+            Iterator<ArcRecordBase> arcIterator = reader.iterator();
+            ArcRecordBase jwatArcRecord = null;
+            while (arcIterator.hasNext()) {
+                jwatArcRecord = arcIterator.next();
+                if (jwatArcRecord != null) {
+                    FlatListArcRecord flArcRecord
+                            = FlatListArcRecordMapper.map(inputFileName,
+                                    jwatArcRecord,
+                                    config.isContentTypeIdentification());
+                    warcCreator.createContentRecord(flArcRecord);
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            LOG.error("File not found error", ex);
+        } catch (IOException ex) {
+            LOG.error("I/O Error", ex);
+        } finally {
+            try {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+                if (reader != null) {
+                    reader.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+                if (writer != null) {
+                    writer.close();
+                }
+            } catch (IOException ex) {
+                LOG.error("I/O Error", ex);
+            }
+        }
     }
 }
