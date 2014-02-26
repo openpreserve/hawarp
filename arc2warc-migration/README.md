@@ -23,7 +23,7 @@ Execute hadoop job from the command line:
 
     hadoop jar
     target/arc2warc-migration-1.0-SNAPSHOT-jar-with-dependencies.jar
-    [-i <arg>] [-o <arg>] [-x <arg>]  [-p] [-d] [-h] [-l] 
+    [-i <arg>] [-o <arg>] [-x <arg>]  [-p] [-l] [-h] 
 
 with the following options:
 
@@ -33,17 +33,25 @@ with the following options:
      -x,--iregex <arg>   Only input paths matching the regular expression will
                          be processed (default: ".*"). [optional].
      -p,--payloadid      Do payload mime type identification. [optional].
-     -d,--digest         Calculate sha1 payload digest. [optional].
      -c,--comprwarc      Create compressed WARC file. [optional].
      -l,--local          Use local file system instead of HDFS (debugging).
                          [optional].
      -h,--help           print this message [optional].
 
-For example, to process all files which have an ".arc.gz" extension, the 
-following command would be used:
+For example, to process all files in an HDFS directory, use:
+
+    hadoop jar hawarp/arc2warc-migration/target/arc2warc-migration-1.0-jar-with-dependencies.jar 
+    -i /hdfs/input/directory/ -o /hdfs/output/directory/
+
+To process only files which have an ".arc.gz" extension, a regular expression
+can be used as a filter for input files (parameter -x):
 
     hadoop jar hawarp/arc2warc-migration/target/arc2warc-migration-1.0-jar-with-dependencies.jar 
     -i /hdfs/input/directory/ -o /hdfs/output/directory/ -x ".*\.arc\.gz"
 
-Note that it is possible to use local file sytem inputs and outputs by using the
--l flag, reading/writing from/to HDFS is the default.
+For testing and debugging, local file sytem inputs and outputs can be used
+instead of HDFS by using the -l flag (reading/writing from/to HDFS is the default):
+
+    hadoop jar hawarp/arc2warc-migration/target/arc2warc-migration-1.0-jar-with-dependencies.jar 
+    -i /hdfs/input/directory/ -o /hdfs/output/directory/ -l
+

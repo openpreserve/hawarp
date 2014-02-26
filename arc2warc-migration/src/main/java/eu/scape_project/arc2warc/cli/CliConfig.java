@@ -28,7 +28,6 @@ public class CliConfig implements Cloneable {
     
     private boolean local;
     private boolean contentTypeIdentification;
-    private boolean payloadDigestCalculation;
     private String inputPathRegexFilter;
     
     private boolean createCompressedWarc;
@@ -82,14 +81,6 @@ public class CliConfig implements Cloneable {
 
     public void setContentTypeIdentification(boolean contentTypeIdentification) {
         this.contentTypeIdentification = contentTypeIdentification;
-    }    
-
-    public boolean isPayloadDigestCalculation() {
-        return payloadDigestCalculation;
-    }
-
-    public void setPayloadDigestCalculation(boolean payloadDigestCalculation) {
-        this.payloadDigestCalculation = payloadDigestCalculation;
     }
 
     public boolean isLocal() {

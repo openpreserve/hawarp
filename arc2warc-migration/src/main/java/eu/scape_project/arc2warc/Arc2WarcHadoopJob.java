@@ -95,10 +95,7 @@ public class Arc2WarcHadoopJob {
                     }
                     payloadContent.readPayloadContent();
                     byte[] payLoadBytes = payloadContent.getPayloadBytes();
-                    boolean doDigest = context.getConfiguration().getBoolean("payload_digest_calculation", false);
-                    if (doDigest) {
-                        flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
-                    }
+                    flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
                     flArcRecord.setContents(payLoadBytes);
                     if (identify) {
                         flArcRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
@@ -162,9 +159,6 @@ public class Arc2WarcHadoopJob {
         }
         if (config.isContentTypeIdentification()) {
             job.getConfiguration().setBoolean("content_type_identification", true);
-        }
-        if (config.isPayloadDigestCalculation()) {
-            job.getConfiguration().setBoolean("payload_digest_calculation", true);
         }
 
         job.getConfiguration().set("input_path_regex_filter", config.getInputPathRegexFilter());
