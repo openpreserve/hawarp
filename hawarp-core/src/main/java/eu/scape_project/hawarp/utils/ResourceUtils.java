@@ -40,7 +40,7 @@ public class ResourceUtils {
         try {
             resourceInputStream = resourceUrl.openStream();
             resContStrWr = new StringWriter();
-            org.apache.commons.io.IOUtils.copy(resourceInputStream, resContStrWr, Charset.forName("UTF-8"));
+            org.apache.commons.io.IOUtils.copy(resourceInputStream, resContStrWr, "UTF-8");
             resourceInputStream.close();
             return resContStrWr.toString();
         } catch (IOException ex) {
