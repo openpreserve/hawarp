@@ -32,7 +32,7 @@ import org.apache.hadoop.io.Writable;
  *
  * @author shsdev https://github.com/shsdev
  */
-public class FlatListArcRecord implements Writable {
+public class HadoopWebArchiveRecord implements Writable {
 
     private String readerIdentifier;
     private String recordIdentifier;

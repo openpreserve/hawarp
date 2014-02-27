@@ -30,6 +30,7 @@ public class Options {
     public static final String HELP_FLG = "h";
     public static final String HELP_OPT = "help";
     public static final String HELP_OPT_DESC = "print this message [optional].";
+    
     public static final String INPUT_FLG = "i";
     public static final String INPUT_OPT = "input";
     public static final String INPUT_OPT_DESC = "HDFS Input directory with ARC files. [required].";
@@ -58,6 +59,10 @@ public class Options {
     public static final String WARCCOMPRESSED_OPT = "comprwarc";
     public static final String WARCCOMPRESSED_OPT_DESC = "Create compressed WARC file. [optional].";
     
+    public static final String ARC2HWARMR_FLG = "a";
+    public static final String ARC2HWARMR_OPT = "arc2hwar";
+    public static final String ARC2HWARMR_OPT_DESC = "ARC to HWAR mapping file path. [optional].";
+    
     public static org.apache.commons.cli.Options OPTIONS = new org.apache.commons.cli.Options();
     public static final String USAGE = "hadoop jar "
             + "target/arc2warc-migration-1.0-SNAPSHOT-jar-with-dependencies.jar";
@@ -71,6 +76,7 @@ public class Options {
         OPTIONS.addOption(TEST_FLG, TEST_OPT, false, TEST_OPT_DESC);
         OPTIONS.addOption(INPUTPATHREGEX_FLG, INPUTPATHREGEX_OPT, true, INPUTPATHREGEX_OPT_DESC);
         OPTIONS.addOption(WARCCOMPRESSED_FLG, WARCCOMPRESSED_OPT, false, WARCCOMPRESSED_OPT_DESC);
+        OPTIONS.addOption(ARC2HWARMR_FLG, ARC2HWARMR_OPT, true, ARC2HWARMR_OPT_DESC);
     }
 
     public static void initOptions(CommandLine cmd, CliConfig pc) {
@@ -127,6 +133,14 @@ public class Options {
         if (cmd.hasOption(WARCCOMPRESSED_OPT)) {
             pc.setCreateCompressedWarc(true);
             System.out.println("Create compressed WARC file output");
+        }
+        
+        // ARC to HWAR mapping
+        String arc2hwar;
+        if (cmd.hasOption(ARC2HWARMR_OPT) && cmd.getOptionValue(ARC2HWARMR_OPT) != null) {
+            arc2hwar = cmd.getOptionValue(ARC2HWARMR_OPT);
+            pc.setArc2hwarMappingFilePath(arc2hwar);
+            System.out.println("ARC to HWAR mapping file path: " + arc2hwar);
         }
         
     }

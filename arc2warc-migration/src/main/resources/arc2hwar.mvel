@@ -1,0 +1,60 @@
+import java.io.InputStream;
+import eu.scape_project.tika_identify.webarchive.PayloadContent;
+import eu.scape_project.tika_identify.tika.TikaIdentification;
+import eu.scape_project.hawarp.utils.DigestUtils;
+
+// Metadata properties
+//
+// - readerIdentifier
+// - url
+// - mimeType
+// - type
+// - date
+// - contentLength
+// - httpReturnCode
+
+flArcRecord.readerIdentifier = filePathString;
+
+flArcRecord.url = jwatArcRecord.getUrlStr();
+
+if(!jwatArcRecord.header.ipAddressStr.isEmpty()) {
+    flArcRecord.ipAddress = jwatArcRecord.header.ipAddressStr;
+}
+
+if(!jwatArcRecord.header.contentTypeStr.isEmpty()) {
+    flArcRecord.mimeType = jwatArcRecord.header.contentTypeStr;
+} else {
+    flArcRecord.mimeType = "unknown/unknown";
+}
+
+flArcRecord.type = "response";
+
+flArcRecord.date = jwatArcRecord.getArchiveDate();
+
+flArcRecord.contentLength = jwatArcRecord.getPayload().getRemaining();
+
+flArcRecord.httpReturnCode = 200;
+
+// Payload content and dependent properties:
+//
+// - contents
+// - payloadDigestStr
+// - identifiedPayloadType
+
+long remaining = jwatArcRecord.getPayload().getRemaining();
+if (remaining < Integer.MAX_VALUE) {
+    InputStream instream = jwatArcRecord.getPayloadContent();
+    PayloadContent payloadContent = new PayloadContent(instream);
+    if (identify) {
+        TikaIdentification ti = TikaIdentification.getInstance();
+        payloadContent.setIdentifier(ti);
+        payloadContent.doPayloadIdentification(true);
+    }
+    payloadContent.readPayloadContent();
+    byte[] payLoadBytes = payloadContent.getPayloadBytes();
+    flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
+    flArcRecord.setContents(payLoadBytes);
+    if (identify) {
+        flArcRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
+    }
+}

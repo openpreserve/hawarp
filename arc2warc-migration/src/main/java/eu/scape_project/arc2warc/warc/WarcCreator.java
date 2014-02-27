@@ -16,7 +16,7 @@
  */
 package eu.scape_project.arc2warc.warc;
 
-import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
+import eu.scape_project.hawarp.mapreduce.HadoopWebArchiveRecord;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -86,7 +86,7 @@ public class WarcCreator {
         writer.closeRecord();
     }
 
-    public void createContentRecord(FlatListArcRecord arcRecord) throws IOException {
+    public void createContentRecord(HadoopWebArchiveRecord arcRecord) throws IOException {
         WarcRecord record = WarcRecord.createRecord(writer);
         String recordId = generator.getRecordID().toString();
         String arcRecordMime = arcRecord.getMimeType();

@@ -18,7 +18,7 @@ package eu.scape_project.arc2warc.warc;
 
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
+import eu.scape_project.hawarp.mapreduce.HadoopWebArchiveRecord;
 import eu.scape_project.hawarp.utils.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -95,9 +95,9 @@ public class WarcCreatorTest {
         assertNotNull(writer);
         WarcCreator warcCreator = new WarcCreator(writer, warcFileName);
         warcCreator.createWarcInfoRecord();
-        List<FlatListArcRecord> hadoopArcRecords = getHadoopArcRecords();
+        List<HadoopWebArchiveRecord> hadoopArcRecords = getHadoopArcRecords();
         assertEquals(5,hadoopArcRecords.size());
-        for(FlatListArcRecord ar : hadoopArcRecords) {
+        for(HadoopWebArchiveRecord ar : hadoopArcRecords) {
             warcCreator.createContentRecord(ar);
         }
         warcCreator.close();
@@ -105,7 +105,7 @@ public class WarcCreatorTest {
         validateWarcFile(tmpWarcFile);
     }
 
-    private List<FlatListArcRecord> getHadoopArcRecords() throws URISyntaxException, IOException {
+    private List<HadoopWebArchiveRecord> getHadoopArcRecords() throws URISyntaxException, IOException {
         InputStream arcFileStream = Resources.getResource("arc/example.arc.gz").openStream();
         ArcRecordBase jwatArcRecord = null;
         ArcReader arcReader = null;
@@ -115,9 +115,9 @@ public class WarcCreatorTest {
             LOG.error("I/O error while trying to read from ARC input stream ", ex);
         }
         Iterator<ArcRecordBase> arcIterator = arcReader.iterator();
-        List<FlatListArcRecord> hadoopArcRecords = new ArrayList<FlatListArcRecord>();
+        List<HadoopWebArchiveRecord> hadoopArcRecords = new ArrayList<HadoopWebArchiveRecord>();
         while (arcIterator.hasNext()) {
-            FlatListArcRecord hadoopArcRecord = new FlatListArcRecord();
+            HadoopWebArchiveRecord hadoopArcRecord = new HadoopWebArchiveRecord();
             jwatArcRecord = arcIterator.next();
             if (jwatArcRecord != null) {
 

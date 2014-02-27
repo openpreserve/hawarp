@@ -33,6 +33,8 @@ public class CliConfig implements Cloneable {
     private boolean createCompressedWarc;
     
     private boolean localTestJob;
+    
+    private String arc2hwarMappingFilePath;
 
     /**
      * Empty constructor
@@ -115,6 +117,14 @@ public class CliConfig implements Cloneable {
 
     public void setLocalTestJob(boolean localTestJob) {
         this.localTestJob = localTestJob;
+    }
+
+    public String getArc2hwarMappingFilePath() {
+        return arc2hwarMappingFilePath;
+    }
+
+    public void setArc2hwarMappingFilePath(String arc2hwarMappingFilePath) {
+        this.arc2hwarMappingFilePath = arc2hwarMappingFilePath;
     }
 
     /**

@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class StringUtils {
 
-        private static final Log LOG = LogFactory.getLog(StringUtils.class);
+    private static final Log LOG = LogFactory.getLog(StringUtils.class);
 
     /**
      * Creates a normalised directory string. Parts will be normalised to a
@@ -54,5 +54,12 @@ public class StringUtils {
         }
         return outDir;
     }
-    
+
+    public static String ensureTrailSep(String path) {
+        if (path.charAt(path.length() - 1) != File.separatorChar) {
+            path += File.separator;
+        }
+        return path;
+    }
+
 }

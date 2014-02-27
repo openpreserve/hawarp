@@ -16,7 +16,7 @@
  */
 package eu.scape_project.arc2warc.warc;
 
-import eu.scape_project.hawarp.mapreduce.FlatListArcRecord;
+import eu.scape_project.hawarp.mapreduce.HadoopWebArchiveRecord;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -47,17 +47,17 @@ import org.jwat.warc.WarcWriterFactory;
  *
  * @author Sven Schlarb <https://github.com/shsdev>
  */
-public class WarcOutputFormat extends FileOutputFormat<Text, FlatListArcRecord> {
+public class WarcOutputFormat extends FileOutputFormat<Text, HadoopWebArchiveRecord> {
 
     private static final Log LOG = LogFactory.getLog(WarcOutputFormat.class);
 
     @Override
-    public RecordWriter<Text, FlatListArcRecord> getRecordWriter(TaskAttemptContext tac) throws IOException, InterruptedException {
+    public RecordWriter<Text, HadoopWebArchiveRecord> getRecordWriter(TaskAttemptContext tac) throws IOException, InterruptedException {
         //create our record writer with the new file
         return new WarcOutputFormat.WarcRecordWriter(tac);
     }
 
-    public class WarcRecordWriter extends RecordWriter<Text, FlatListArcRecord> {
+    public class WarcRecordWriter extends RecordWriter<Text, HadoopWebArchiveRecord> {
 
         private WarcWriter writer = null;
 
@@ -88,7 +88,7 @@ public class WarcOutputFormat extends FileOutputFormat<Text, FlatListArcRecord> 
         }
 
         @Override
-        public void write(Text k, FlatListArcRecord arcRecord) throws IOException, InterruptedException {
+        public void write(Text k, HadoopWebArchiveRecord arcRecord) throws IOException, InterruptedException {
             // writer is initialised at the first record because only at this
             // point the input filename is known by the hadoop record key
             if (writer == null) {
