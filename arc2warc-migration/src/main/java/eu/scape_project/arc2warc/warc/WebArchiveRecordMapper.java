@@ -22,10 +22,12 @@ import eu.scape_project.tika_identify.tika.TikaIdentification;
 import eu.scape_project.tika_identify.webarchive.PayloadContent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import org.jwat.arc.ArcRecordBase;
 import org.mvel2.MVEL;
+import org.mvel2.compiler.CompiledExpression;
 
 /**
  * JWAT ARC-record to Hadoop Web Archive Record conversion. The JWAT ARC record
@@ -36,7 +38,7 @@ import org.mvel2.MVEL;
  */
 public class WebArchiveRecordMapper {
 
-    public static HadoopWebArchiveRecord map(String arc2hwar, String filePathString, ArcRecordBase jwatArcRecord, boolean identify) throws IOException {
+    public static HadoopWebArchiveRecord map(Serializable compiledarc2hwar, String filePathString, ArcRecordBase jwatArcRecord, boolean identify) throws IOException {
 
         // MVEL-mapped properties
         HadoopWebArchiveRecord flArcRecord = new HadoopWebArchiveRecord();
@@ -45,7 +47,9 @@ public class WebArchiveRecordMapper {
         vars.put("jwatArcRecord", jwatArcRecord);
         vars.put("filePathString", filePathString);
         vars.put("identify", identify);
-        MVEL.eval(arc2hwar, flArcRecord, vars);
+        MVEL.executeExpression(compiledarc2hwar, flArcRecord, vars);
+        
+        
 
         return flArcRecord;
     }

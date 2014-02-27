@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -63,6 +64,8 @@ import org.apache.hadoop.io.Text;
 import org.jwat.arc.ArcReader;
 import org.jwat.warc.WarcWriter;
 import org.jwat.warc.WarcWriterFactory;
+import org.mvel2.MVEL;
+import org.mvel2.compiler.CompiledExpression;
 
 /**
  * ARC to WARC conversion using Hadoop. This class defines a Hadoop job that can
@@ -84,6 +87,8 @@ public class Arc2WarcMigration {
 
     private Configuration conf;
 
+    private static int count;
+
     /**
      * Mapper class.
      */
@@ -91,15 +96,20 @@ public class Arc2WarcMigration {
             extends Mapper<LongWritable, ArcRecordBase, Text, HadoopWebArchiveRecord> {
 
         private static final Log LOG = LogFactory.getLog(Arc2WarcConversionMapper.class);
+        
+        private static Serializable compiledarc2hwar;
 
         @Override
         public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws IOException, InterruptedException {
-
+            if(compiledarc2hwar == null) {
+                String arc2hwar = context.getConfiguration().get("arc2hwar");
+                compiledarc2hwar = MVEL.compileExpression(arc2hwar); 
+            }
             String filePathString = ((FileSplit) context.getInputSplit()).getPath().toString();
             boolean identify = context.getConfiguration().getBoolean("content_type_identification", false);
             if (RegexUtils.pathMatchesRegexFilter(filePathString, context.getConfiguration().get("input_path_regex_filter"))) {
-                String arc2hwar = context.getConfiguration().get("arc2hwar");
-                HadoopWebArchiveRecord flArcRecord = WebArchiveRecordMapper.map(arc2hwar, filePathString, jwatArcRecord, identify);
+                
+                HadoopWebArchiveRecord flArcRecord = WebArchiveRecordMapper.map(compiledarc2hwar, filePathString, jwatArcRecord, identify);
                 context.write(new Text(filePathString), flArcRecord);
             }
         }
@@ -134,12 +144,12 @@ public class Arc2WarcMigration {
 
         if (config.getArc2hwarMappingFilePath() == null || config.getArc2hwarMappingFilePath().isEmpty()) {
             URL resourceUrl = Resources.getResource("arc2hwar.mvel");
-            LOG.info("Loading ARC to HWAR mapping file from resource: "+resourceUrl.getPath());
+            LOG.info("Loading ARC to HWAR mapping file from resource: " + resourceUrl.getPath());
             String arc2hwar = ResourceUtils.getStringFromResource(resourceUrl);
             conf.set("arc2hwar", arc2hwar);
         } else {
             File arc2hwarFile = new File(config.getArc2hwarMappingFilePath());
-            LOG.info("Loading ARC to HWAR mapping file from file: "+arc2hwarFile.getPath());
+            LOG.info("Loading ARC to HWAR mapping file from file: " + arc2hwarFile.getPath());
             String arc2hwar = org.apache.commons.io.FileUtils.readFileToString(arc2hwarFile);
             conf.set("arc2hwar", arc2hwar);
         }
@@ -212,6 +222,7 @@ public class Arc2WarcMigration {
         long startTime = System.currentTimeMillis();
         File outDirectory = new File(config.getOutputDirStr());
         outDirectory.mkdirs();
+        count = 1;
         Arc2WarcMigration a2wm = new Arc2WarcMigration();
         a2wm.conf = conf;
         a2wm.traverseDir(new File(config.getInputDirStr()));
@@ -252,7 +263,7 @@ public class Arc2WarcMigration {
             reader = JwatArcReaderFactory.getReader(fileInputStream);
             String warcExt = config.createCompressedWarc() ? ".warc.gz" : ".warc";
             String warcFileName = inputFileName + warcExt;
-            
+
             String warcFilePath = StringUtils.ensureTrailSep(config.getOutputDirStr()) + warcFileName;
 
             outputStream = new FileOutputStream(new File(warcFilePath));
@@ -261,18 +272,21 @@ public class Arc2WarcMigration {
             warcCreator.createWarcInfoRecord();
             Iterator<ArcRecordBase> arcIterator = reader.iterator();
             ArcRecordBase jwatArcRecord = null;
+            String arc2hwar = conf.get("arc2hwar");
+            Serializable compiled = MVEL.compileExpression(arc2hwar); 
             while (arcIterator.hasNext()) {
                 jwatArcRecord = arcIterator.next();
                 if (jwatArcRecord != null) {
-                    String arc2hwar = conf.get("arc2hwar");
                     HadoopWebArchiveRecord flArcRecord
-                            = WebArchiveRecordMapper.map(arc2hwar,
+                            = WebArchiveRecordMapper.map(compiled,
                                     inputFileName,
                                     jwatArcRecord,
                                     config.isContentTypeIdentification());
                     warcCreator.createContentRecord(flArcRecord);
                 }
             }
+            LOG.info("File " + count + " processed: " + arcFile.getAbsolutePath());
+            count++;
         } catch (FileNotFoundException ex) {
             LOG.error("File not found error", ex);
         } catch (IOException ex) {
