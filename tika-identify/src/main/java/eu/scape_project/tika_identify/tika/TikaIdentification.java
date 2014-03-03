@@ -53,6 +53,8 @@ public class TikaIdentification implements Identifier {
 
     // Singleton Instance
     private static TikaIdentification instance = null;
+    
+    private String currentItemId;
 
     /**
      * Get instance with default signature file
@@ -93,7 +95,7 @@ public class TikaIdentification implements Identifier {
         try {
             return tika.detect(file);
         } catch (IOException ex) {
-            LOG.warn("Identification failed.", ex);
+            LOG.warn("Identification failed: "+currentItemId, ex);
             return MIME_UNKNOWN;
         }
     }
@@ -110,7 +112,7 @@ public class TikaIdentification implements Identifier {
         try {
             return tika.detect(inStream);
         } catch (IOException ex) {
-            LOG.warn("Identification failed.", ex);
+            LOG.warn("Identification failed: "+currentItemId, ex);
             return MIME_UNKNOWN;
         }
     }
@@ -127,9 +129,19 @@ public class TikaIdentification implements Identifier {
             String mimetype = tika.detect(prefix);
             return mimetype;
         } catch (java.lang.Exception e) {
-            LOG.warn("Tika identification failed.");
+            LOG.warn("Tika identification failed: "+currentItemId);
             return MIME_UNKNOWN;
         }
     }
+
+    public String getCurrentItemId() {
+        return currentItemId;
+    }
+
+    public void setCurrentItemId(String currentItemId) {
+        this.currentItemId = currentItemId;
+    }
+    
+    
 
 }

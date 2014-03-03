@@ -9,10 +9,10 @@
     </parent>
     
     <groupId>eu.scape_project</groupId>
-    <artifactId>arc2warc-migration</artifactId>
+    <artifactId>arc2warc-migration-hdp</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
-    <name>arc2warc-migration</name>
+    <name>arc2warc-migration-hdp</name>
     
     <build>
         <plugins>

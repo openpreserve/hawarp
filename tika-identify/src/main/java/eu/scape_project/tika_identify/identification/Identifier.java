@@ -30,4 +30,9 @@ public interface Identifier {
     
     public String identify(String filePath) throws IOException;
     
+    public String getCurrentItemId();
+
+    public void setCurrentItemId(String currentItemId);
+    
+    
 }

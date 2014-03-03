@@ -14,12 +14,13 @@
     <description>HAdoop-based Web Archive Record Processing</description>    
 
     <modules>
-        <module>./arc2warc-migration</module>
-        <module>./droid-identify</module>
-        <module>./hawarp-core</module>
-        <module>./unpack2temp-identify</module>
-        <module>./tika-identify</module>
-        <module>./tomar-prepare-inputdata</module>
+        <module>droid-identify</module>
+        <module>hawarp-core</module>
+        <module>unpack2temp-identify</module>
+        <module>tika-identify</module>
+        <module>tomar-prepare-inputdata</module>
+        <module>arc2warc-migration-cli</module>
+        <module>arc2warc-migration-cli</module>
     </modules>
  
     <developers>
