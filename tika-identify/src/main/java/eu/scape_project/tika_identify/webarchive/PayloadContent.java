@@ -23,6 +23,8 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,6 +49,8 @@ public class PayloadContent {
     private Identifier identifier;
 
     private boolean doPayloadIdentification;
+    
+    private boolean error;
 
     private PayloadContent() {
         identifiedPayLoadType = MIME_UNKNOWN;
@@ -54,6 +58,7 @@ public class PayloadContent {
         consumed = false;
         identifier = null;
         doPayloadIdentification = false;
+        error = false;
     }
 
     public PayloadContent(InputStream inputStream) {
@@ -61,11 +66,16 @@ public class PayloadContent {
         this.inputStream = inputStream;
     }
 
-    public void readPayloadContent() throws IOException {
-        payloadBytes = inputStreamToByteArray();
-        if (inputStream.read() == -1) {
-            consumed = true;
-        }
+    public void readPayloadContent() {
+        try {
+            payloadBytes = inputStreamToByteArray();
+            if (inputStream.read() == -1) {
+                consumed = true;
+            }
+        } catch (IOException ex) {
+            LOG.error("I/O Exception while checking stream", ex);
+            this.error = true;
+        } 
     }
 
     public void setIdentifier(Identifier identifier) {
@@ -73,6 +83,9 @@ public class PayloadContent {
     }
 
     public String getIdentifiedPayLoadType() {
+        if(isError()) {
+            throw new IllegalStateException("Unable to get payload bytes, an error occurred while reading the content");
+        }
         if (!isConsumed()) {
             throw new IllegalStateException("Input stream must be read before accessing the payload type.");
         }
@@ -82,25 +95,31 @@ public class PayloadContent {
         return identifiedPayLoadType;
     }
 
-    private byte[] inputStreamToByteArray() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BufferedInputStream buffis = new BufferedInputStream(inputStream);
-        BufferedOutputStream buffos = new BufferedOutputStream(baos);
-        byte[] tempBuffer = new byte[BUFFER_SIZE];
-        int bytesRead;
-        boolean firstByteArray = true;
-        while ((bytesRead = buffis.read(tempBuffer)) != -1) {
-            buffos.write(tempBuffer, 0, bytesRead);
-            if (doPayloadIdentification && firstByteArray && tempBuffer != null && bytesRead > 0) {
-                identified = identifyPayloadType(tempBuffer);
+    private byte[] inputStreamToByteArray() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            BufferedInputStream buffis = new BufferedInputStream(inputStream);
+            BufferedOutputStream buffos = new BufferedOutputStream(baos);
+            byte[] tempBuffer = new byte[BUFFER_SIZE];
+            int bytesRead;
+            boolean firstByteArray = true;
+            while ((bytesRead = buffis.read(tempBuffer)) != -1) {
+                buffos.write(tempBuffer, 0, bytesRead);
+                if (doPayloadIdentification && firstByteArray && tempBuffer != null && bytesRead > 0) {
+                    identified = identifyPayloadType(tempBuffer);
+                }
+                firstByteArray = false;
             }
-            firstByteArray = false;
-        }
-        buffis.close();
-        buffos.flush();
-        buffos.close();
-
-        return baos.toByteArray();
+            buffis.close();
+            buffos.flush();
+            buffos.close();
+            
+            return baos.toByteArray();
+        } catch (IOException ex) {
+            LOG.error("Error while trying to read payload content", ex);
+            this.error = true;
+            return null;
+        } 
     }
 
     private boolean identifyPayloadType(byte[] prefix) {
@@ -116,7 +135,10 @@ public class PayloadContent {
         return identified;
     }
 
-    public byte[] getPayloadBytes() {
+    public byte[] getPayloadBytes() throws IllegalStateException {
+        if(isError()) {
+            throw new IllegalStateException("Unable to get payload bytes, an error occurred while reading the content");
+        }
         if (!isConsumed()) {
             throw new IllegalStateException("Input stream must be read before accessing content");
         }
@@ -133,6 +155,14 @@ public class PayloadContent {
 
     public void doPayloadIdentification(boolean doPayloadIdentification) {
         this.doPayloadIdentification = doPayloadIdentification;
+    }
+
+    public boolean isError() {
+        return error;
+    }
+
+    public void setError(boolean error) {
+        this.error = error;
     }
 
 }

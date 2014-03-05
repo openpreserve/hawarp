@@ -18,6 +18,10 @@ package eu.scape_project.hawarp.mapreduce;
 
 import java.io.IOException;
 import java.io.PushbackInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -42,6 +46,8 @@ import org.jwat.arc.ArcRecordBase;
  * @author Sven Schlarb <https://github.com/shsdev>
  */
 public class ArcInputFormat extends FileInputFormat<LongWritable, ArcRecordBase> {
+    
+    private static final Log LOG = LogFactory.getLog(ArcInputFormat.class);
 
     /**
      * Create ARC record reader.
@@ -117,9 +123,15 @@ public class ArcInputFormat extends FileInputFormat<LongWritable, ArcRecordBase>
          * @throws IOException
          */
         @Override
-        public boolean nextKeyValue() throws IOException {
+        public boolean nextKeyValue() {
 
-            ArcRecordBase arcRecord = reader.getNextRecord();
+            ArcRecordBase arcRecord = null;
+            try {           
+                arcRecord = reader.getNextRecord();
+            } catch (IOException ex) {
+                LOG.warn("Unable to read ARC record", ex);
+            }
+            
             if (arcRecord == null) {
                 return false;
             }
