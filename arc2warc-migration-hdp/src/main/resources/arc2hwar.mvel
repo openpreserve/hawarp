@@ -52,9 +52,11 @@ if (remaining < Integer.MAX_VALUE) {
     }
     payloadContent.readPayloadContent();
     byte[] payLoadBytes = payloadContent.getPayloadBytes();
-    flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
-    flArcRecord.setContents(payLoadBytes);
-    if (identify) {
-        flArcRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
+    if(!payloadContent.isError()) {
+        flArcRecord.setPayloadDigestStr(DigestUtils.SHAsum(payLoadBytes));
+        flArcRecord.setContents(payLoadBytes);
+        if (identify) {
+            flArcRecord.setIdentifiedPayloadType(payloadContent.getIdentifiedPayLoadType());
+        }
     }
 }

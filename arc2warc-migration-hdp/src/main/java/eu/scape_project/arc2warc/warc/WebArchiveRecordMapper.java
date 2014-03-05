@@ -15,6 +15,7 @@
  */
 package eu.scape_project.arc2warc.warc;
 
+import eu.scape_project.arc2warc.Arc2WarcMigration;
 import eu.scape_project.hawarp.mapreduce.HadoopWebArchiveRecord;
 import eu.scape_project.hawarp.utils.DigestUtils;
 import static eu.scape_project.tika_identify.identification.IdentificationConstants.MIME_UNKNOWN;
@@ -25,6 +26,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jwat.arc.ArcRecordBase;
 import org.mvel2.MVEL;
 import org.mvel2.compiler.CompiledExpression;
@@ -38,18 +41,22 @@ import org.mvel2.compiler.CompiledExpression;
  */
 public class WebArchiveRecordMapper {
 
-    public static HadoopWebArchiveRecord map(Serializable compiledarc2hwar, String filePathString, ArcRecordBase jwatArcRecord, boolean identify) throws IOException {
+    private static final Log LOG = LogFactory.getLog(WebArchiveRecordMapper.class);
+
+    public static HadoopWebArchiveRecord map(Serializable compiledarc2hwar, String filePathString, ArcRecordBase jwatArcRecord, boolean identify) throws Arc2WarcMigrationException {
 
         // MVEL-mapped properties
         HadoopWebArchiveRecord flArcRecord = new HadoopWebArchiveRecord();
-        Map vars = new HashMap();
-        vars.put("flArcRecord", flArcRecord);
-        vars.put("jwatArcRecord", jwatArcRecord);
-        vars.put("filePathString", filePathString);
-        vars.put("identify", identify);
-        MVEL.executeExpression(compiledarc2hwar, flArcRecord, vars);
-        
-        
+        try {
+            Map vars = new HashMap();
+            vars.put("flArcRecord", flArcRecord);
+            vars.put("jwatArcRecord", jwatArcRecord);
+            vars.put("filePathString", filePathString);
+            vars.put("identify", identify);
+            MVEL.executeExpression(compiledarc2hwar, flArcRecord, vars);
+        } catch (IllegalStateException ex) {
+            throw new Arc2WarcMigrationException("Unable to create flat list record, errors occurred in file");
+        }
 
         return flArcRecord;
     }

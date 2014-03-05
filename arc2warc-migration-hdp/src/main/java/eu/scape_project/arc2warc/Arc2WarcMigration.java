@@ -19,6 +19,7 @@ package eu.scape_project.arc2warc;
 import com.google.common.io.Resources;
 import eu.scape_project.arc2warc.cli.CliConfig;
 import eu.scape_project.arc2warc.cli.Options;
+import eu.scape_project.arc2warc.warc.Arc2WarcMigrationException;
 import eu.scape_project.arc2warc.warc.WebArchiveRecordMapper;
 import eu.scape_project.arc2warc.warc.WarcCreator;
 import eu.scape_project.arc2warc.warc.WarcOutputFormat;
@@ -95,22 +96,26 @@ public class Arc2WarcMigration {
     public static class Arc2WarcConversionMapper
             extends Mapper<LongWritable, ArcRecordBase, Text, HadoopWebArchiveRecord> {
 
-        private static final Log LOG = LogFactory.getLog(Arc2WarcConversionMapper.class);
-        
         private static Serializable compiledarc2hwar;
 
         @Override
-        public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws IOException, InterruptedException {
-            if(compiledarc2hwar == null) {
+        public void map(LongWritable key, ArcRecordBase jwatArcRecord, Mapper.Context context) throws InterruptedException, IOException {
+            if (compiledarc2hwar == null) {
                 String arc2hwar = context.getConfiguration().get("arc2hwar");
-                compiledarc2hwar = MVEL.compileExpression(arc2hwar); 
+                compiledarc2hwar = MVEL.compileExpression(arc2hwar);
             }
             String filePathString = ((FileSplit) context.getInputSplit()).getPath().toString();
             boolean identify = context.getConfiguration().getBoolean("content_type_identification", false);
             if (RegexUtils.pathMatchesRegexFilter(filePathString, context.getConfiguration().get("input_path_regex_filter"))) {
-                
-                HadoopWebArchiveRecord flArcRecord = WebArchiveRecordMapper.map(compiledarc2hwar, filePathString, jwatArcRecord, identify);
-                context.write(new Text(filePathString), flArcRecord);
+
+                HadoopWebArchiveRecord flArcRecord;
+                try {
+                    flArcRecord = WebArchiveRecordMapper.map(compiledarc2hwar, filePathString, jwatArcRecord, identify);
+                    context.write(new Text(filePathString), flArcRecord);
+                } catch (Exception ex) {
+                    LOG.error("Unable to create WARC file: "+filePathString, ex);
+                }
+
             }
         }
 
@@ -273,16 +278,21 @@ public class Arc2WarcMigration {
             Iterator<ArcRecordBase> arcIterator = reader.iterator();
             ArcRecordBase jwatArcRecord = null;
             String arc2hwar = conf.get("arc2hwar");
-            Serializable compiled = MVEL.compileExpression(arc2hwar); 
+            Serializable compiled = MVEL.compileExpression(arc2hwar);
             while (arcIterator.hasNext()) {
                 jwatArcRecord = arcIterator.next();
                 if (jwatArcRecord != null) {
-                    HadoopWebArchiveRecord flArcRecord
-                            = WebArchiveRecordMapper.map(compiled,
-                                    inputFileName,
-                                    jwatArcRecord,
-                                    config.isContentTypeIdentification());
-                    warcCreator.createContentRecord(flArcRecord);
+                    HadoopWebArchiveRecord flArcRecord;
+                    try {
+                        flArcRecord = WebArchiveRecordMapper.map(compiled,
+                                inputFileName,
+                                jwatArcRecord,
+                                config.isContentTypeIdentification());
+                        warcCreator.createContentRecord(flArcRecord);
+                    } catch (Arc2WarcMigrationException ex) {
+                        LOG.error("Error while migrating file: " + arcFile.getAbsolutePath());
+                    }
+
                 }
             }
             LOG.info("File " + count + " processed: " + arcFile.getAbsolutePath());
