@@ -8,7 +8,6 @@
 # Input variables
 HDFS_WORKING_DIR_INPUT=%%hdfs_working_dir%%
 HDFS_INPUT_DIR=%%hdfs_input_dir%%
-HDFS_INPUT_DIR2=%%hdfs_input_dir2%%
 OPERATION_INPUT=%%operation%%
 TOOLSPEC_INPUT='%%toolspec%%'
 
@@ -30,7 +29,7 @@ hadoop fs -mkdir $HDFS_TOOLSPEC_DIR
 echo -n $TOOLSPEC_INPUT | hadoop fs -put - $HDFS_TOOLSPEC_DIR/${TOOLSPEC}.xml
 
 # list and format control file line output
-{ hadoop fs -ls ${HDFS_INPUT_DIR}; hadoop fs -ls ${HDFS_INPUT_DIR2}; } | grep .arc.gz$ | \
+hadoop fs -ls ${HDFS_INPUT_DIR} | grep .arc.gz$ | \
     awk '{gsub(".*/","",$8); print "'$TOOLSPEC'" " '$OPERATION_INPUT' " "--input=\"hdfs://" \
         "'${HDFS_INPUT_DIR%/}'/" $8 "\" --output=\"hdfs://" "'$HDFS_DATA_OUT_DIR'" $8 ".warc\""}' |  \
 #    head -10 | \ 
