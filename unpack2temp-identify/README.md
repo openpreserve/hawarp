@@ -1,8 +1,10 @@
 unpack2temp-identify 
 ====================
 
-unpack2temp-identify is a tool to identify and/or characterise files packaged
-in container files using as standalone java application or using a Hadoop job.
+unpack2temp-identify is a tool to unpack the files of a flat container file
+and identify the files using various file format identification tools.  The
+tool can be used either as a local java application or as a Hadoop job to
+execute the tasks in parallel. 
 
 Introduction 
 ------------
@@ -20,12 +22,9 @@ fmt/11). The output of the identification results is in tabular form which
 allows to import the result as a comma separated file (CSV) in spreadsheet
 applications or for large data sets in a Hive (http://hive.apache.org) table.
 
-In the current implementation, the number of elements packaged in a single
-container file should not bee too high, i.e. rather hundreds of thousands
-than millions, because, firstly, the file lists are internally managed
-as ArrayList and HashMap objects and, secondly, in the Hadoop job, one
-container is processed in a map task and the container items are extracted
-to one single directory.
+The individual files are are internally managed as ArrayList and HashMap objects 
+and, secondly, in the Hadoop job, one container is processed in a map task and 
+the container items are extracted to one single directory.
 
 The spring-based application configuration allows easily adding new
 identification tools by extending the abstract class 'Identification'
@@ -89,7 +88,7 @@ Usage
 The command line application is executed by typing
 
     java -jar
-      target/mapunpack2temp-identify-1.0-SNAPSHOT-jar-with-dependencies.jar
+      target/unpack2temp-identify-1.0-SNAPSHOT-jar-with-dependencies.jar
       -d /path/to/local/filesystem/directory/
 
 where
@@ -99,7 +98,7 @@ where
 and the hadoop job is be executed by typing
 
     hadoop jar
-      target/mapunpack2temp-identify-1.0-SNAPSHOT-jar-with-dependencies.jar
+      target/unpack2temp-identify-1.0-SNAPSHOT-jar-with-dependencies.jar
       -d /path/to/hdfs/directory/
 
 where
@@ -120,9 +119,15 @@ input text file.
 For example, let us assume a textfile named zipcontainerhdfspaths.txt which
 is input for the Hadoop job:
 
-    /user/name/input/000.zip /user/name/input/001.zip /user/name/input/002.zip
-    /user/name/input/003.zip /user/name/input/004.zip /user/name/input/005.zip
-    /user/name/input/006.zip /user/name/input/007.zip /user/name/input/008.zip
+    /user/name/input/000.zip 
+    /user/name/input/001.zip
+    /user/name/input/002.zip
+    /user/name/input/003.zip 
+    /user/name/input/004.zip
+    /user/name/input/005.zip
+    /user/name/input/006.zip 
+    /user/name/input/007.zip 
+    /user/name/input/008.zip
     /user/name/input/009.zip
 
 The size of this textfile is far below the 64MB default split size, therefore
@@ -145,6 +150,6 @@ Additional hadoop parameters must be defined after the jar parameter, e.g.
 setting the maximum number of tasks that should run in parallel:
 
     hadoop jar
-      target/mapunpack2temp-identify-1.0-SNAPSHOT-jar-with-dependencies.jar
+      target/unpack2temp-identify-1.0-SNAPSHOT-jar-with-dependencies.jar
       -Dmapred.tasktracker.map.tasks.maximum=2 -d
       /path/to/hdfs/input/directory

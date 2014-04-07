@@ -16,8 +16,8 @@
  */
 package eu.scape_project.up2ti;
 
-import eu.scape_project.up2ti.cli.CliConfig;
-import eu.scape_project.up2ti.cli.Options;
+import eu.scape_project.up2ti.cli.Up2tiCliConfig;
+import eu.scape_project.up2ti.cli.Up2tiCliOptions;
 import eu.scape_project.up2ti.container.ArcContainer;
 import eu.scape_project.up2ti.container.Container;
 import eu.scape_project.up2ti.container.ZipContainer;
@@ -33,12 +33,11 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.ObjectWritable;
 import org.apache.hadoop.io.Text;
@@ -47,7 +46,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.commons.logging.Log;
@@ -67,9 +65,9 @@ public class Unpack2TempIdentify {
 
     public static final String SPRING_CONFIG_RESOURCE_PATH = "eu/scape_project/up2ti/spring-config.xml";
     private static ApplicationContext ctx;
-    private static CliConfig config;
+    private static Up2tiCliConfig config;
     // Logger instance
-    
+
     private static final Log LOG = LogFactory.getLog(Unpack2TempIdentify.class);
 
     /**
@@ -129,7 +127,7 @@ public class Unpack2TempIdentify {
     public Unpack2TempIdentify() {
     }
 
-    public static CliConfig getConfig() {
+    public static Up2tiCliConfig getConfig() {
         return config;
     }
 
@@ -140,16 +138,31 @@ public class Unpack2TempIdentify {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        Unpack2TempIdentify u2ti = new Unpack2TempIdentify();
+        u2ti.start(args);
+    }
+
+    /**
+     * Start
+     *
+     * @param args Command line arguments
+     * @throws ParseException
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws InterruptedException
+     */
+    private void start(String[] args) throws ParseException, IOException, FileNotFoundException, InterruptedException {
         Configuration conf = new Configuration();
         // Command line interface
-        config = new CliConfig();
+        config = new Up2tiCliConfig();
         CommandLineParser cmdParser = new PosixParser();
         GenericOptionsParser gop = new GenericOptionsParser(conf, args);
-        CommandLine cmd = cmdParser.parse(Options.OPTIONS, gop.getRemainingArgs());
-        if ((args.length == 0) || (cmd.hasOption(Options.HELP_OPT))) {
-            Options.exit("Usage", 0);
+        Up2tiCliOptions cliOptions = new Up2tiCliOptions();
+        CommandLine cmd = cmdParser.parse(cliOptions.options, gop.getRemainingArgs());
+        if ((args.length == 0) || (cmd.hasOption(cliOptions.HELP_OPT))) {
+            cliOptions.exit("Help", 0);
         } else {
-            Options.initOptions(cmd, config);
+            cliOptions.initOptions(cmd, config);
         }
         // Trying to load spring configuration from local file system (same
         // directory where the application is executed). If the spring 
@@ -160,8 +173,8 @@ public class Unpack2TempIdentify {
         } else {
             ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG_RESOURCE_PATH);
         }
-        if (config.isMapReduceJob()) {
-            startHadoopJob(conf);
+        if (!config.isLocal()) {
+            startHadoopJob(conf, config);
         } else {
             startApplication();
         }
@@ -170,19 +183,21 @@ public class Unpack2TempIdentify {
     public static void startApplication() throws FileNotFoundException, IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
         Unpack2TempIdentify wai = new Unpack2TempIdentify();
-        wai.traverseDir(new File(config.getDirStr()));
+        wai.traverseDir(new File(config.getInputStr()));
         long elapsedTime = System.currentTimeMillis() - startTime;
         LOG.debug("Processing time (sec): " + elapsedTime / 1000F);
         System.exit(0);
     }
 
-    public static void startHadoopJob(Configuration conf) {
+    public static void startHadoopJob(Configuration conf, Up2tiCliConfig config) {
         try {
             Job job = new Job(conf, "up2ti");
 
-            // local debugging (pseudo-distributed)
-//             job.getConfiguration().set("mapred.job.tracker", "local");
-//             job.getConfiguration().set("fs.default.name", "file:///");
+            if (config.isPseudoDistributed()) {
+                // local debugging (pseudo-distributed)
+                job.getConfiguration().set("mapred.job.tracker", "local");
+                job.getConfiguration().set("fs.default.name", "file:///");
+            }
 
             job.setJarByClass(Unpack2TempIdentify.class);
 
@@ -200,8 +215,11 @@ public class Unpack2TempIdentify {
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(ObjectWritable.class);
 
-            TextInputFormat.addInputPath(job, new Path(config.getDirStr()));
-            String outpath = "output/" + System.currentTimeMillis();
+            TextInputFormat.addInputPath(job, new Path(config.getInputStr()));
+            String outpath = config.getOutputDir();
+            if (outpath == null) {
+                outpath = "up2ti/" + System.currentTimeMillis();
+            }
             FileOutputFormat.setOutputPath(job, new Path(outpath));
             job.waitForCompletion(true);
             System.out.print(outpath);
@@ -213,7 +231,7 @@ public class Unpack2TempIdentify {
 
     private Container createContainer(InputStream containerFileStream, String containerFileName) throws IOException {
         Container container;
-        if (containerFileName.endsWith(".arc.gz")) {
+        if (containerFileName.endsWith(".arc.gz") || containerFileName.endsWith(".arc")) {
             container = new ArcContainer();
         } else if (containerFileName.endsWith(".zip")) {
             container = new ZipContainer();
@@ -270,7 +288,6 @@ public class Unpack2TempIdentify {
             FileInputStream fileInputStream = new FileInputStream(arcFile);
             Container container = createContainer(fileInputStream, arcFile.getName());
             performIdentification(container, null);
-            // TODO: Add characterisation
         }
     }
 }

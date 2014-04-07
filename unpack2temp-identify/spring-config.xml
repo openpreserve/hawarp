@@ -29,17 +29,17 @@
         <constructor-arg type="java.lang.String" value="%1$s&#x9;%2$s&#x9;%3$s"/>
     </bean>
     
-<!--    <bean id="containerBean" class="eu.scape_project.archiventory.container.ZipContainer">
+<!--    <bean id="containerBean" class="eu.scape_project.up2ti.container.ZipContainer">
     </bean>-->
     
     <!-- Using &#x9; as tab delimiter, for example. -->
-    <bean id="outWriterBean" class="eu.scape_project.archiventory.output.SimpleKeyValueOutputWriter">
+    <bean id="outWriterBean" class="eu.scape_project.up2ti.output.SimpleKeyValueOutputWriter">
         <constructor-arg value="&#x9;"/>
     </bean>
     
     <!-- Identification stack -->
     <bean id="identificationStack"
-          class="eu.scape_project.archiventory.identifiers.IdentifierCollection">
+          class="eu.scape_project.up2ti.identifiers.IdentifierCollection">
         <property name="identifiers">
             <list>
                 <ref bean="droidIdentificationBean" />
@@ -50,23 +50,23 @@
         </property>
     </bean>
     
-    <bean id="droidIdentificationBean" class="eu.scape_project.archiventory.identifiers.DroidIdentification">
+    <bean id="droidIdentificationBean" class="eu.scape_project.up2ti.identifiers.DroidIdentification">
         <!-- Load the signature file from the local file system /-->
         <!--constructor-arg value="file:DROID_SignatureFile_V67.xml" /-->
         <!-- Load the signature file from the class path (included in jar) /-->
-        <constructor-arg value="classpath:eu/scape_project/archiventory/identifiers/DROID_SignatureFile_V67.xml" />
+        <constructor-arg value="classpath:eu/scape_project/up2ti/identifiers/DROID_SignatureFile_V67.xml" />
         <property name="tool" value="droid" />
         <property name="outputKeyFormat" ref="outputKeyFormat"/>
         <property name="outputValueFormat" ref="outputValueFormat"/>
     </bean>
     
-    <bean id="tikaIdentificationBean" class="eu.scape_project.archiventory.identifiers.TikaIdentification">
+    <bean id="tikaIdentificationBean" class="eu.scape_project.up2ti.identifiers.TikaIdentification">
         <property name="tool" value="tika" />
         <property name="outputKeyFormat" ref="outputKeyFormat"/>
         <property name="outputValueFormat" ref="outputValueFormat"/>
     </bean>
     
-    <bean id="unixfileIdentificationBean" class="eu.scape_project.archiventory.identifiers.UnixFileIdentification">
+    <bean id="unixfileIdentificationBean" class="eu.scape_project.up2ti.identifiers.UnixFileIdentification">
         <property name="tool" value="unixfile" />
         <property name="command" value="file --mime-type" />
         <property name="outputKeyFormat" ref="outputKeyFormat"/>

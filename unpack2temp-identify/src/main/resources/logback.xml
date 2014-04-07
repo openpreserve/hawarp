@@ -8,10 +8,10 @@
  
  <!-- logging to file -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender" prudent="true">
-        <file>/tmp/archiventory.log</file>
+        <file>/tmp/up2ti.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
    <!-- daily rollover -->
-            <fileNamePattern>/tmp/archiventory.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/tmp/up2ti.%d{yyyy-MM-dd}.log</fileNamePattern>
    <!-- keep 30 days' log history -->
             <maxHistory>30</maxHistory>
         </rollingPolicy>

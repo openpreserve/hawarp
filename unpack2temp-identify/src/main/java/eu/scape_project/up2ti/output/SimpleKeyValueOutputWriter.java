@@ -33,7 +33,7 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
  */
 public class SimpleKeyValueOutputWriter implements OutWritable {
 
-    private String separator;
+    private final String separator;
     
     private static final Log LOG = LogFactory.getLog(SimpleKeyValueOutputWriter.class);
 

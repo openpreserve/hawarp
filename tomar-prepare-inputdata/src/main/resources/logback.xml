@@ -8,7 +8,7 @@
  
  <!-- logging to file -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender" prudent="true">
-        <file>/tmp/archiventory.log</file>
+        <file>/tmp/unpack2temp.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
    <!-- daily rollover -->
             <fileNamePattern>/tmp/spacip.%d{yyyy-MM-dd}.log</fileNamePattern>
