@@ -17,18 +17,16 @@
 package eu.scape_project.arc2warc;
 
 import com.google.common.io.Resources;
-import eu.scape_project.arc2warc.cli.CliConfig;
-import eu.scape_project.arc2warc.cli.Options;
+import eu.scape_project.arc2warc.cli.Arc2WarcMigrationCliConfig;
+import eu.scape_project.arc2warc.cli.Arc2WarcMigrationCliOptions;
 import eu.scape_project.arc2warc.warc.Arc2WarcMigrationException;
 import eu.scape_project.arc2warc.warc.WebArchiveRecordMapper;
 import eu.scape_project.arc2warc.warc.WarcCreator;
 import eu.scape_project.arc2warc.warc.WarcOutputFormat;
-import eu.scape_project.tika_identify.tika.TikaIdentification;
 import eu.scape_project.hawarp.mapreduce.ArcInputFormat;
 import eu.scape_project.hawarp.mapreduce.HadoopWebArchiveRecord;
 import eu.scape_project.hawarp.mapreduce.JwatArcReaderFactory;
 import java.io.IOException;
-import java.io.InputStream;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.PosixParser;
@@ -40,17 +38,11 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.jwat.arc.ArcRecordBase;
-
-import eu.scape_project.tika_identify.webarchive.PayloadContent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import eu.scape_project.hawarp.utils.DigestUtils;
 import eu.scape_project.hawarp.utils.RegexUtils;
 import eu.scape_project.hawarp.utils.ResourceUtils;
 import eu.scape_project.hawarp.utils.StringUtils;
-
-import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -58,15 +50,11 @@ import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import org.apache.hadoop.io.Text;
 import org.jwat.arc.ArcReader;
 import org.jwat.warc.WarcWriter;
 import org.jwat.warc.WarcWriterFactory;
 import org.mvel2.MVEL;
-import org.mvel2.compiler.CompiledExpression;
 
 /**
  * ARC to WARC conversion using Hadoop. This class defines a Hadoop job that can
@@ -84,7 +72,7 @@ public class Arc2WarcMigration {
 
     private static final Log LOG = LogFactory.getLog(Arc2WarcMigration.class);
 
-    private static CliConfig config;
+    private static Arc2WarcMigrationCliConfig config;
 
     private Configuration conf;
 
@@ -124,7 +112,7 @@ public class Arc2WarcMigration {
     public Arc2WarcMigration() {
     }
 
-    public static CliConfig getConfig() {
+    public static Arc2WarcMigrationCliConfig getConfig() {
         return config;
     }
 
@@ -137,14 +125,15 @@ public class Arc2WarcMigration {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         // Command line interface
-        config = new CliConfig();
+        config = new Arc2WarcMigrationCliConfig();
         CommandLineParser cmdParser = new PosixParser();
         GenericOptionsParser gop = new GenericOptionsParser(conf, args);
-        CommandLine cmd = cmdParser.parse(Options.OPTIONS, gop.getRemainingArgs());
-        if ((args.length == 0) || (cmd.hasOption(Options.HELP_OPT))) {
-            Options.exit("Usage", 0);
+        Arc2WarcMigrationCliOptions a2wopt = new Arc2WarcMigrationCliOptions();
+        CommandLine cmd = cmdParser.parse(a2wopt.options, gop.getRemainingArgs());
+        if ((args.length == 0) || (cmd.hasOption(a2wopt.HELP_OPT))) {
+            a2wopt.exit("Usage", 0);
         } else {
-            Options.initOptions(cmd, config);
+            a2wopt.initOptions(cmd, config);
         }
 
         if (config.getArc2hwarMappingFilePath() == null || config.getArc2hwarMappingFilePath().isEmpty()) {
@@ -159,7 +148,7 @@ public class Arc2WarcMigration {
             conf.set("arc2hwar", arc2hwar);
         }
 
-        if (config.isLocalTestJob()) {
+        if (config.isLocal()) {
             startApplication(conf);
         } else {
             startHadoopJob(conf);
@@ -180,7 +169,7 @@ public class Arc2WarcMigration {
         Job job = new Job(conf, "arc2warc");
 
         // local debugging (pseudo-distributed/using local file system instead of HDFS)
-        if (config.isLocal()) {
+        if (config.isPseudoDistributed()) {
             job.getConfiguration().set("mapred.job.tracker", "local");
             job.getConfiguration().set("fs.default.name", "file:///");
         }
@@ -216,8 +205,8 @@ public class Arc2WarcMigration {
         // a following step.
         job.setNumReduceTasks(0);
 
-        ArcInputFormat.addInputPath(job, new Path(config.getInputDirStr()));
-        WarcOutputFormat.setOutputPath(job, new Path(config.getOutputDirStr()));
+        ArcInputFormat.addInputPath(job, new Path(config.getInputStr()));
+        WarcOutputFormat.setOutputPath(job, new Path(config.getOutputStr()));
         job.waitForCompletion(true);
         System.exit(0);
 
@@ -225,12 +214,12 @@ public class Arc2WarcMigration {
 
     public static void startApplication(Configuration conf) throws FileNotFoundException, IOException, InterruptedException {
         long startTime = System.currentTimeMillis();
-        File outDirectory = new File(config.getOutputDirStr());
+        File outDirectory = new File(config.getOutputStr());
         outDirectory.mkdirs();
         count = 1;
         Arc2WarcMigration a2wm = new Arc2WarcMigration();
         a2wm.conf = conf;
-        a2wm.traverseDir(new File(config.getInputDirStr()));
+        a2wm.traverseDir(new File(config.getInputStr()));
         long elapsedTime = System.currentTimeMillis() - startTime;
         LOG.debug("Processing time (sec): " + elapsedTime / 1000F);
         System.exit(0);
@@ -269,7 +258,7 @@ public class Arc2WarcMigration {
             String warcExt = config.createCompressedWarc() ? ".warc.gz" : ".warc";
             String warcFileName = inputFileName + warcExt;
 
-            String warcFilePath = StringUtils.ensureTrailSep(config.getOutputDirStr()) + warcFileName;
+            String warcFilePath = StringUtils.ensureTrailSep(config.getOutputStr()) + warcFileName;
 
             outputStream = new FileOutputStream(new File(warcFilePath));
             writer = WarcWriterFactory.getWriter(outputStream, config.createCompressedWarc());

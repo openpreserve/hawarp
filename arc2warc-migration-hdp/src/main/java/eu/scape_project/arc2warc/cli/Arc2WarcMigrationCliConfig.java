@@ -16,67 +16,29 @@
  */
 package eu.scape_project.arc2warc.cli;
 
+import eu.scape_project.hawarp.cli.CliConfig;
+
 /**
  * Process configuration
  *
  * @author Sven Schlarb https://github.com/shsdev
  */
-public class CliConfig implements Cloneable {
-
-    private String inputDirStr;
-    private String outputDirStr;
+public class Arc2WarcMigrationCliConfig extends CliConfig {
     
-    private boolean local;
+  
     private boolean contentTypeIdentification;
+    
     private String inputPathRegexFilter;
     
     private boolean createCompressedWarc;
-    
-    private boolean localTestJob;
     
     private String arc2hwarMappingFilePath;
 
     /**
      * Empty constructor
      */
-    public CliConfig() {
+    public Arc2WarcMigrationCliConfig() {
 
-    }
-
-    /**
-     * Getter for the directories parameter
-     *
-     * @return Input directory
-     */
-    public String getInputDirStr() {
-        return inputDirStr;
-    }
-
-    /**
-     * Setter for the input directory parameter
-     *
-     * @param inputDirStr Input directory
-     */
-    public void setInputDirStr(String inputDirStr) {
-        this.inputDirStr = inputDirStr;
-    }
-
-    /**
-     * Getter for the directories parameter
-     *
-     * @return Output directory
-     */
-    public String getOutputDirStr() {
-        return outputDirStr;
-    }
-
-    /**
-     * Setter for the input directory parameter
-     *
-     * @param outputDirStr Output directory
-     */
-    public void setOutputDirStr(String outputDirStr) {
-        this.outputDirStr = outputDirStr;
     }
 
     public boolean isContentTypeIdentification() {
@@ -85,14 +47,6 @@ public class CliConfig implements Cloneable {
 
     public void setContentTypeIdentification(boolean contentTypeIdentification) {
         this.contentTypeIdentification = contentTypeIdentification;
-    }
-
-    public boolean isLocal() {
-        return local;
-    }
-
-    public void setLocal(boolean local) {
-        this.local = local;
     }
 
     public String getInputPathRegexFilter() {
@@ -111,35 +65,12 @@ public class CliConfig implements Cloneable {
         this.createCompressedWarc = createCompressedWarc;
     }
 
-    public boolean isLocalTestJob() {
-        return localTestJob;
-    }
-
-    public void setLocalTestJob(boolean localTestJob) {
-        this.localTestJob = localTestJob;
-    }
-
     public String getArc2hwarMappingFilePath() {
         return arc2hwarMappingFilePath;
     }
 
     public void setArc2hwarMappingFilePath(String arc2hwarMappingFilePath) {
         this.arc2hwarMappingFilePath = arc2hwarMappingFilePath;
-    }
-
-    /**
-     * Clone object
-     *
-     * @return cloned object
-     * @throws java.lang.CloneNotSupportedException
-     */
-    @Override
-    public CliConfig clone() throws CloneNotSupportedException {
-        try {
-            return (CliConfig) super.clone();
-        } catch (CloneNotSupportedException ex) {
-            throw new AssertionError();
-        }
     }
 
 }
