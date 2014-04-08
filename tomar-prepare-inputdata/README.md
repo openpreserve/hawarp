@@ -29,18 +29,20 @@ Create executable jar with dependencies:
 Usage
 -----
 
-Invoke the application using hadoop without parameters to get the help
-output with parameters that can be used: 
+Start the application without parameters to get the help output explaining
+required and optional parameters: 
 
-    hadoop jar ./target/tomar-prepare-inputdata-1.0-SNAPSHOT-jar-with-dependencies.jar  
+    usage: (java -jar|hadoop jar)
+           hawarp/tomar-prepare-inputdata/target/tomar-prepare-inputdata-1.0-j
+           ar-with-dependencies.jar [-h] [-i <arg>] [-n <arg>] [-p]
+     -h,--help          print this message [optional].
+     -i,--input <arg>   Path to input. [required].
+     -n,--npt <arg>     Number of items to be processed per task (e.g. 50).
+                        [optional, default: 50].
+     -p,--pseudo        Execute Hadoop job in pseudo-distributed mode and use
+                        local file system ("file://") instead of HDFS
+                        ("hdfs://"). [optional].
 
-The following parameters can be used in any order:
-
-    -d,--dir <arg>   HDFS directory containing (the) text file(s) with HDFS
-                     paths to container files (e.g. '/user/name/inputdir/').
-                     [required].
-    -n,--npt <arg>   Number of items to be processed per invokation (e.g. 50).
-                     [optional, default: 50].
 
 Important: The input directory (parameter -d) should not contain the ARC files, 
 but it must contain (a) text file(s) with absolute HDFS paths to the ARC container 

@@ -62,4 +62,9 @@ public class StringUtils {
         return path;
     }
 
+    public static String formatCommandOutput(String pattern, String inlist, String outlist) {
+        String ptmapred_cmd = String.format(pattern, inlist, outlist);
+        return ptmapred_cmd;
+    }
+
 }

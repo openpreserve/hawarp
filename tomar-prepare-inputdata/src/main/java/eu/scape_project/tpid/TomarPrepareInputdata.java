@@ -16,45 +16,44 @@
  */
 package eu.scape_project.tpid;
 
-import eu.scape_project.tpid.cli.CliConfig;
-import eu.scape_project.tpid.cli.Options;
-import eu.scape_project.tpid.utils.PropertyUtil;
-import eu.scape_project.tpid.utils.StringUtils;
+import eu.scape_project.hawarp.utils.StringUtils;
+import eu.scape_project.tpid.cli.TpidCliConfig;
+import eu.scape_project.tpid.cli.TpidOptions;
+import eu.scape_project.hawarp.utils.PropertyUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.ObjectWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * TomarPrepareInputdata: Scape PlAtform Container Input Preparation
+ * TomarPrepareInputdata. Hadoop job to prepare input data for ToMaR.
  *
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
  */
 public class TomarPrepareInputdata {
 
-    private static CliConfig config;
-    // Logger instance
-    private static Logger logger = LoggerFactory.getLogger(TomarPrepareInputdata.class.getName());
-    
+    private static TpidCliConfig config;
+
+    private static final Log LOG = LogFactory.getLog(TomarPrepareInputdata.class);
+
     private static PropertyUtil pu;
 
     /**
@@ -77,9 +76,15 @@ public class TomarPrepareInputdata {
 
         @Override
         public void map(LongWritable key, Text value, Mapper.Context context) throws IOException, InterruptedException, FileNotFoundException {
-            Path pt = new Path("hdfs://" + value);
+
             Configuration conf = context.getConfiguration();
-            
+            String fileSystemPrefix;
+            if (conf.getBoolean("pseudo_distributed", false)) {
+                fileSystemPrefix = "file://";
+            } else {
+                fileSystemPrefix = "hdfs://";
+            }
+            Path pt = new Path(fileSystemPrefix + value);
             String containerFileName = pt.getName();
             if (containerFileName.endsWith(conf.get("containerfilesuffix", ".arc.gz"))) {
                 ContainerProcessing contProc = new ContainerProcessing(mos, context, conf);
@@ -101,7 +106,7 @@ public class TomarPrepareInputdata {
      *
      * @return CLI configuration
      */
-    public static CliConfig getConfig() {
+    public static TpidCliConfig getConfig() {
         return config;
     }
 
@@ -112,26 +117,45 @@ public class TomarPrepareInputdata {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-      
-        // configuration properties
-        pu = new PropertyUtil("/eu/scape_project/tpid/config.properties");
-        
+        start(args);
+    }
+
+    /**
+     * Start.
+     *
+     * @param args Command line arguments
+     * @throws IOException
+     * @throws ParseException
+     */
+    private static void start(String[] args) throws IOException, ParseException {
+
         // hadoop configuration
         Configuration hadoopConf = new Configuration();
         // Command line interface
-        config = new CliConfig();
+        config = new TpidCliConfig();
+        
         CommandLineParser cmdParser = new PosixParser();
         GenericOptionsParser gop = new GenericOptionsParser(hadoopConf, args);
-        CommandLine cmd = cmdParser.parse(Options.OPTIONS, gop.getRemainingArgs());
-        if ((args.length == 0) || (cmd.hasOption(Options.HELP_OPT))) {
-            Options.exit("Usage", 0);
+        
+        TpidOptions tpidOptions = new TpidOptions();
+        CommandLine cmd = cmdParser.parse(tpidOptions.options, gop.getRemainingArgs());
+        if ((args.length == 0) || (cmd.hasOption(tpidOptions.HELP_OPT))) {
+            tpidOptions.exit("Help", 0);
         } else {
-            Options.initOptions(cmd, config);
+            tpidOptions.initOptions(cmd, config);
         }
+
+        // configuration properties
+        if (config.getPropertiesFilePath() != null) {
+            pu = new PropertyUtil(config.getPropertiesFilePath(), true);
+        } else {
+            pu = new PropertyUtil("/eu/scape_project/tpid/config.properties", false);
+        }
+
         // cli parameter has priority over default configuration
         int cliParamNumPerInv = config.getNumItemsPerInvokation();
         int defaultNumPerInv = Integer.parseInt(pu.getProp("default.itemsperinvokation"));
-        int numPerInv = (cliParamNumPerInv != 0)?cliParamNumPerInv:defaultNumPerInv;
+        int numPerInv = (cliParamNumPerInv != 0) ? cliParamNumPerInv : defaultNumPerInv;
         // setting hadoop configuration parameters so that they can be used
         // during MapReduce
         hadoopConf.setInt("num_items_per_task", numPerInv);
@@ -142,8 +166,8 @@ public class TomarPrepareInputdata {
         hadoopConf.set("tooloutput_hdfs_path", pu.getProp("default.hdfsdir.toolout"));
         hadoopConf.set("container_file_suffix", pu.getProp("containerfilesuffix"));
         hadoopConf.set("tomar_param_pattern", pu.getProp("tomar.param.pattern"));
+        hadoopConf.setBoolean("pseudo_distributed", config.isPseudoDistributed());
         startHadoopJob(hadoopConf);
-
     }
 
     /**
@@ -153,12 +177,11 @@ public class TomarPrepareInputdata {
      */
     public static void startHadoopJob(Configuration conf) {
         try {
-            Job job = new Job(conf, "tpid_"+conf.getInt("num_items_per_task", 0));
-
-            // local debugging (pseudo-distributed)
-//             job.getConfiguration().set("mapred.job.tracker", "local");
-//             job.getConfiguration().set("fs.default.name", "file:///");
-
+            Job job = new Job(conf, "tpid_" + conf.getInt("num_items_per_task", 0));
+            if (conf.getBoolean("pseudo_distributed", false)) {
+                job.getConfiguration().set("mapred.job.tracker", "local");
+                job.getConfiguration().set("fs.default.name", "file:///");
+            }
             job.setJarByClass(TomarPrepareInputdata.class);
 
             job.setMapperClass(TomarPrepareInputdata.ContainerProcessingMapper.class);
@@ -166,7 +189,7 @@ public class TomarPrepareInputdata {
             job.setNumReduceTasks(0);
 
             job.setInputFormatClass(TextInputFormat.class);
-            
+
             MultipleOutputs.addNamedOutput(job, "keyfilmapping", TextOutputFormat.class, Text.class, Text.class);
             MultipleOutputs.addNamedOutput(job, "tomarinput", TextOutputFormat.class, Text.class, Text.class);
             MultipleOutputs.addNamedOutput(job, "error", TextOutputFormat.class, Text.class, Text.class);
@@ -177,8 +200,8 @@ public class TomarPrepareInputdata {
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(ObjectWritable.class);
 
-            TextInputFormat.addInputPath(job, new Path(config.getDirStr()));
-            String outpath = StringUtils.normdir(conf.get("joboutput_hdfs_path","tpid_joboutput")) + System.currentTimeMillis();
+            TextInputFormat.addInputPath(job, new Path(config.getInputStr()));
+            String outpath = StringUtils.normdir(conf.get("joboutput_hdfs_path", "tpid_joboutput")) + System.currentTimeMillis();
             FileOutputFormat.setOutputPath(job, new Path(outpath));
             LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class);
             job.waitForCompletion(true);
@@ -186,7 +209,7 @@ public class TomarPrepareInputdata {
             System.out.print(outpath);
             System.exit(0);
         } catch (Exception e) {
-            logger.error("I/O error", e);
+            LOG.error("I/O error", e);
         }
     }
 }

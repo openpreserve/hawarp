@@ -216,7 +216,7 @@ public class Unpack2TempIdentify {
             job.setOutputValueClass(ObjectWritable.class);
 
             TextInputFormat.addInputPath(job, new Path(config.getInputStr()));
-            String outpath = config.getOutputDir();
+            String outpath = config.getOutputStr();
             if (outpath == null) {
                 outpath = "up2ti/" + System.currentTimeMillis();
             }
@@ -265,6 +265,9 @@ public class Unpack2TempIdentify {
             if (mos != null) {
                 outWriter.write(identifyFileList, mos);
             } else {
+                if(config.getOutputStr() != null) {
+                    outWriter.setOutputFilePath(config.getOutputStr());
+                }
                 outWriter.write(identifyFileList);
             }
         }

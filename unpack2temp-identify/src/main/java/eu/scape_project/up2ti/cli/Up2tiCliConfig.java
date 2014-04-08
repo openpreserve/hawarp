@@ -28,8 +28,6 @@ import eu.scape_project.hawarp.cli.CliConfig;
 public class Up2tiCliConfig extends CliConfig {
 
     private String springConfig;
-    
-    private String outputDir;
 
     public String getSpringConfig() {
         return springConfig;
@@ -37,14 +35,6 @@ public class Up2tiCliConfig extends CliConfig {
 
     public void setSpringConfig(String springConfig) {
         this.springConfig = springConfig;
-    }
-
-    public String getOutputDir() {
-        return outputDir;
-    }
-
-    public void setOutputDir(String outputDir) {
-        this.outputDir = outputDir;
     }
 
 }

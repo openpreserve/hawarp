@@ -15,15 +15,8 @@
  */
 package eu.scape_project.up2ti.container;
 
-import de.schlichtherle.io.FileOutputStream;
-import eu.scape_project.up2ti.utils.IOUtils;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
 

@@ -16,42 +16,23 @@
  */
 package eu.scape_project.tpid.cli;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.scape_project.hawarp.cli.CliConfig;
 
 /**
- * Process configuration 
+ * Process configuration
+ *
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
  */
-public class CliConfig implements Cloneable {
+public class TpidCliConfig extends CliConfig {
 
-    private String dirStr;
     private int numItemsPerInvokation;
-  
+
     /**
      * Empty constructor
      */
-    public CliConfig() {
-        
-    }
+    public TpidCliConfig() {
 
-    private static Logger logger = LoggerFactory.getLogger(CliConfig.class.getName());
-
-    /**
-     * Getter for the directories parameter
-     * @return Directories parameter
-     */
-    public String getDirStr() {
-        return dirStr;
-    }
-
-    /**
-     * Setter for the directories parameter
-     * @param dirsStr
-     */
-    public void setDirStr(String dirsStr) {
-        this.dirStr = dirsStr;
     }
 
     public int getNumItemsPerInvokation() {
@@ -61,19 +42,5 @@ public class CliConfig implements Cloneable {
     public void setNumItemsPerInvokation(int numItemsPerTask) {
         this.numItemsPerInvokation = numItemsPerTask;
     }
-    
-    
-    /**
-     * Clone object
-     * @return cloned object
-     */
-    @Override public CliConfig clone() {
-        try {
-            return (CliConfig) super.clone();
-        } catch (CloneNotSupportedException ex) {
-            logger.error("CloneNotSupportedException:",ex);
-            throw new AssertionError();
-        }
-    }
-    
+
 }

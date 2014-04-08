@@ -15,15 +15,17 @@
  *  under the License.
  */
 
-package eu.scape_project.tpid.utils;
+package eu.scape_project.hawarp.utils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.log4j.Logger;
-import org.apache.log4j.BasicConfigurator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * PropertyUtils
@@ -32,21 +34,28 @@ import org.apache.log4j.BasicConfigurator;
  */
 public class PropertyUtil {
 
-    private static Logger logger = Logger.getLogger(PropertyUtil.class.getName());
+    private static final Log LOG = LogFactory.getLog(PropertyUtil.class);
+    
     private Properties properties;
     private HashMap<String, String> map;
 
     /**
      * Construct the property utils object from the properties file
      * @param propertiesFile a string path to a properties file
+     * @param loadPropertiesFromFile Load properties file from local file system
      * @throws RuntimeException
      */
-    public PropertyUtil(String propertiesFile) throws RuntimeException {
+    public PropertyUtil(String propertiesFile, boolean loadPropertiesFromFile) throws RuntimeException {
         try {
             properties = new Properties();
-            // TODO: alternatively load properties from local file
-            properties.load(PropertyUtil.class.getResourceAsStream(propertiesFile));
-            logger.debug("Property file \"" + propertiesFile + "\" loaded.");
+            if(loadPropertiesFromFile) {
+                FileInputStream fis = new FileInputStream(new File(propertiesFile));
+                properties.load(fis);
+                LOG.info("Property file loaded from local file system: \"" + propertiesFile + "\".");
+            } else {
+                properties.load(PropertyUtil.class.getResourceAsStream(propertiesFile));
+                LOG.info("Property file loaded from resource: \"" + propertiesFile + "\".");
+            }
         } catch (IOException ex) {
             throw new RuntimeException("Unable to load properties file!");
         }

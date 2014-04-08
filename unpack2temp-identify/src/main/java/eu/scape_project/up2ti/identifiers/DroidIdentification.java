@@ -16,8 +16,8 @@
  */
 package eu.scape_project.up2ti.identifiers;
 
+import eu.scape_project.hawarp.utils.IOUtils;
 import eu.scape_project.up2ti.container.ZipContainer;
-import eu.scape_project.up2ti.utils.IOUtils;
 import java.io.*;
 import java.net.URI;
 import java.util.HashMap;

@@ -27,8 +27,11 @@ import org.apache.commons.logging.LogFactory;
 public abstract class CliConfig implements Cloneable {
 
     protected String inputStr;
+    private String outputStr;
     protected boolean local;
     protected boolean pseudoDistributed;
+    
+    protected String propertiesFilePath;
 
     protected static final Log LOG = LogFactory.getLog(CliConfig.class);
 
@@ -39,12 +42,34 @@ public abstract class CliConfig implements Cloneable {
 
     }
 
+    /**
+     * Input string
+     *
+     * @return input string
+     */
     public String getInputStr() {
         return inputStr;
     }
 
+    /**
+     * Input string
+     *
+     * @param inputStr input string
+     */
     public void setInputStr(String inputStr) {
         this.inputStr = inputStr;
+    }
+
+    /**
+     * 
+     * @return 
+     */
+    public String getOutputStr() {
+        return outputStr;
+    }
+
+    public void setOutputStr(String outputDir) {
+        this.outputStr = outputDir;
     }
 
     /**
@@ -83,6 +108,14 @@ public abstract class CliConfig implements Cloneable {
      */
     public void setPseudoDistributed(boolean pseudoDistributed) {
         this.pseudoDistributed = pseudoDistributed;
+    }
+
+    public String getPropertiesFilePath() {
+        return propertiesFilePath;
+    }
+
+    public void setPropertiesFilePath(String propertiesFilePath) {
+        this.propertiesFilePath = propertiesFilePath;
     }
 
 }

@@ -16,6 +16,7 @@
  */
 package eu.scape_project.up2ti.output;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
@@ -35,6 +36,8 @@ public interface OutWritable {
      * @param resultMap { "recordkey": [ "tool/property/value" ] }
      */
     public void write(HashMap<String, List<String>> resultMap);
+    
+    public void setOutputFilePath(String outputPathStr);
 
     /**
      * Reporting method for hadoop job. Input is a single value or

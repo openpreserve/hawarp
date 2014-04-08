@@ -19,6 +19,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -90,4 +91,189 @@ public class IOUtils {
         return tmpFile;
     }
 
+    public static File copyInputStreamToTempFile(InputStream is, String prefix, String ext) {
+        FileOutputStream fos = null;
+        File tmpFile = null;
+        try {
+            tmpFile = File.createTempFile(prefix, ext);
+            fos = new FileOutputStream(tmpFile);
+            org.apache.commons.io.IOUtils.copy(is, fos);
+            fos.flush();
+        } catch (FileNotFoundException ex) {
+            LOG.error("Temporary file not available.", ex);
+        } catch (IOException ex) {
+            LOG.error("I/O Error occured.", ex);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException _) {
+                    // ignore
+                }
+            }
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException _) {
+                    // ignore
+                }
+            }
+            return tmpFile;
+        }
+    }
+
+    /**
+     * Copy byte array to file in temporary directory
+     *
+     * @param barray byte array
+     * @param dir Directory where the temporary file is created
+     * @param ext Extension of temporary file
+     * @return Temporary file
+     */
+    public static File copyByteArrayToTempFileInDir(byte[] barray, String dir, String ext) {
+        String filename = System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(5) + ext;
+        if (!dir.endsWith("/")) {
+            dir += "/";
+        }
+        FileOutputStream fos = null;
+        File tmpFile = null;
+        try {
+            tmpFile = new File(dir + filename);
+            fos = new FileOutputStream(tmpFile);
+            org.apache.commons.io.IOUtils.write(barray, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException ex) {
+            LOG.error("Temporary file not available.", ex);
+        } catch (IOException ex) {
+            LOG.error("I/O Error", ex);
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException _) {
+                    // ignore
+                }
+            }
+        }
+        return tmpFile;
+    }
+
+    /**
+     * Copy byte array to temporary file
+     *
+     * @param barray byte array
+     * @param prefix Prefix of temporary file
+     * @param ext Extension of temporary file
+     * @return Temporary file
+     */
+    public static File copyByteArrayToTempFile(byte[] barray, String prefix, String ext) {
+        FileOutputStream fos = null;
+        File tmpFile = null;
+        try {
+            tmpFile = File.createTempFile(prefix, ext);
+            fos = new FileOutputStream(tmpFile);
+            org.apache.commons.io.IOUtils.write(barray, fos);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException ex) {
+            LOG.error("Temporary file not available.", ex);
+        } catch (IOException ex) {
+            LOG.error("I/O Error", ex);
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException _) {
+                    // ignore
+                }
+            }
+        }
+        return tmpFile;
+    }
+
+    public static String copyInputStreamToString(InputStream is) {
+        String strContent = null;
+        try {
+            strContent = org.apache.commons.io.IOUtils.toString(is);
+        } catch (IOException ex) {
+            LOG.error("I/O Error", ex);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException _) {
+                    // ignore
+                }
+            }
+        }
+        return strContent;
+    }
+
+    public static byte[] getBytesFromFile(String filePath) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new FileNotFoundException("File not available");
+        }
+        InputStream is = null;
+        byte[] bytes = null;
+        try {
+            is = new FileInputStream(file);
+            long length = file.length();
+            if (length > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("File object is too large");
+            }
+            bytes = new byte[(int) length];
+            int offset = 0;
+            int numRead = 0;
+            while (offset < bytes.length
+                    && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+                offset += numRead;
+            }
+        } catch (IOException ex) {
+            LOG.error("I/O Error", ex);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException _) {
+                    // ignore
+                }
+            }
+        }
+        return bytes;
+
+    }
+
+    /**
+     * Reads a file and copies the content to an output stream
+     *
+     * @param file File to be read
+     * @param output Output stream
+     * @param bufferSize Buffer size
+     * @return
+     */
+    public static void copyFileToOutputStream(File file, OutputStream output, int bufferSize) {
+        InputStream input = null;
+        byte[] buf = new byte[bufferSize];
+        try {
+            input = new BufferedInputStream(new FileInputStream(file));
+            int bytesRead = input.read(buf);
+            while (bytesRead != -1) {
+                output.write(buf, 0, bytesRead);
+                bytesRead = input.read(buf);
+            }
+            output.flush();
+        } catch (IOException e) {
+            LOG.error("IOException occurred", e);
+        } finally {
+            try {
+                if (input != null) {
+                    input.close();
+                    output.close();
+                }
+            } catch (Exception _) {
+            }
+        }
+    }
 }

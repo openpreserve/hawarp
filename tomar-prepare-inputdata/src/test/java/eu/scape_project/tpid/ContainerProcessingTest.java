@@ -4,6 +4,8 @@
  */
 package eu.scape_project.tpid;
 
+import eu.scape_project.hawarp.mapreduce.JwatArcReaderFactory;
+import eu.scape_project.hawarp.utils.ArcUtils;
 import eu.scape_project.tpid.ContainerProcessing;
 import eu.scape_project.tpid.ContainerProcessing;
 import java.io.*;
@@ -22,6 +24,8 @@ import org.archive.io.ArchiveRecordHeader;
 import org.archive.io.arc.ARCRecord;
 import org.junit.*;
 import static org.junit.Assert.*;
+import org.jwat.arc.ArcReader;
+import org.jwat.arc.ArcRecordBase;
 
 /**
  *
@@ -69,19 +73,17 @@ public class ContainerProcessingTest {
     @Test
     public void testArcToOutputStream() throws Exception {
         FileInputStream fis = new FileInputStream(tmpTestFile);
-        ArchiveReader reader = ArchiveReaderFactory.get("test.arc.gz", fis, true);
-        Iterator<ArchiveRecord> recordIterator = reader.iterator();
-        while (recordIterator.hasNext()) {
-            ArchiveRecord nativeArchiveRecord = recordIterator.next();
-            ArchiveRecordHeader header = nativeArchiveRecord.getHeader();
-            String mimeSuffix = header.getMimetype().replaceAll("/", "-");
-            ARCRecord arcRecord = (ARCRecord) nativeArchiveRecord;
+        ArcReader reader = JwatArcReaderFactory.getReader(fis);
+        
+        Iterator<ArcRecordBase> arcIterator = reader.iterator();
+        while (arcIterator.hasNext()) {
+            ArcRecordBase arcRecord = arcIterator.next();
             File tmpDir = new File("/tmp/arcrecords");
             tmpDir.mkdir();
-            File tmpOutFile = File.createTempFile("arcrecord", mimeSuffix, tmpDir);
+            File tmpOutFile = File.createTempFile("arcrecord", "file", tmpDir);
             assertTrue("Record file not created", tmpOutFile.exists());
             FileOutputStream fos = new FileOutputStream(tmpOutFile);
-            ContainerProcessing.recordToOutputStream(arcRecord, fos);
+            ArcUtils.recordToOutputStream(arcRecord, fos);
             tmpDir.deleteOnExit();
             tmpOutFile.deleteOnExit();
         }

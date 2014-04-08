@@ -16,10 +16,15 @@
  */
 package eu.scape_project.up2ti.output;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
@@ -34,8 +39,10 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 public class SimpleKeyValueOutputWriter implements OutWritable {
 
     private final String separator;
-    
+
     private static final Log LOG = LogFactory.getLog(SimpleKeyValueOutputWriter.class);
+
+    private String outputPathStr;
 
     /**
      * Constructor
@@ -58,8 +65,22 @@ public class SimpleKeyValueOutputWriter implements OutWritable {
         while (iter.hasNext()) {
             String key = (String) iter.next();
             List<String> valueList = resultMap.get(key);
+            PrintStream pout = null;
+            if (outputPathStr != null) {
+                FileOutputStream fos;
+                try {
+                    fos = new FileOutputStream(outputPathStr, true);
+                    pout = new PrintStream(fos);
+                    System.setOut(pout);
+                } catch (FileNotFoundException ex) {
+                    LOG.error("File not found error", ex);
+                }
+            }
             for (String value : valueList) {
                 System.out.println(key + separator + value);
+            }
+            if (pout != null) {
+                pout.close();
             }
         }
     }
@@ -79,7 +100,7 @@ public class SimpleKeyValueOutputWriter implements OutWritable {
             List<String> valueList = resultMap.get(key);
             try {
                 for (String value : valueList) {
-                    mos.write("idtab",new Text(key), new Text(value));
+                    mos.write("idtab", new Text(key), new Text(value));
                 }
             } catch (IOException ex) {
                 LOG.error("I/O Error", ex);
@@ -88,4 +109,10 @@ public class SimpleKeyValueOutputWriter implements OutWritable {
             }
         }
     }
+
+    @Override
+    public void setOutputFilePath(String outputPathStr) {
+        this.outputPathStr = outputPathStr;
+    }
+
 }

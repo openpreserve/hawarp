@@ -85,29 +85,16 @@ and a copy is available locally in the project root directory.
 Usage 
 -----
 
-The command line application is executed by typing
-
-    java -jar
-      target/unpack2temp-identify-1.0-SNAPSHOT-jar-with-dependencies.jar
-      -d /path/to/local/filesystem/directory/
-
-where
-
-    -d,--dir <arg>    Local file system directory containing the ARC files.
-
-and the hadoop job is be executed by typing
-
-    hadoop jar
-      target/unpack2temp-identify-1.0-SNAPSHOT-jar-with-dependencies.jar
-      -d /path/to/hdfs/directory/
-
-where
-
-    -d,--dir <arg>    HDFS directory containing (the) text file(s)
-    listing HDFS
-                      paths to container files. Attention: Not the container
-                      files directory like in local java application
-                      execution mode!
+    usage: (java -jar|hadoop jar)
+           hawarp/unpack2temp-identify/target/unpack2temp-identify-1.0-jar-wit
+           h-dependencies.jar [-h] [-i <arg>] [-l] [-o <arg>] [-s <arg>]
+     -h,--help                 print this message [optional].
+     -i,--input <arg>          Path to input. [required].
+     -l,--local                Execute as java application (java -jar ...),
+                               default Hadoop job (hadoop jar ...).
+                               [optional].
+     -o,--output <arg>         Path to output. [optional].
+     -s,--springconfig <arg>   Spring configuration XML file [optional].
 
 The HDFS directory must point to a directory containing (the) text file(s)
 listing HDFS paths to container files. If the file size is smaller than

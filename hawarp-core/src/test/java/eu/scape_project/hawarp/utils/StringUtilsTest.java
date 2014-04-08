@@ -77,5 +77,20 @@ public class StringUtilsTest {
         assertEquals(expResult, result);
 
     }
+    
+
+    /**
+     * Test of formatCommandOutput method, of class StrUt.
+     */
+    @Test
+    public void testFormatCommandOutput() {
+        System.out.println("formatCommandOutput");
+        String inlist = "hdfs:///user/in1.txt,hdfs:///user/in2.txt";
+        String outlist = "hdfs:///user/out1.txt,hdfs:///user/out2.txt";
+        String expResult = "--input=\"hdfs:///./\" --inputlist=\"hdfs:///user/in1.txt,hdfs:///user/in2.txt\" --output=\"hdfs:///./\" --outputlist=\"hdfs:///user/out1.txt,hdfs:///user/out2.txt\"";
+        String pattern = "--input=\"hdfs:///./\" --inputlist=\"%1$s\" --output=\"hdfs:///./\" --outputlist=\"%2$s\"";
+        String result = StringUtils.formatCommandOutput(pattern, inlist, outlist);
+        assertEquals(expResult, result);
+    }
 
 }

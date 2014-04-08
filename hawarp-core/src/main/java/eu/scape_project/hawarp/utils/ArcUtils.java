@@ -19,11 +19,15 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.archive.io.ArchiveRecord;
 import org.archive.io.arc.ARCRecord;
+import org.archive.io.arc.ARCRecordMetaData;
 import org.archive.uid.RecordIDGenerator;
 import org.archive.uid.UUIDGenerator;
+import org.jwat.arc.ArcRecordBase;
 
 /**
  * ARC utility methods.
@@ -63,6 +67,27 @@ public class ArcUtils {
         buffos.flush();
         buffos.close();
         return baos.toByteArray();
+    }
+    
+
+    /**
+     * Write ARC record content to output stream (JWAT)
+     *
+     * @param arcRecord ARC record
+     * @param outputStream Output stream
+     * @throws IOException
+     */
+    public static void recordToOutputStream(ArcRecordBase arcRecord, OutputStream outputStream) throws IOException {
+        BufferedInputStream bis = new BufferedInputStream(arcRecord.getPayloadContent());
+        BufferedOutputStream bos = new BufferedOutputStream(outputStream);
+        byte[] tempBuffer = new byte[BUFFER_SIZE];
+        int bytesRead;
+        while ((bytesRead = bis.read(tempBuffer)) != -1) {
+            bos.write(tempBuffer, 0, bytesRead);
+        }
+        bos.flush();
+        bis.close();
+        bos.close();
     }
     
 }

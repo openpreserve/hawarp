@@ -48,7 +48,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>eu.scape_project.up2ti.Unpack2TempIdentify</mainClass>
+                            <mainClass>eu.scape_project.tpid.TomarPrepareInputdata</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -60,6 +60,12 @@
     </build>
     
     <dependencies>
+        <dependency>
+            <groupId>eu.scape_project</groupId>
+            <artifactId>hawarp-core</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>

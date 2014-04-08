@@ -34,18 +34,17 @@ public class Up2tiCliOptions extends CliOptions {
     public String SPRING_OPT = "springconfig";
     public String SPRING_OPT_DESC = "Spring configuration XML file [optional].";
     
-    public String OUTPUT_FLG = "o";
-    public String OUTPUT_OPT = "output";
-    public String OUTPUT_OPT_DESC = "Path to output. [optional (hadoop only)].";
-    
     public Up2tiCliOptions() {
         super();
         options.addOption(SPRING_FLG, SPRING_OPT, true, SPRING_OPT_DESC);
         options.addOption(OUTPUT_FLG, OUTPUT_OPT, true, OUTPUT_OPT_DESC);
+        options.addOption(LOCAL_FLG, LOCAL_OPT, false, LOCAL_OPT_DESC);
     }
     
     public void initOptions(CommandLine cmd, Up2tiCliConfig pc) {
+        
         super.initOptions(cmd, pc);
+        
         // Spring config
         String springConfig;
         if (!(cmd.hasOption(SPRING_OPT) && cmd.getOptionValue(SPRING_OPT) != null)) {
@@ -56,18 +55,6 @@ public class Up2tiCliOptions extends CliOptions {
             LOG.debug("Spring configuration : " + springConfig);
         }
 
-        // output
-        String outputStr;
-        if (!(cmd.hasOption(OUTPUT_OPT) && cmd.getOptionValue(OUTPUT_OPT) != null)) {
-            // output is an optional parameter
-        } else {
-            if(cmd.hasOption(LOCAL_OPT)) {
-                exit("No output required in local mode.", 1);
-            }
-            outputStr = cmd.getOptionValue(OUTPUT_OPT);
-            pc.setOutputDir(outputStr);
-            System.out.println("Output: " + outputStr);
-        }
         
     }
 
