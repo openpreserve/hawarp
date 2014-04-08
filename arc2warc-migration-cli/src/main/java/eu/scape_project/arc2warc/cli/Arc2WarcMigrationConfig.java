@@ -16,55 +16,25 @@
  */
 package eu.scape_project.arc2warc.cli;
 
+import eu.scape_project.hawarp.cli.CliConfig;
+
 /**
  * Process configuration
  *
  * @author Sven Schlarb https://github.com/shsdev
  */
-public class Config implements Cloneable {
+public class Arc2WarcMigrationConfig extends CliConfig {
 
-    private String inputStr;
-    private String outputDirStr;
-    
     private boolean contentTypeIdentification;
     private String inputPathRegexFilter;
-    
     private boolean createCompressedWarc;
-    
     private boolean directoryInput;
-    
 
     /**
      * Empty constructor
      */
-    public Config() {
+    public Arc2WarcMigrationConfig() {
 
-    }
-
-    public String getInputStr() {
-        return inputStr;
-    }
-
-    public void setInputStr(String inputStr) {
-        this.inputStr = inputStr;
-    }
-
-    /**
-     * Getter for the directories parameter
-     *
-     * @return Output directory
-     */
-    public String getOutputStr() {
-        return outputDirStr;
-    }
-
-    /**
-     * Setter for the input directory parameter
-     *
-     * @param outputDirStr Output directory
-     */
-    public void setOutputStr(String outputDirStr) {
-        this.outputDirStr = outputDirStr;
     }
 
     public boolean isContentTypeIdentification() {
@@ -97,21 +67,6 @@ public class Config implements Cloneable {
 
     public void setDirectoryInput(boolean directoryInput) {
         this.directoryInput = directoryInput;
-    }
-
-    /**
-     * Clone object
-     *
-     * @return cloned object
-     * @throws java.lang.CloneNotSupportedException
-     */
-    @Override
-    public Config clone() throws CloneNotSupportedException {
-        try {
-            return (Config) super.clone();
-        } catch (CloneNotSupportedException ex) {
-            throw new AssertionError();
-        }
     }
 
 }

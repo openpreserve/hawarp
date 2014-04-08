@@ -15,7 +15,7 @@
  */
 package eu.scape_project.arc2warc;
 
-import eu.scape_project.arc2warc.cli.Config;
+import eu.scape_project.arc2warc.cli.Arc2WarcMigrationConfig;
 import eu.scape_project.hawarp.mapreduce.JwatArcReaderFactory;
 import eu.scape_project.hawarp.utils.StringUtils;
 import java.io.File;
@@ -39,7 +39,7 @@ public class ArcMigrator {
 
     private static final Log LOG = LogFactory.getLog(ArcMigrator.class);
 
-    private final Config config;
+    private final Arc2WarcMigrationConfig config;
 
     private final File arcFile;
 
@@ -47,7 +47,7 @@ public class ArcMigrator {
 
     private final String warcFilePath;
 
-    public ArcMigrator(Config config, File arcFile) {
+    public ArcMigrator(Arc2WarcMigrationConfig config, File arcFile) {
         this.config = config;
         this.arcFile = arcFile;
         //File input = new File(config.getInputStr());

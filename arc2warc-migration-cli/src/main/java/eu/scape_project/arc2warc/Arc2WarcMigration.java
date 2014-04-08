@@ -16,8 +16,8 @@
  */
 package eu.scape_project.arc2warc;
 
-import eu.scape_project.arc2warc.cli.Config;
-import eu.scape_project.arc2warc.cli.Options;
+import eu.scape_project.arc2warc.cli.Arc2WarcMigrationConfig;
+import eu.scape_project.arc2warc.cli.Arc2WarcMigrationOptions;
 import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -43,12 +43,12 @@ public class Arc2WarcMigration {
 
     private static final Log LOG = LogFactory.getLog(Arc2WarcMigration.class);
 
-    private static Config config;
+    private static Arc2WarcMigrationConfig config;
 
     public Arc2WarcMigration() {
     }
 
-    public static Config getConfig() {
+    public static Arc2WarcMigrationConfig getConfig() {
         return config;
     }
 
@@ -62,19 +62,21 @@ public class Arc2WarcMigration {
     public static void main(String[] args) throws IOException, ParseException {
         Configuration conf = new Configuration();
         // Command line interface
-        config = new Config();
+        config = new Arc2WarcMigrationConfig();
         CommandLineParser cmdParser = new PosixParser();
         GenericOptionsParser gop = new GenericOptionsParser(conf, args);
-        CommandLine cmd = cmdParser.parse(Options.OPTIONS, gop.getRemainingArgs());
-        if ((args.length == 0) || (cmd.hasOption(Options.HELP_OPT))) {
-            Options.exit("Usage", 0);
+        Arc2WarcMigrationOptions a2wopt = new Arc2WarcMigrationOptions();
+        CommandLine cmd = cmdParser.parse(a2wopt.options, gop.getRemainingArgs());
+        if ((args.length == 0) || (cmd.hasOption(a2wopt.HELP_OPT))) {
+            a2wopt.exit("Help", 0);
         } else {
-            Options.initOptions(cmd, config);
+            a2wopt.initOptions(cmd, config);
         }
         Arc2WarcMigration a2wm = new Arc2WarcMigration();
         long startMillis = System.currentTimeMillis();
         File input = new File(config.getInputStr());
-        if (config.isDirectoryInput()) {
+        
+        if(input.isDirectory()) {
             a2wm.traverseDir(input);
         } else {
             ArcMigrator arcMigrator = new ArcMigrator(config, input);

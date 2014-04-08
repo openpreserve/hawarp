@@ -18,7 +18,7 @@ package eu.scape_project.arc2warc;
 
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import eu.scape_project.arc2warc.cli.Config;
+import eu.scape_project.arc2warc.cli.Arc2WarcMigrationConfig;
 import eu.scape_project.hawarp.utils.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -79,7 +79,7 @@ public class ArcMigratorTest {
         File arcFile = IOUtils.copyStreamToTempFileInDir(arcInputStream, tempDir.getAbsolutePath(), "arc.gz");
         assertNotNull(arcInputStream);
         File tmpWarcFile = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
-        Config conf = new Config();
+        Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
         conf.setInputStr(tmpWarcFile.getAbsolutePath());
         conf.setOutputStr(tmpWarcFile.getAbsolutePath());
         conf.setDirectoryInput(false);
