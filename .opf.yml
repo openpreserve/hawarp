@@ -1,0 +1,42 @@
+# Specification for .opf.yml file
+#
+# MANDATORY
+# The name of the software project, NOT just the higher level project
+# e.g. Jpylyzer, scape-toolwrapper
+name: hawarp
+ 
+# MANDATORY
+# The project or organisation responsible for repository
+# e.g.SCAPE, OPF, or The British Library
+vendor: SCAPE
+ 
+# MANDATORY
+# The name and email address of the project maintainer.
+# Initially set to individual who requested the repository
+maintainer:
+    name: Sven Schlarb
+    email: shsschlarb-dev@yahoo.de
+ 
+# All the remaining fields are optional, please supply any info known
+ 
+# Details of the deployment platform
+# e.g. Java, Python, Tomcat....
+platform: Java, Hadoop
+ 
+# Target OS if OS specific
+# e.g. Windows 7, linux, MacOS
+operating-system: Cloudera-based Hadoop-Cluster
+ 
+# URL of download page, if one exists
+download: https://github.com/openplanets/hawarp
+ 
+# List of developers working on the project, repeat all three lines of the
+# developer list item to add details for multiple developers.
+# There's no need to repeat the project maintainer here
+developers:
+    - developer:
+        name: Sven Schlarb
+        email: shsschlarb-dev@yahoo.de
+ 
+# URL of software web site home page, if one exists
+homepage: https://github.com/openplanets/hawarp
