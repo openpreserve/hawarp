@@ -16,7 +16,6 @@
  */
 package eu.scape_project.droid_identify.droid;
 
-import eu.scape_project.droid_identify.hadoop.DroidIdentifyHadoopJob;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,11 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.logging.Level;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,34 +40,34 @@ import uk.gov.nationalarchives.droid.core.interfaces.resource.RequestMetaData;
 
 /**
  * Droid File Format Identification. File format identification using the Droid
- * version 6.1 API. A DroidIdentification object can be initialised with a
- * default signature file version 67 using the default constructor or with
- * another signature file using the constructor that allows to give a path to
- * another signature file. Identification can be performed using a file or an
- * input stream.
+ version 6.1 API. A DroidIdentificationTask object can be initialised with a
+ default signature file version 67 using the default constructor or with
+ another signature file using the constructor that allows to give a path to
+ another signature file. Identification can be performed using a file or an
+ input stream.
  *
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
  */
-public class DroidIdentification {
+public class DroidIdentificationTask {
 
-    private static final Log LOG = LogFactory.getLog(DroidIdentification.class);
+    private static final Log LOG = LogFactory.getLog(DroidIdentificationTask.class);
     public static final String SIGNATURE_FILE_V67_URL = "http://www.nationalarchives.gov.uk/documents/DROID_SignatureFile_V67.xml";
     private String sigFilePath;
     private BinarySignatureIdentifier bsi;
     // Singleton Instance
-    private static DroidIdentification instance = null;
+    private static DroidIdentificationTask instance = null;
 
     /**
      * Get instance with default signature file
      *
-     * @return DroidIdentification instance
+     * @return DroidIdentificationTask instance
      * @throws IOException
      * @throws SignatureParseException
      */
-    public static DroidIdentification getInstance() throws IOException, SignatureParseException {
+    public static DroidIdentificationTask getInstance() throws IOException, SignatureParseException {
         if (instance == null) {
-            instance = new DroidIdentification();
+            instance = new DroidIdentificationTask();
         }
         return instance;
     }
@@ -80,17 +76,17 @@ public class DroidIdentification {
      * Get instance with path to signature file
      *
      * @param sigFilePath Path to signature file
-     * @return DroidIdentification instance
+     * @return DroidIdentificationTask instance
      * @throws IOException
      * @throws SignatureParseException
      */
-    public static DroidIdentification getInstance(String sigFilePath) throws IOException, SignatureParseException {
+    public static DroidIdentificationTask getInstance(String sigFilePath) throws IOException, SignatureParseException {
         // reset instance if new signature file is used
         if (instance != null && !instance.sigFilePath.equals(sigFilePath)) {
             instance = null;
         }
         if (instance == null) {
-            instance = new DroidIdentification(sigFilePath);
+            instance = new DroidIdentificationTask(sigFilePath);
         }
         return instance;
     }
@@ -101,7 +97,7 @@ public class DroidIdentification {
      * @throws IOException
      * @throws SignatureParseException
      */
-    public DroidIdentification() throws IOException, SignatureParseException {
+    public DroidIdentificationTask() throws IOException, SignatureParseException {
         URL sigFileV67Url = new URL(SIGNATURE_FILE_V67_URL);
         InputStream sigFileStream = sigFileV67Url.openStream();
         File tmpSigFile = File.createTempFile("tmpsigfile", ".xml");
@@ -118,7 +114,7 @@ public class DroidIdentification {
      * @param sigFilePath
      * @throws SignatureParseException
      */
-    private DroidIdentification(String sigFilePath) throws SignatureParseException {
+    private DroidIdentificationTask(String sigFilePath) throws SignatureParseException {
         this.sigFilePath = sigFilePath;
         this.init();
     }

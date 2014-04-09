@@ -21,7 +21,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>eu.scape_project.droid_identify.hadoop.DroidIdentifyHadoopJob</mainClass>
+                            <mainClass>eu.scape_project.droid_identify.DroidIdentification</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -33,7 +33,12 @@
     </build>
 
     <dependencies>
-        
+        <dependency>
+            <groupId>eu.scape_project</groupId>
+            <artifactId>hawarp-core</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
         <dependency>
             <groupId>uk.gov.nationalarchives</groupId>
             <artifactId>droid-core</artifactId>

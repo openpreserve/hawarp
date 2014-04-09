@@ -16,7 +16,7 @@
  */
 package eu.scape_project.pc.droid;
 
-import eu.scape_project.droid_identify.droid.DroidIdentification;
+import eu.scape_project.droid_identify.droid.DroidIdentificationTask;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -32,11 +32,11 @@ import uk.gov.nationalarchives.droid.core.interfaces.IdentificationResult;
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
  */
-public class DroidIdentificationTest {
+public class DroidIdentificationTaskTest {
     
     public static final String SIGNATURE_FILE_V67_URL = "http://www.nationalarchives.gov.uk/documents/DROID_SignatureFile_V67.xml";
 
-    private static DroidIdentification dihj;
+    private static DroidIdentificationTask dihj;
 
     /**
      * Set up.
@@ -50,7 +50,7 @@ public class DroidIdentificationTest {
         FileOutputStream fos = new FileOutputStream(tmpSigFile);
         IOUtils.copy(sigFileStream, fos);
         fos.close();
-        dihj = DroidIdentification.getInstance(tmpSigFile.getAbsolutePath());
+        dihj = DroidIdentificationTask.getInstance(tmpSigFile.getAbsolutePath());
     }
 
     @AfterClass
@@ -71,7 +71,7 @@ public class DroidIdentificationTest {
      */
     @Test
     public void testIdentifyOdt() throws IOException {
-        InputStream odtTestFileStream = DroidIdentificationTest.class.getResourceAsStream("testfile.odt");
+        InputStream odtTestFileStream = DroidIdentificationTaskTest.class.getResourceAsStream("testfile.odt");
         File tmpOdtTestFile = File.createTempFile("odttestfile", ".odt");
         FileOutputStream fos = new FileOutputStream(tmpOdtTestFile);
         IOUtils.copy(odtTestFileStream, fos);
@@ -89,7 +89,7 @@ public class DroidIdentificationTest {
      */
     @Test
     public void testIdentifyPdf() throws IOException {
-        InputStream odtTestFileStream = DroidIdentificationTest.class.getResourceAsStream("testfile.pdf");
+        InputStream odtTestFileStream = DroidIdentificationTaskTest.class.getResourceAsStream("testfile.pdf");
         File tmpOdtTestFile = File.createTempFile("pdftestfile", ".pdf");
         FileOutputStream fos = new FileOutputStream(tmpOdtTestFile);
         IOUtils.copy(odtTestFileStream, fos);
