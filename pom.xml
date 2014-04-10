@@ -12,7 +12,7 @@
     <name>hawarp</name>
 
     <description>HAdoop-based Web Archive Record Processing</description>    
-
+    
     <modules>
         <module>droid-identify</module>
         <module>hawarp-core</module>
@@ -45,14 +45,14 @@
         <url>git@github.com:openplanets/hawarp.git</url>
     </scm>
     
-    
     <repositories>
         <repository>
             <id>libs-release-local</id>
             <name>CDH3u5</name>
             <url>https://repository.cloudera.com/artifactory/libs-release-local</url>
         </repository>
-        <repository>
+<!--        <repository>
+            
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
@@ -67,17 +67,8 @@
             <name>Internet Archive Maven Repository</name>
             <url>http://builds.archive.org:8080/maven2</url>
             <layout>default</layout>
-        </repository>
+        </repository>-->
     </repositories>
-    
-    
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <cdh.version>0.20.2-cdh3u5</cdh.version>
-        <pig.version>0.10.0-cdh3u4</pig.version>
-        <jwat.version>1.0.0</jwat.version>
-        <tika.version>1.4</tika.version>
-    </properties>
 
     <build>
         <plugins>
@@ -92,13 +83,22 @@
             </plugin>
         </plugins>
     </build>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <cdh.version>0.20.2-cdh3u5</cdh.version>
+        <pig.version>0.10.0-cdh3u4</pig.version>
+        <jwat.version>1.0.0</jwat.version>
+    </properties>
+    
     <dependencies>
-
+        
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
             <version>0.20.2-cdh3u5</version>
         </dependency>
+        
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
@@ -120,7 +120,7 @@
             <version>4.10</version>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.2</version>
@@ -136,11 +136,10 @@
             <version>2.6</version>
         </dependency>
         
-        <dependency>
+        <!--        <dependency>
             <groupId>org.archive.heritrix</groupId>
             <artifactId>heritrix-commons</artifactId>
             <version>3.1.0</version>
-            <!-- heritrix poi conflicts with tika poi -->
             <exclusions>
                 <exclusion>
                     <artifactId>poi</artifactId>
@@ -151,7 +150,7 @@
                     <groupId>commons-io</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
         
         <dependency>
             <groupId>org.jwat</groupId>
@@ -173,21 +172,13 @@
             <artifactId>jwat-warc</artifactId>
             <version>${jwat.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.jwat</groupId>
             <artifactId>jwat-tools</artifactId>
             <version>0.5.6-SNAPSHOT</version>
-        </dependency>
-        <!-- Tika dependencies -->
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
-            <version>${tika.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
-            <version>${tika.version}</version>
-        </dependency>
+        </dependency>-->
+            
+        
     </dependencies>
+    
 </project>

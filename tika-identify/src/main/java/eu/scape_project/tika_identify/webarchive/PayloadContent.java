@@ -16,7 +16,6 @@
 package eu.scape_project.tika_identify.webarchive;
 
 import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
-import static eu.scape_project.hawarp.utils.IOUtils.BUFFER_SIZE;
 import eu.scape_project.tika_identify.identification.Identifier;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -100,7 +99,7 @@ public class PayloadContent {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             BufferedInputStream buffis = new BufferedInputStream(inputStream);
             BufferedOutputStream buffos = new BufferedOutputStream(baos);
-            byte[] tempBuffer = new byte[BUFFER_SIZE];
+            byte[] tempBuffer = new byte[8192];
             int bytesRead;
             boolean firstByteArray = true;
             while ((bytesRead = buffis.read(tempBuffer)) != -1) {

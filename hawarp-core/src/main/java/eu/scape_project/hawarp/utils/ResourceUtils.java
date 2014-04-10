@@ -15,7 +15,6 @@
  */
 package eu.scape_project.hawarp.utils;
 
-import com.google.common.io.Resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -59,5 +58,24 @@ public class ResourceUtils {
         }
         return null;
     }
+    
+//    public static InputStream getInputStreamFromResource(Class., String path) {
+//        InputStream resourceInputStream = null;
+//        try {
+//            URL resourceUrl = new URL("jar://"+path);
+//            return resourceUrl.openStream();
+//        } catch (IOException ex) {
+//            LOG.error("I/O error when reading resource", ex);
+//        } finally {
+//            try {
+//                if (resourceInputStream != null) {
+//                    resourceInputStream.close();
+//                }
+//            } catch (IOException ex) {
+//                LOG.error("I/O error", ex);
+//            }
+//        }
+//        return null;
+//    }
 
 }

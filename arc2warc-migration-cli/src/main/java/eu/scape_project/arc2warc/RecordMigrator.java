@@ -15,18 +15,17 @@
  */
 package eu.scape_project.arc2warc;
 
+import static eu.scape_project.hawarp.utils.UUIDGenerator.getRecordID;
 import static eu.scape_project.tika_identify.identification.IdentificationConstants.MIME_UNKNOWN;
 import eu.scape_project.tika_identify.tika.TikaIdentification;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.archive.uid.RecordIDGenerator;
-import org.archive.uid.UUIDGenerator;
 import org.jwat.arc.ArcRecordBase;
 import org.jwat.warc.WarcRecord;
 import org.jwat.warc.WarcWriter;
@@ -40,8 +39,6 @@ class RecordMigrator {
     private static final Log LOG = LogFactory.getLog(RecordMigrator.class);
 
     public static final long LIMIT_LARGE_PAYLOAD = Integer.MAX_VALUE; // 4194304; // 4MB
-
-    static protected RecordIDGenerator generator = new UUIDGenerator();
 
     static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
@@ -57,11 +54,13 @@ class RecordMigrator {
         this.warcFileName = warcFileName;
     }
 
-    public void createWarcInfoRecord() throws IOException {
+    public void createWarcInfoRecord() throws IOException, URISyntaxException {
         WarcRecord record = WarcRecord.createRecord(writer);
         record.header.addHeader("WARC-Type", "warcinfo");
         record.header.addHeader("WARC-Date", sdf.format(Calendar.getInstance().getTime()));
-        warcInfoId = generator.getRecordID().toString();
+        
+        warcInfoId = getRecordID().toString();
+        
         record.header.addHeader("WARC-Record-ID", warcInfoId);
         record.header.addHeader("WARC-Filename", warcFileName);
         record.header.addHeader("Content-Type", "application/warc-fields");
@@ -76,9 +75,9 @@ class RecordMigrator {
         writer.closeRecord();
     }
 
-    public void migrateRecord(ArcRecordBase jwatArcRecord, boolean doPayloadContIdent) throws IOException {
+    public void migrateRecord(ArcRecordBase jwatArcRecord, boolean doPayloadContIdent) throws IOException, URISyntaxException {
         WarcRecord record = WarcRecord.createRecord(writer);
-        String recordId = generator.getRecordID().toString();
+        String recordId = getRecordID().toString();
         String mimeType = (jwatArcRecord.getContentType() != null) ? jwatArcRecord.getContentType().toString() : MIME_UNKNOWN;
 
         String type = (arcMetadataRecord) ? "metadata" : (mimeType.equals("text/dns")) ? "resource" : "response";

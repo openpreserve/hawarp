@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,6 +90,8 @@ public class ArcMigrator {
                 }
             }
             LOG.info("File processed: " + arcFile.getAbsolutePath());
+        } catch (URISyntaxException ex) {
+            LOG.error("File not found error", ex);
         } catch (FileNotFoundException ex) {
             LOG.error("File not found error", ex);
         } catch (IOException ex) {

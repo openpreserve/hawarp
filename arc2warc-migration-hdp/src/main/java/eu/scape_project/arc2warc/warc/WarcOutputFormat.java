@@ -21,6 +21,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.compress.compressors.CompressorException;
@@ -83,7 +84,7 @@ public class WarcOutputFormat extends FileOutputFormat<Text, HadoopWebArchiveRec
                     outputStream.close();
                 }
             } catch (IOException e) {
-                LOG.error("I/O Exception",e);
+                LOG.error("I/O Exception", e);
             }
         }
 
@@ -94,7 +95,11 @@ public class WarcOutputFormat extends FileOutputFormat<Text, HadoopWebArchiveRec
             if (writer == null) {
                 initialiseWriter(k);
             }
-            warcCreator.createContentRecord(arcRecord);
+            try {
+                warcCreator.createContentRecord(arcRecord);
+            } catch (URISyntaxException ex) {
+                LOG.error("URI error", ex);
+            }
         }
 
         private void initialiseWriter(Text k) throws IOException {
@@ -110,7 +115,11 @@ public class WarcOutputFormat extends FileOutputFormat<Text, HadoopWebArchiveRec
             outputStream = fsDataOutputStream;
             writer = WarcWriterFactory.getWriter(outputStream, createCompressedWarc);
             warcCreator = new WarcCreator(writer, warcFileName);
-            warcCreator.createWarcInfoRecord();
+            try {
+                warcCreator.createWarcInfoRecord();
+            } catch (URISyntaxException ex) {
+                LOG.error("URI error", ex);
+            }
         }
 
     }

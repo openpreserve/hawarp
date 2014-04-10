@@ -21,16 +21,6 @@
             <name>SpringSource Repository</name>
             <url>http://repo.springsource.org/release</url>
         </repository>
-        <repository>
-            <id>archive-releases</id>
-            <name>Archive Releases</name>
-            <url>http://builds.archive.org:8080/maven2</url>
-        </repository>
-        <repository>
-            <id>libs-release-local</id>
-            <name>CDH3u5</name>
-            <url>https://repository.cloudera.com/artifactory/libs-release-local</url>
-        </repository>
     </repositories>
    
     <build>
@@ -59,11 +49,14 @@
             <version>1.0</version>
             <type>jar</type>
         </dependency>
+        
+        <!-- Droid -->
         <dependency>
             <groupId>uk.gov.nationalarchives</groupId>
             <artifactId>droid-core</artifactId>
             <version>6.1</version>
         </dependency>
+        
         <!-- Spring framework -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -80,10 +73,27 @@
             <artifactId>spring-beans</artifactId>
             <version>${org.springframework.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${org.springframework.version}</version>
+        </dependency>
         
+        <!-- Apache Tika -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>${tika.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>${tika.version}</version>
+        </dependency>
     </dependencies>
     
     <properties>
+        <tika.version>1.4</tika.version>
         <org.springframework.version>3.2.3.RELEASE</org.springframework.version>
     </properties>
     

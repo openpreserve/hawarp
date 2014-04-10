@@ -17,18 +17,18 @@
 package eu.scape_project.arc2warc.warc;
 
 import eu.scape_project.hawarp.mapreduce.HadoopWebArchiveRecord;
+import static eu.scape_project.hawarp.utils.UUIDGenerator.getRecordID;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.archive.uid.RecordIDGenerator;
-import org.archive.uid.UUIDGenerator;
 import org.jwat.warc.WarcRecord;
 import org.jwat.warc.WarcWriter;
 
 import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
+import java.net.URISyntaxException;
 
 /**
  * Creating WARC records using JWAT. This class creates WARC records using JWAT
@@ -43,8 +43,6 @@ public class WarcCreator {
     protected WarcWriter writer;
     
     protected String fileName;
-
-    static protected RecordIDGenerator generator = new UUIDGenerator();
 
     static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     
@@ -67,11 +65,11 @@ public class WarcCreator {
         writer.close();
     }
     
-    public void createWarcInfoRecord() throws IOException {
+    public void createWarcInfoRecord() throws IOException, URISyntaxException {
         WarcRecord record = WarcRecord.createRecord(writer);
         record.header.addHeader("WARC-Type", "warcinfo");
         record.header.addHeader("WARC-Date", sdf.format(Calendar.getInstance().getTime()));
-        warcInfoId = generator.getRecordID().toString();
+        warcInfoId = getRecordID().toString();
         record.header.addHeader("WARC-Record-ID", warcInfoId);
         record.header.addHeader("WARC-Filename", fileName);
         record.header.addHeader("Content-Type", "application/warc-fields");
@@ -86,9 +84,9 @@ public class WarcCreator {
         writer.closeRecord();
     }
 
-    public void createContentRecord(HadoopWebArchiveRecord arcRecord) throws IOException {
+    public void createContentRecord(HadoopWebArchiveRecord arcRecord) throws IOException, URISyntaxException {
         WarcRecord record = WarcRecord.createRecord(writer);
-        String recordId = generator.getRecordID().toString();
+        String recordId = getRecordID().toString();
         String arcRecordMime = arcRecord.getMimeType();
         String mimeType = (arcRecordMime != null) ? arcRecordMime : MIME_UNKNOWN;
         if(isArcMetadataRecord) mimeType = "text/xml";

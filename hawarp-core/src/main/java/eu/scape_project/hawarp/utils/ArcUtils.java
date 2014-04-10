@@ -22,11 +22,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.archive.io.ArchiveRecord;
-import org.archive.io.arc.ARCRecord;
-import org.archive.io.arc.ARCRecordMetaData;
-import org.archive.uid.RecordIDGenerator;
-import org.archive.uid.UUIDGenerator;
+//import org.archive.io.ArchiveRecord;
+//import org.archive.io.arc.ARCRecord;
+//import org.archive.io.arc.ARCRecordMetaData;
+//import org.archive.uid.RecordIDGenerator;
+//import org.archive.uid.UUIDGenerator;
 import org.jwat.arc.ArcRecordBase;
 
 /**
@@ -40,7 +40,7 @@ public class ArcUtils {
     
     private static final Log LOG = LogFactory.getLog(ArcUtils.class);
 
-    static protected RecordIDGenerator generator = new UUIDGenerator();
+//    static protected RecordIDGenerator generator = new UUIDGenerator();
     
     /**
      * Read the ARC record content into a byte array. Note that the record
@@ -50,24 +50,24 @@ public class ArcUtils {
      * @return Content byte array.
      * @throws IOException If content is too large to be stored in a byte array.
      */
-    public static byte[] arcRecordPayloadToByteArray(ARCRecord arcRecord) throws IOException {
-        // Byte point where the content of the ARC record begins
-        int contentBegin = (int) arcRecord.getMetaData().getContentBegin();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BufferedInputStream buffis = new BufferedInputStream(arcRecord);
-        BufferedOutputStream buffos = new BufferedOutputStream(baos);
-        byte[] tempBuffer = new byte[BUFFER_SIZE];
-        int bytesRead;
-        // skip header content
-        buffis.skip(contentBegin);
-        while ((bytesRead = buffis.read(tempBuffer)) != -1) {
-            buffos.write(tempBuffer, 0, bytesRead);
-        }
-        buffis.close();
-        buffos.flush();
-        buffos.close();
-        return baos.toByteArray();
-    }
+//    public static byte[] arcRecordPayloadToByteArray(ARCRecord arcRecord) throws IOException {
+//        // Byte point where the content of the ARC record begins
+//        int contentBegin = (int) arcRecord.getMetaData().getContentBegin();
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        BufferedInputStream buffis = new BufferedInputStream(arcRecord);
+//        BufferedOutputStream buffos = new BufferedOutputStream(baos);
+//        byte[] tempBuffer = new byte[BUFFER_SIZE];
+//        int bytesRead;
+//        // skip header content
+//        buffis.skip(contentBegin);
+//        while ((bytesRead = buffis.read(tempBuffer)) != -1) {
+//            buffos.write(tempBuffer, 0, bytesRead);
+//        }
+//        buffis.close();
+//        buffos.flush();
+//        buffos.close();
+//        return baos.toByteArray();
+//    }
     
 
     /**

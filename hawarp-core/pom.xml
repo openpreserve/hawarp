@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>hawarp</artifactId>
         <groupId>eu.scape_project</groupId>
+        <artifactId>hawarp</artifactId>
         <version>1.0</version>
     </parent>
 
@@ -15,6 +15,15 @@
 
     <name>hawarp-core</name>
     <url>http://maven.apache.org</url>
+    
+    <dependencies>
+        
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>r05</version>
+        </dependency>
+    </dependencies>
     
 </project>
 

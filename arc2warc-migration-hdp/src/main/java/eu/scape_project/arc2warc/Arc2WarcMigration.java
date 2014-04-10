@@ -48,6 +48,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
 import org.apache.hadoop.io.Text;
@@ -101,7 +102,7 @@ public class Arc2WarcMigration {
                     flArcRecord = WebArchiveRecordMapper.map(compiledarc2hwar, filePathString, jwatArcRecord, identify);
                     context.write(new Text(filePathString), flArcRecord);
                 } catch (Exception ex) {
-                    LOG.error("Unable to create WARC file: "+filePathString, ex);
+                    LOG.error("Unable to create WARC file: " + filePathString, ex);
                 }
 
             }
@@ -286,6 +287,8 @@ public class Arc2WarcMigration {
             }
             LOG.info("File " + count + " processed: " + arcFile.getAbsolutePath());
             count++;
+        } catch (URISyntaxException ex) {
+            LOG.error("URI error", ex);
         } catch (FileNotFoundException ex) {
             LOG.error("File not found error", ex);
         } catch (IOException ex) {
