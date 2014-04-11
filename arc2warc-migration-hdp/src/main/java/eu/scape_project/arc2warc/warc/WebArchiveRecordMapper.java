@@ -15,14 +15,7 @@
  */
 package eu.scape_project.arc2warc.warc;
 
-import eu.scape_project.arc2warc.Arc2WarcMigration;
 import eu.scape_project.hawarp.mapreduce.HadoopWebArchiveRecord;
-import eu.scape_project.hawarp.utils.DigestUtils;
-import static eu.scape_project.tika_identify.identification.IdentificationConstants.MIME_UNKNOWN;
-import eu.scape_project.tika_identify.tika.TikaIdentification;
-import eu.scape_project.tika_identify.webarchive.PayloadContent;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jwat.arc.ArcRecordBase;
 import org.mvel2.MVEL;
-import org.mvel2.compiler.CompiledExpression;
 
 /**
  * JWAT ARC-record to Hadoop Web Archive Record conversion. The JWAT ARC record

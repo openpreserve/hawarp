@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.scape_project.tika_identify.webarchive;
+package eu.scape_project.hawarp.webarchive;
 
-import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
-import eu.scape_project.tika_identify.identification.Identifier;
+import eu.scape_project.hawarp.interfaces.Identifier;
+import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;

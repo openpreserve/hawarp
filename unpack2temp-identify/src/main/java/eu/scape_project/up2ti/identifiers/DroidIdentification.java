@@ -16,6 +16,7 @@
  */
 package eu.scape_project.up2ti.identifiers;
 
+import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
 import eu.scape_project.hawarp.utils.IOUtils;
 import eu.scape_project.up2ti.container.ZipContainer;
 import java.io.*;
@@ -135,7 +136,7 @@ public class DroidIdentification extends Identification {
             }
         }
         if (!droidIdRes.containsKey("mime")) {
-            droidIdRes.put("mime", "application/octet-stream");
+            droidIdRes.put("mime", MIME_UNKNOWN);
         }
         if (!droidIdRes.containsKey("puid")) {
             droidIdRes.put("puid", "fmt/0");

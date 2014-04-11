@@ -16,6 +16,7 @@
  */
 package eu.scape_project.arc2warc.warc;
 
+import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
 import eu.scape_project.hawarp.mapreduce.HadoopWebArchiveRecord;
 import static eu.scape_project.hawarp.utils.UUIDGenerator.getRecordID;
 import java.io.ByteArrayInputStream;
@@ -26,8 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jwat.warc.WarcRecord;
 import org.jwat.warc.WarcWriter;
-
-import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
 import java.net.URISyntaxException;
 
 /**

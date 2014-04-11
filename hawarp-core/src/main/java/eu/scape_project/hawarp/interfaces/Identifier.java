@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
-package eu.scape_project.tika_identify.identification;
+package eu.scape_project.hawarp.interfaces;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
+ * Identifier. Interface to be implemented by identifiers.
  *
- * @author scape
+ * @author shsdev https://github.com/shsdev
  */
-public interface IdentificationConstants {
+public interface Identifier {
     
-    public static final String MIME_UNKNOWN = "unknown/unknown";
+    public static final String MIME_UNKNOWN = "application/octet-stream";
+    
+    public String identify(byte[] prefix);
+    
+    public String identify(String filePath) throws IOException;
+    
+    public String getCurrentItemId();
+
+    public void setCurrentItemId(String currentItemId);
+    
     
 }

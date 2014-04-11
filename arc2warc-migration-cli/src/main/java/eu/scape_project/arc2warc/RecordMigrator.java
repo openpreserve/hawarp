@@ -15,9 +15,9 @@
  */
 package eu.scape_project.arc2warc;
 
+import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
 import static eu.scape_project.hawarp.utils.UUIDGenerator.getRecordID;
-import static eu.scape_project.tika_identify.identification.IdentificationConstants.MIME_UNKNOWN;
-import eu.scape_project.tika_identify.tika.TikaIdentification;
+import eu.scape_project.tika_identify.tika.TikaIdentificationTask;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -103,7 +103,7 @@ class RecordMigrator {
             InputStream inputStream = jwatArcRecord.getPayloadContent();
             PayloadContent payloadContent = new PayloadContent(inputStream);
             if (doPayloadContIdent) {
-                TikaIdentification ti = TikaIdentification.getInstance();
+                TikaIdentificationTask ti = TikaIdentificationTask.getInstance();
                 ti.setCurrentItemId(recordId);
                 payloadContent.setIdentifier(ti);
                 payloadContent.doPayloadIdentification(true);

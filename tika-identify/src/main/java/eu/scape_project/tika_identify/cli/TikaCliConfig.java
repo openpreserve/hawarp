@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 scape.
+ * Copyright 2014 onbscs.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package eu.scape_project.tika_identify.identification;
+package eu.scape_project.tika_identify.cli;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import eu.scape_project.hawarp.cli.CliConfig;
 
 /**
- * Identifier. Interface to be implemented by identifiers.
  *
- * @author shsdev https://github.com/shsdev
+ * @author onbscs
  */
-public interface Identifier {
-    
-    public String identify(byte[] prefix);
-    
-    public String identify(String filePath) throws IOException;
-    
-    public String getCurrentItemId();
-
-    public void setCurrentItemId(String currentItemId);
-    
+public class TikaCliConfig extends CliConfig {
     
 }

@@ -17,7 +17,7 @@
 package eu.scape_project.tika_identify.tika;
 
 import com.google.common.io.Resources;
-import eu.scape_project.tika_identify.tika.TikaIdentification;
+import eu.scape_project.tika_identify.tika.TikaIdentificationTask;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
  */
 public class TikaIdentificationTest {
 
-    private static TikaIdentification tikaid;
+    private static TikaIdentificationTask tikaid;
 
     /**
      * Set up.
@@ -43,7 +43,7 @@ public class TikaIdentificationTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         
-        tikaid = TikaIdentification.getInstance();
+        tikaid = TikaIdentificationTask.getInstance();
       
     }
 

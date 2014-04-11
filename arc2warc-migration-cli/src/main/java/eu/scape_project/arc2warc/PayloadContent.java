@@ -15,9 +15,9 @@
  */
 package eu.scape_project.arc2warc;
 
-import static eu.scape_project.tika_identify.identification.IdentificationConstants.*;
 import static eu.scape_project.hawarp.utils.IOUtils.BUFFER_SIZE;
-import eu.scape_project.tika_identify.identification.Identifier;
+import eu.scape_project.hawarp.interfaces.Identifier;
+import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
