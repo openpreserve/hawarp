@@ -17,6 +17,7 @@
 package eu.scape_project.arc2warc.cli;
 
 import eu.scape_project.hawarp.cli.CliOptions;
+import java.io.File;
 import org.apache.commons.cli.CommandLine;
 
 /**
@@ -48,7 +49,7 @@ public class Arc2WarcMigrationOptions extends CliOptions {
     public void initOptions(CommandLine cmd, Arc2WarcMigrationConfig pc) {
 
         super.initOptions(cmd, pc);
-        
+
         // content type identification
         if (cmd.hasOption(CONTENTTYPEID_OPT)) {
             pc.setContentTypeIdentification(true);
@@ -69,6 +70,19 @@ public class Arc2WarcMigrationOptions extends CliOptions {
         if (cmd.hasOption(WARCCOMPRESSED_OPT)) {
             pc.setCreateCompressedWarc(true);
             System.out.println("Create compressed WARC file output");
+        }
+
+        if (cmd.hasOption(OUTPUT_OPT) && cmd.getOptionValue(OUTPUT_OPT) != null) {
+            File input = new File(cmd.getOptionValue(INPUT_OPT));
+            String outputStr = cmd.getOptionValue(OUTPUT_OPT);
+            File output = new File(outputStr);
+            if (output.exists()) {
+                throw new IllegalArgumentException("The output file/directory must not exist!");
+            }
+            if (input.isDirectory()) {
+                output.mkdirs();
+            }
+
         }
 
     }

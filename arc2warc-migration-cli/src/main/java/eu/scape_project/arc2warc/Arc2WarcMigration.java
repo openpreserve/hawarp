@@ -77,6 +77,7 @@ public class Arc2WarcMigration {
         File input = new File(config.getInputStr());
         
         if(input.isDirectory()) {
+            config.setDirectoryInput(true);
             a2wm.traverseDir(input);
         } else {
             ArcMigrator arcMigrator = new ArcMigrator(config, input);
