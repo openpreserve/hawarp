@@ -21,12 +21,17 @@ import eu.scape_project.tika_identify.tika.TikaIdentificationTask;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jwat.arc.ArcRecordBase;
+import org.jwat.common.HeaderLine;
 import org.jwat.warc.WarcRecord;
 import org.jwat.warc.WarcWriter;
 
@@ -35,7 +40,7 @@ import org.jwat.warc.WarcWriter;
  * @author scape
  */
 class RecordMigrator {
-    
+
     private static final Log LOG = LogFactory.getLog(RecordMigrator.class);
 
     public static final long LIMIT_LARGE_PAYLOAD = Integer.MAX_VALUE; // 4194304; // 4MB
@@ -43,12 +48,12 @@ class RecordMigrator {
     static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     static private String warcInfoId;
-    
-    private final WarcWriter writer; 
+
+    private final WarcWriter writer;
     private final String warcFileName;
-    
+
     private boolean arcMetadataRecord;
-    
+
     public RecordMigrator(WarcWriter writer, String warcFileName) {
         this.writer = writer;
         this.warcFileName = warcFileName;
@@ -58,9 +63,9 @@ class RecordMigrator {
         WarcRecord record = WarcRecord.createRecord(writer);
         record.header.addHeader("WARC-Type", "warcinfo");
         record.header.addHeader("WARC-Date", sdf.format(Calendar.getInstance().getTime()));
-        
+
         warcInfoId = getRecordID().toString();
-        
+
         record.header.addHeader("WARC-Record-ID", warcInfoId);
         record.header.addHeader("WARC-Filename", warcFileName);
         record.header.addHeader("Content-Type", "application/warc-fields");
@@ -86,20 +91,42 @@ class RecordMigrator {
         record.header.addHeader("WARC-Date", sdf.format(jwatArcRecord.getArchiveDate()));
         record.header.addHeader("WARC-Record-ID", recordId);
         if (arcMetadataRecord) {
+            // ARC metadata record relates to the WARC info record
             record.header.addHeader("WARC-Concurrent-To", warcInfoId);
         }
         if (jwatArcRecord.getIpAddress() != null) {
             record.header.addHeader("WARC-IP-Address", jwatArcRecord.getIpAddress());
         }
+        // Content type as available in the ARC record, not the identified mime type
         record.header.addHeader("Content-Type", mimeType);
+
+        // Payload metadata = HTTP Response lines
+        String payloadHeader = "";
+        if (jwatArcRecord.getHttpHeader() != null) {
+            String statusCodeStr = jwatArcRecord.getHttpHeader().statusCodeStr;
+
+            String httpVersionStr = jwatArcRecord.getHttpHeader().httpVersion;
+
+            if (httpVersionStr != null && statusCodeStr != null) {
+                Integer statusCode = jwatArcRecord.getHttpHeader().statusCode;
+                payloadHeader += httpVersionStr + " " + statusCodeStr + " " + HttpStatus.getStatusText(statusCode)+"\r\n";
+            }
+            List<HeaderLine> headerList = jwatArcRecord.getHttpHeader().getHeaderList();
+            if (headerList != null) {
+                for (HeaderLine hl : headerList) {
+                    payloadHeader += hl.name + ": " + hl.value +"\r\n";
+                }
+            }
+            payloadHeader += "\r\n"; // end of HTTP response header
+        }
+
         byte[] payloadBytes = null;
         InputStream payloadInputStream = null;
         boolean isLarge = false;
         if (jwatArcRecord.hasPayload()) {
             long remaining = jwatArcRecord.getPayload().getRemaining();
-
-            record.header.addHeader("Content-Length", Long.toString(remaining));
-
+            // WARC content length is payload length + payload header length
+            record.header.addHeader("Content-Length", Long.toString(remaining + payloadHeader.length()));
             InputStream inputStream = jwatArcRecord.getPayloadContent();
             PayloadContent payloadContent = new PayloadContent(inputStream);
             if (doPayloadContIdent) {
@@ -116,7 +143,6 @@ class RecordMigrator {
                 payloadInputStream = payloadContent.getDumpedPayloadContentAsInputStream();
                 isLarge = true;
             }
-
             if (payloadContent.getDigestStr() != null) {
                 record.header.addHeader("WARC-Payload-Digest",
                         payloadContent.getDigestStr());
@@ -126,14 +152,26 @@ class RecordMigrator {
                         payloadContent.getIdentifiedPayLoadType());
             }
         }
-
+        
+        // finished creating header, write it to the WARC record
         writer.writeHeader(record);
 
+        // Record payload
         if (jwatArcRecord.hasPayload()) {
+            // "large" payload is added as input stream (see RecordMigrator.LIMIT_LARGE_PAYLOAD)
             if (isLarge) {
-                writer.streamPayload(payloadInputStream);
+                // Prepend payload metadata = HTTP Response lines
+                ByteArrayInputStream bais = new ByteArrayInputStream(payloadHeader.getBytes());
+                SequenceInputStream sis = new SequenceInputStream(bais, payloadInputStream);
+                writer.streamPayload(sis);
+            // "small" payload is added as byte array (see RecordMigrator.LIMIT_LARGE_PAYLOAD)
             } else {
-                writer.writePayload(payloadBytes);
+                // Prepend payload metadata = HTTP Response lines
+                byte[] prepend = payloadHeader.getBytes();
+                byte[] combined = new byte[prepend.length + payloadBytes.length];
+                System.arraycopy(prepend, 0, combined, 0, prepend.length);
+                System.arraycopy(payloadBytes, 0, combined, prepend.length, payloadBytes.length);
+                writer.writePayload(combined);
             }
         }
 
@@ -148,7 +186,5 @@ class RecordMigrator {
     public void setArcMetadataRecord(boolean arcMetadataRecord) {
         this.arcMetadataRecord = arcMetadataRecord;
     }
-    
-    
 
 }
