@@ -122,7 +122,7 @@ public class ArcMigratorTest {
                     break;
                 case 3:
                     // header
-                    assertEquals("resource", warcRecord.getHeader("WARC-Type").value);
+                    assertEquals("response", warcRecord.getHeader("WARC-Type").value);
                     assertEquals("text/dns", warcRecord.getHeader("Content-Type").value);
                     assertEquals("57", warcRecord.getHeader("Content-Length").value);
                     // payload
@@ -134,27 +134,27 @@ public class ArcMigratorTest {
                     // header
                     assertEquals("response", warcRecord.getHeader("WARC-Type").value);
                     assertEquals("text/html", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("287", warcRecord.getHeader("Content-Length").value);
+                    assertEquals("490", warcRecord.getHeader("Content-Length").value);
                     // payload
                     String robots = new String(IOUtils.inputStreamToByteArray(payloadIs), Charset.forName("UTF-8"));
-                    assertTrue(robots.startsWith("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">"));
+                    assertTrue(robots.startsWith("HTTP/1.1 404 Not Found"));
                     assertTrue(robots.endsWith("</body></html>\n"));
                     break;
                 case 5:
                     // header
                     assertEquals("response", warcRecord.getHeader("WARC-Type").value);
                     assertEquals("text/html", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("164", warcRecord.getHeader("Content-Length").value);
+                    assertEquals("441", warcRecord.getHeader("Content-Length").value);
                     // payload
                     String html = new String(IOUtils.inputStreamToByteArray(payloadIs), Charset.forName("UTF-8"));
-                    assertTrue(html.startsWith("<html>"));
+                    assertTrue(html.startsWith("HTTP/1.1 200 OK"));
                     assertTrue(html.endsWith("</html>\n\n"));
                     break;
                 case 6:
                     // header
                     assertEquals("response", warcRecord.getHeader("WARC-Type").value);
                     assertEquals("image/png", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("607", warcRecord.getHeader("Content-Length").value);
+                    assertEquals("862", warcRecord.getHeader("Content-Length").value);
                     break;
             }
         }

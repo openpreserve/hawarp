@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,8 +45,7 @@ class RecordMigrator {
     private static final Log LOG = LogFactory.getLog(RecordMigrator.class);
 
     public static final long LIMIT_LARGE_PAYLOAD = Integer.MAX_VALUE; // 4194304; // 4MB
-
-    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    
 
     static private String warcInfoId;
 
@@ -53,7 +53,12 @@ class RecordMigrator {
     private final String warcFileName;
 
     private boolean arcMetadataRecord;
-
+    
+    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    {
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
+    
     public RecordMigrator(WarcWriter writer, String warcFileName) {
         this.writer = writer;
         this.warcFileName = warcFileName;
@@ -85,7 +90,7 @@ class RecordMigrator {
         String recordId = getRecordID().toString();
         String mimeType = (jwatArcRecord.getContentType() != null) ? jwatArcRecord.getContentType().toString() : MIME_UNKNOWN;
 
-        String type = (arcMetadataRecord) ? "metadata" : (mimeType.equals("text/dns")) ? "resource" : "response";
+        String type = (arcMetadataRecord) ? "metadata" : (mimeType.equals("text/dns")) ? "response" : "response";
         record.header.addHeader("WARC-Type", type);
         record.header.addHeader("WARC-Target-URI", jwatArcRecord.getUrlStr());
         record.header.addHeader("WARC-Date", sdf.format(jwatArcRecord.getArchiveDate()));
