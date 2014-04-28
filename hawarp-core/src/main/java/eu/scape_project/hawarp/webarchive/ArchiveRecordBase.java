@@ -34,6 +34,7 @@ public abstract class ArchiveRecordBase {
     protected String ipAddress;
     protected String type;
     protected int contentLength;
+    protected long contentLengthLong;
     protected String payloadDigestStr;
     
     public String getReaderIdentifier() {
@@ -115,7 +116,14 @@ public abstract class ArchiveRecordBase {
     public void setContentLength(int contentLength) {
         this.contentLength = contentLength;
     }
-    
+
+    public long getContentLengthLong() {
+        return contentLengthLong;
+    }
+
+    public void setContentLengthLong(long contentLengthLong) {
+        this.contentLengthLong = contentLengthLong;
+    }
     
     public void setPayloadDigestStr(String payloadDigestStr) {
         this.payloadDigestStr = payloadDigestStr;

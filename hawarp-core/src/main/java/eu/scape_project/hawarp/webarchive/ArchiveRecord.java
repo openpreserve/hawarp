@@ -17,9 +17,20 @@ package eu.scape_project.hawarp.webarchive;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jwat.arc.ArcRecordBase;
+import org.jwat.common.ByteCountingPushBackInputStream;
 import org.jwat.common.HeaderLine;
+import org.jwat.common.HttpHeader;
 import org.jwat.common.Payload;
 import org.jwat.common.PayloadWithHeaderAbstract;
 import org.jwat.warc.WarcRecord;
@@ -29,6 +40,14 @@ import org.jwat.warc.WarcRecord;
  * @author onbscs
  */
 public class ArchiveRecord extends ArchiveRecordBase {
+
+    private static final Log LOG = LogFactory.getLog(ArchiveRecord.class);
+
+    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+    {
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     ArchiveRecord(ArcRecordBase arcRecord) {
         this.readerIdentifier = arcRecord.getFileName();
@@ -46,41 +65,72 @@ public class ArchiveRecord extends ArchiveRecordBase {
     }
 
     ArchiveRecord(WarcRecord warcRecord) {
-//        WARC-Type: warcinfo
-//        WARC-Record-ID: <urn:uuid:1fa08584-e401-4584-ba2c-8b52e18bd030>
-//        WARC-Date: 2014-04-25T12:42:41Z
-//        Content-Length: 133
-//        Content-Type: application/warc-fields
-//        WARC-Filename: example.warc.gz
-        System.out.println("##########################################");
+        boolean isResponseType = false;
+
+        LOG.debug("################ WARC Header ################");
+        for (HeaderLine hl : warcRecord.getHeaderList()) {
+            LOG.debug(hl.name + ": " + hl.value);
+        }
         if (warcRecord.getHeaderList() != null) {
-            HeaderLine hl = warcRecord.getHeader("WARC-Type");
-            if (hl != null && hl.value.equals("warcinfo")) {
+            HeaderLine warcTypeHl = warcRecord.getHeader("WARC-Type");
+            if (warcTypeHl != null && warcTypeHl.value.equals("warcinfo")) {
                 this.readerIdentifier = warcRecord.getHeader("WARC-Filename").value;
+            } else if (warcTypeHl != null && warcTypeHl.value.equals("response")) {
+                isResponseType = true;
             }
-        }
-        List<HeaderLine> hlList = warcRecord.getHeaderList();
-        for (HeaderLine hl : hlList) {
-            System.out.println(hl.name + ": " + hl.value);;
-        }
-        System.out.println("-------------------------------------");
-        if (warcRecord.hasPayload()) {
-            Payload payload = warcRecord.getPayload();
-            
-            PayloadWithHeaderAbstract payloadHeaderWrapped = payload.getPayloadHeaderWrapped();
-            
-            if (payloadHeaderWrapped != null) {
-                
-                List<HeaderLine> headerList = warcRecord.getPayload().getPayloadHeaderWrapped().getHeaderList();
-                if (headerList != null) {
-                    for (HeaderLine hl : headerList) {
-                        System.out.println(hl.name + ": " + hl.value);;
-                    }
+            HeaderLine ipAddressHl = warcRecord.getHeader("WARC-IP-Address");
+            if (ipAddressHl != null) {
+                this.ipAddress = ipAddressHl.value;
+            }
+            HeaderLine contentTypeHl = warcRecord.getHeader("Content-Type");
+            if (contentTypeHl != null) {
+                this.mimeType = contentTypeHl.value;
+            }
+            HeaderLine contentLengthHl = warcRecord.getHeader("Content-Length");
+            if (contentLengthHl != null) {
+                try {
+                    this.contentLengthLong = Long.parseLong(contentLengthHl.value);
+                } catch (NumberFormatException ex) {
+                    this.contentLengthLong = -1;
+                }
+            }
+            HeaderLine paloadDigestHl = warcRecord.getHeader("WARC-Payload-Digest");
+            if (paloadDigestHl != null) {
+                this.payloadDigestStr = paloadDigestHl.value;
+            }
+
+            HeaderLine targetUriHl = warcRecord.getHeader("WARC-Target-URI");
+            if (targetUriHl != null) {
+                this.url = targetUriHl.value;
+            }
+            HeaderLine dateHl = warcRecord.getHeader("WARC-Date");
+            if (dateHl != null) {
+                try {
+                    this.date = sdf.parse(dateHl.value);
+                } catch (ParseException ex) {
+                    this.date = new Date(0);
                 }
             }
         }
+        LOG.debug("----------------- HTTP Header -----------------");
+        if (warcRecord.hasPayload()) {
+            try {
+                Payload payload = warcRecord.getPayload();
+                ByteCountingPushBackInputStream pcpbis = new ByteCountingPushBackInputStream(payload.getInputStream(), 8192);
+                if (isResponseType) {
+                    HttpHeader hh = HttpHeader.processPayload(HttpHeader.HT_RESPONSE, pcpbis, payload.getRemaining(), "SHA1");
+                    for (HeaderLine hl : hh.getHeaderList()) {
+                        System.out.println(hl.name + ": " + hl.value);
+                    }
+                    if (hh.statusCodeStr != null) {
+                        this.httpReturnCode = hh.statusCode;
+                    }
 
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            } catch (IOException ex) {
+                LOG.error("I/O Error", ex);
+            }
+        }
     }
 
 }

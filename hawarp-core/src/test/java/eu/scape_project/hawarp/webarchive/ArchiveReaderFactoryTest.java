@@ -81,13 +81,14 @@ public class ArchiveReaderFactoryTest {
         Object[][] data = new Object[][]{
             {"arc/example.arc.gz", 0},
             {"arc/example.arc", 1},
-            {"warc/example.warc.gz", 2}
+            {"warc/example.warc.gz", 0}
         };
         return Arrays.asList(data);
     }
 
     /**
      * Test of getReader method, of class ArchiveReaderFactory.
+     * @throws java.io.FileNotFoundException
      */
     @Test
     public void testGetReader() throws FileNotFoundException, IOException {
@@ -108,33 +109,21 @@ public class ArchiveReaderFactoryTest {
                 "http://www.unet.univie.ac.at/robots.txt",
                 "http://www.unet.univie.ac.at/~a9210170/scape/index.html",
                 "http://www.unet.univie.ac.at/~a9210170/scape/black.gif"
-            },
-            {
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
             }
+            
         };
-
-//        ArcReader reader = ArcReaderFactory.getReaderCompressed(arcFileStream);
-//        Iterator<ArcRecordBase> iterator = reader.iterator();
-//        while (iterator.hasNext()) {
-//            ArcRecordBase ar = iterator.next();
-//            System.out.println(testResource + ": " + ar.getUrlStr());
-//        }
         ArchiveReader reader = ArchiveReaderFactory.getReader(arcFileStream);
         int i = 0;
         while (reader.hasNext()) {
+            if(testResource.equals("warc/example.warc.gz") && i == 0) {
+                reader.next(); // skip first
+            }
             ArchiveRecord ar = reader.next();
-
             System.out.println("Test resource: "+testResource + ": " + ar.getUrl());
-            assertEquals("Record URL not as expected", expected[expValSetIndex][i], ar.getUrl());
+            assertEquals("Record URL not as expected at pos "+i+": ", expected[expValSetIndex][i], ar.getUrl());
             i++;
         }
-        assertTrue("Number of records incorrect", i > 0);
+        assertEquals("Number of records incorrect", expected[expValSetIndex].length, i);
     }
 
 }
