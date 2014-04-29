@@ -15,18 +15,30 @@
  */
 package eu.scape_project.cdx_creator;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.fasterxml.jackson.dataformat.csv.impl.CsvWriter;
 import eu.scape_project.cdx_creator.cli.CDXCreatorConfig;
 import eu.scape_project.hawarp.interfaces.ArchiveReader;
 import eu.scape_project.hawarp.mapreduce.JwatArcReaderFactory;
 import eu.scape_project.hawarp.utils.StringUtils;
 import eu.scape_project.hawarp.webarchive.ArchiveReaderFactory;
 import eu.scape_project.hawarp.webarchive.ArchiveRecord;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jwat.arc.ArcReader;
@@ -80,17 +92,26 @@ public class CDXCreationTask {
         try {
             fileInputStream = new FileInputStream(archiveFile);
             reader = ArchiveReaderFactory.getReader(fileInputStream);
-//            outputStream = new FileOutputStream(new File(cdxFilePath));
-//            Iterator<ArchiveRecordBase> arcIterator = reader.iterator();
-//            ArcRecordBase jwatArcRecord = null;
-//            while (arcIterator.hasNext()) {
-//                jwatArcRecord = arcIterator.next();
-//                if (jwatArcRecord != null) {
-//                    
-//                    
-//                    
-//                }
-//            }
+
+            List<ArchiveRecord> cdxArchRecords = new ArrayList<ArchiveRecord>();
+            while (reader.hasNext()) {
+                ArchiveRecord cdxArchRec = (ArchiveRecord) reader.next();
+                cdxArchRecords.add(cdxArchRec);
+            }
+
+            CsvMapper mapper = new CsvMapper();
+            CsvSchema schema = mapper.schemaFor(CdxArchiveRecord.class);
+            
+            schema = schema.withColumnSeparator('\t');
+
+            ObjectWriter myObjectWriter = mapper.writer(schema);
+            File tmpFile = new File("/home/onbscs/test.csv");
+            FileOutputStream tempFileOutputStream = new FileOutputStream(tmpFile);
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(tempFileOutputStream, 1024);
+            OutputStreamWriter writerOutputStream = new OutputStreamWriter(bufferedOutputStream, "UTF-8");
+
+            myObjectWriter.writeValue(writerOutputStream, cdxArchRecords);
+
             LOG.info("File processed: " + archiveFile.getAbsolutePath());
         } catch (FileNotFoundException ex) {
             LOG.error("File not found error", ex);

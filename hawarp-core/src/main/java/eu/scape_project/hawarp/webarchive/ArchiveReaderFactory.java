@@ -33,6 +33,8 @@ import org.jwat.warc.WarcConstants;
 public class ArchiveReaderFactory {
 
     public static final int LEADING_BYTES_BUFFER_LENGTH = 16;
+    
+    
 
     public static ArchiveReader getReader(InputStream inputStream) {
         ArchiveReader reader = null;

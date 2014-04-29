@@ -33,7 +33,7 @@ public class ArcArchiveReader implements ArchiveReader {
 
     ArcReader reader;
 
-    Iterator<ArcRecordBase> iterator;
+    Iterator<ArcRecordBase> iterator; 
 
     public ArcArchiveReader(InputStream is) throws IOException {
         reader = ArcReaderFactory.getReaderUncompressed(is);

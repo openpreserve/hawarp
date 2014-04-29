@@ -48,6 +48,10 @@ public class ArchiveRecord extends ArchiveRecordBase {
     {
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
+    
+    public ArchiveRecord() {
+        
+    }
 
     ArchiveRecord(ArcRecordBase arcRecord) {
         this.readerIdentifier = arcRecord.getFileName();
