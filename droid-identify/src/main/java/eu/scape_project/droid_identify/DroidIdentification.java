@@ -148,9 +148,9 @@ public class DroidIdentification {
     public void startApplication() throws IOException {
         long startClock = System.currentTimeMillis();
         File dir = new File(appConfig.getInputStr());
-        if (!dir.isDirectory()) {
-            throw new IllegalArgumentException("Input is not a directory: " + appConfig.getInputStr());
-        }
+//        if (!dir.isDirectory()) {
+//            throw new IllegalArgumentException("Input is not a directory: " + appConfig.getInputStr());
+//        }
         PrintStream pout = null;
         String outputPathStr = appConfig.getOutputStr();
         if (outputPathStr != null) {
