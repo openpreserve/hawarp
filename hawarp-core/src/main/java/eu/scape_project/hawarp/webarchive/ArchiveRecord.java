@@ -66,15 +66,19 @@ public class ArchiveRecord extends ArchiveRecordBase {
         }
         this.type = "response";
         this.date = arcRecord.getArchiveDate();
+        if(arcRecord.getResultCode() != null) {
+            this.httpReturnCode = arcRecord.getResultCode();
+        } else {
+            if(arcRecord.getHttpHeader() != null && arcRecord.getHttpHeader().statusCode != null) {
+                this.httpReturnCode = arcRecord.getHttpHeader().statusCode;
+            }
+            
+        }
     }
 
     ArchiveRecord(WarcRecord warcRecord) {
         boolean isResponseType = false;
-
-        LOG.debug("################ WARC Header ################");
-        for (HeaderLine hl : warcRecord.getHeaderList()) {
-            LOG.debug(hl.name + ": " + hl.value);
-        }
+        
         if (warcRecord.getHeaderList() != null) {
             HeaderLine warcTypeHl = warcRecord.getHeader("WARC-Type");
             if (warcTypeHl != null && warcTypeHl.value.equals("warcinfo")) {
@@ -116,25 +120,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
                 }
             }
         }
-        LOG.debug("----------------- HTTP Header -----------------");
-        if (warcRecord.hasPayload()) {
-            try {
-                Payload payload = warcRecord.getPayload();
-                ByteCountingPushBackInputStream pcpbis = new ByteCountingPushBackInputStream(payload.getInputStream(), 8192);
-                if (isResponseType) {
-                    HttpHeader hh = HttpHeader.processPayload(HttpHeader.HT_RESPONSE, pcpbis, payload.getRemaining(), "SHA1");
-                    for (HeaderLine hl : hh.getHeaderList()) {
-                        System.out.println(hl.name + ": " + hl.value);
-                    }
-                    if (hh.statusCodeStr != null) {
-                        this.httpReturnCode = hh.statusCode;
-                    }
 
-                }
-            } catch (IOException ex) {
-                LOG.error("I/O Error", ex);
-            }
-        }
     }
 
 }

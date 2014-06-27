@@ -41,11 +41,10 @@ import org.apache.commons.cli.ParseException;
  */
 public class CDXCreator {
 
-    private static final Log LOG = LogFactory.getLog(CDXCreator.class);
-
+    
     private static CDXCreatorConfig config;
 
-    public CDXCreator() {
+    public CDXCreator() {   
     }
 
     public static CDXCreatorConfig getConfig() {
@@ -84,7 +83,7 @@ public class CDXCreator {
             cdxCreationTask.createIndex();
         }
         long elapsedTimeMillis = System.currentTimeMillis() - startMillis;
-        LOG.info("Processing time (sec): " + elapsedTimeMillis / 1000F);
+      
         System.exit(0);
     }
 
