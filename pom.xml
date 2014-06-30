@@ -20,7 +20,6 @@
         <module>tika-identify</module>
         <module>tomar-prepare-inputdata</module>
         <module>arc2warc-migration-cli</module>
-        <module>arc2warc-migration-hdp</module>
         <module>cdx-creator</module>
     </modules>
  

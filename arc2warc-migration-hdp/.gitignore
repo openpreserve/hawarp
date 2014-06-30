@@ -1,8 +1,0 @@
-/target/
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-nbactions.xml
