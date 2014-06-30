@@ -16,6 +16,7 @@
  */
 package eu.scape_project.hawarp.mapreduce;
 
+import eu.scape_project.hawarp.webarchive.ArchiveRecordBase;
 import java.io.*;
 import java.util.Date;
 import org.apache.hadoop.io.Writable;
@@ -32,20 +33,9 @@ import org.apache.hadoop.io.Writable;
  *
  * @author shsdev https://github.com/shsdev
  */
-public class HadoopWebArchiveRecord implements Writable {
+public class HadoopWebArchiveRecord extends ArchiveRecordBase implements Writable {
 
-    private String readerIdentifier;
-    private String recordIdentifier;
-    private String url = null;
-    private String mimeType = null;
-    private String identifiedPayloadType;
-    private Date date = null;
-    private int httpReturnCode = -1;
-    private String ipAddress;
-    private String type;
-    private int contentLength;
     private byte[] contents;
-    private String payloadDigestStr;
 
     /**
      * Reset the properties
@@ -62,86 +52,6 @@ public class HadoopWebArchiveRecord implements Writable {
         payloadDigestStr = "";
     }
 
-    public String getReaderIdentifier() {
-        return readerIdentifier;
-    }
-
-    public void setReaderIdentifier(String readerIdentifier) {
-        this.readerIdentifier = readerIdentifier;
-    }
-
-    public String getRecordIdentifier() {
-        return recordIdentifier;
-    }
-
-    public void setRecordIdentifier(String recordIdentifier) {
-        this.recordIdentifier = recordIdentifier;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
-    }
-
-    public String getIdentifiedPayloadType() {
-        return identifiedPayloadType;
-    }
-
-    public void setIdentifiedPayloadType(String identifiedPayloadType) {
-        this.identifiedPayloadType = identifiedPayloadType;
-    }
-    
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public int getHttpReturnCode() {
-        return httpReturnCode;
-    }
-
-    public void setHttpReturnCode(int httpReturnCode) {
-        this.httpReturnCode = httpReturnCode;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public int getContentLength() {
-        return contentLength;
-    }
-
-    public void setContentLength(int contentLength) {
-        this.contentLength = contentLength;
-    }
-
     public byte[] getContents() {
         return contents;
     }
@@ -155,10 +65,6 @@ public class HadoopWebArchiveRecord implements Writable {
             return "";
         }
         return payloadDigestStr;
-    }
-
-    public void setPayloadDigestStr(String payloadDigestStr) {
-        this.payloadDigestStr = payloadDigestStr;
     }
 
     @Override
