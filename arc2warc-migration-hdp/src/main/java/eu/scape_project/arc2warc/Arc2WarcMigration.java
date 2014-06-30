@@ -69,6 +69,7 @@ import org.mvel2.MVEL;
  *
  * @author Sven Schlarb <https://github.com/shsdev>
  */
+@Deprecated
 public class Arc2WarcMigration {
 
     private static final Log LOG = LogFactory.getLog(Arc2WarcMigration.class);

@@ -55,6 +55,7 @@ import org.jwat.warc.WarcWriterFactory;
  *
  * @author Sven Schlarb https://github.com/shsdev
  */
+@Deprecated
 public class WarcCreatorTest {
 
     private static final Log LOG = LogFactory.getLog(WarcCreatorTest.class);

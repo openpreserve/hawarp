@@ -24,6 +24,7 @@ import org.apache.commons.cli.CommandLine;
  *
  * @author Sven Schlarb https://github.com/shsdev
  */
+@Deprecated
 public class Arc2WarcMigrationCliOptions extends CliOptions {
     
     public String CONTENTTYPEID_FLG = "m";

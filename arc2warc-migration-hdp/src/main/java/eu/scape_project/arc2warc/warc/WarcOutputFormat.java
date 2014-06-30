@@ -48,6 +48,7 @@ import org.jwat.warc.WarcWriterFactory;
  *
  * @author Sven Schlarb <https://github.com/shsdev>
  */
+@Deprecated
 public class WarcOutputFormat extends FileOutputFormat<Text, HadoopWebArchiveRecord> {
 
     private static final Log LOG = LogFactory.getLog(WarcOutputFormat.class);

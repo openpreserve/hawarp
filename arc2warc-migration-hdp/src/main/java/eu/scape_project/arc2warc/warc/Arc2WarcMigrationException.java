@@ -20,6 +20,7 @@ package eu.scape_project.arc2warc.warc;
  *
  * @author onbscs
  */
+@Deprecated
 public class Arc2WarcMigrationException extends Exception {
 
     public Arc2WarcMigrationException(String msg) {

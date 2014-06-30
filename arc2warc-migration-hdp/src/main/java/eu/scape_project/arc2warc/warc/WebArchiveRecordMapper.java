@@ -31,6 +31,7 @@ import org.mvel2.MVEL;
  *
  * @author Sven Schlarb <https://github.com/shsdev>
  */
+@Deprecated
 public class WebArchiveRecordMapper {
 
     private static final Log LOG = LogFactory.getLog(WebArchiveRecordMapper.class);

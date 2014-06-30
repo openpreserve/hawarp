@@ -23,6 +23,7 @@ import eu.scape_project.hawarp.cli.CliConfig;
  *
  * @author Sven Schlarb https://github.com/shsdev
  */
+@Deprecated
 public class Arc2WarcMigrationCliConfig extends CliConfig {
     
   

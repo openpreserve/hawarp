@@ -35,6 +35,7 @@ import java.net.URISyntaxException;
  *
  * @author Sven Schlarb <https://github.com/shsdev>
  */
+@Deprecated
 public class WarcCreator {
 
     private static final Log LOG = LogFactory.getLog(WarcCreator.class);
