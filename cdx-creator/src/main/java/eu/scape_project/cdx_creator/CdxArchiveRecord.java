@@ -19,36 +19,63 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.scape_project.hawarp.webarchive.ArchiveRecord;
+import eu.scape_project.hawarp.webarchive.ArchiveRecordBase;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
  *
  * @author onbscs
  */
-@JsonPropertyOrder(
-        {
-            "url", // a original url
-            "mimeType", // m mime type of original document
-            "date", // b date
-            "httpReturnCode", // s response code
-            "ipAddress" // e IP
-        }
-)
+//@JsonPropertyOrder(
+//        {
+//            "url", // a original url
+//            "mimeType", // m mime type of original document
+//            "date", // b date
+//            "httpReturnCode", // s response code
+//            "ipAddress", // e IP
+//            "startOffset" // offset in container
+//        }
+//)
 @JsonFilter("cdxfields")
 public class CdxArchiveRecord extends ArchiveRecord {
 
-    private CdxArchiveRecord(String url, String mimeType, Date date,
-            int httpReturnCode, String ipAddress) {
-        this.url = url;
-        this.mimeType = mimeType;
-        this.date = date;
-        this.httpReturnCode = httpReturnCode;
-        this.ipAddress = ipAddress;
+    /**
+     * Private constructor (see fromArchiveRecord)
+     */
+    private CdxArchiveRecord() {
     }
 
+    /**
+     * Copy superclass fields using reflection. The ArchiveRecord base
+     * class is part of the core module hawarp-core. CDX creator specific
+     * class annotations are therefore added in this derived class.
+     *
+     * @param ar ArchiveRecord object
+     * @return CdxArchiveRecord object
+     */
     public static CdxArchiveRecord fromArchiveRecord(ArchiveRecord ar) {
-        return new CdxArchiveRecord(ar.getUrl(), ar.getMimeType(), ar.getDate(),
-                ar.getHttpReturnCode(), ar.getIpAddress());
+        CdxArchiveRecord cdxArchiveRecord = new CdxArchiveRecord();
+        String methodName = null;
+        try {
+
+            Field[] fields = ar.getClass().getSuperclass().getDeclaredFields();
+            for (Field field : fields) {
+
+                methodName = field.getName().substring(0, 1).toUpperCase()
+                        + field.getName()
+                        .substring(1, field.getName().length());
+
+                Method method = ar.getClass().getSuperclass().getMethod("set" + methodName, field.getType());
+                method.invoke(cdxArchiveRecord, field.get(ar));
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return cdxArchiveRecord;
     }
 
     @JsonIgnore

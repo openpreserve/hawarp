@@ -15,6 +15,7 @@
  */
 package eu.scape_project.hawarp.webarchive;
 
+import static eu.scape_project.hawarp.utils.IOUtils.BUFFER_SIZE;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -36,21 +37,24 @@ import org.jwat.common.PayloadWithHeaderAbstract;
 import org.jwat.warc.WarcRecord;
 
 /**
+ * ArchiveRecord is a flat properties representation of a web archive record. It
+ * is build from ARC or WARC records, the properties are initialised in the
+ * contructors for ARC and WARC records respectively.
  *
  * @author onbscs
  */
 public class ArchiveRecord extends ArchiveRecordBase {
 
-    private static final Log LOG = LogFactory.getLog(ArchiveRecord.class);
+//    private static final Log LOG = LogFactory.getLog(ArchiveRecord.class);
 
-    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     {
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
-    
+
     public ArchiveRecord() {
-        
+
     }
 
     ArchiveRecord(ArcRecordBase arcRecord) {
@@ -66,19 +70,20 @@ public class ArchiveRecord extends ArchiveRecordBase {
         }
         this.type = "response";
         this.date = arcRecord.getArchiveDate();
-        if(arcRecord.getResultCode() != null) {
+        if (arcRecord.getResultCode() != null) {
             this.httpReturnCode = arcRecord.getResultCode();
         } else {
-            if(arcRecord.getHttpHeader() != null && arcRecord.getHttpHeader().statusCode != null) {
+            if (arcRecord.getHttpHeader() != null && arcRecord.getHttpHeader().statusCode != null) {
                 this.httpReturnCode = arcRecord.getHttpHeader().statusCode;
             }
-            
+
         }
+        this.startOffset = arcRecord.getStartOffset();
     }
 
     ArchiveRecord(WarcRecord warcRecord) {
         boolean isResponseType = false;
-        
+
         if (warcRecord.getHeaderList() != null) {
             HeaderLine warcTypeHl = warcRecord.getHeader("WARC-Type");
             if (warcTypeHl != null && warcTypeHl.value.equals("warcinfo")) {
@@ -119,6 +124,27 @@ public class ArchiveRecord extends ArchiveRecordBase {
                     this.date = new Date(0);
                 }
             }
+            Payload pl = warcRecord.getPayload();
+
+            long length = pl.getTotalLength();
+            // http header
+            try {
+                ByteCountingPushBackInputStream pbin = new ByteCountingPushBackInputStream(warcRecord.getPayloadContent(), BUFFER_SIZE);
+
+                long consumed = length - pbin.getConsumed();
+                HttpHeader httpHeader = HttpHeader.processPayload(HttpHeader.HT_RESPONSE, pbin, length, "SHA1");
+                if (httpHeader != null && httpHeader.statusCode != null) {
+                    this.httpReturnCode = httpHeader.statusCode;
+                }
+                // long to int conversion safe, payload header size must not exceed buffer size
+                pbin.unread((int) consumed);
+
+            } catch (IOException ex) {
+                //LOG.warn("Unable to process HTTP metadata", ex);
+            }
+            
+            this.startOffset = warcRecord.getStartOffset();
+            
         }
 
     }

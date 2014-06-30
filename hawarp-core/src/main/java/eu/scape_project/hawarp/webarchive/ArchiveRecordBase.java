@@ -24,18 +24,20 @@ import java.util.Date;
  */
 public abstract class ArchiveRecordBase {
     
-    protected String readerIdentifier;
-    protected String recordIdentifier;
-    protected String url = null;
-    protected String mimeType = null;
-    protected String identifiedPayloadType;
-    protected Date date = null;
-    protected int httpReturnCode = -1;
-    protected String ipAddress;
-    protected String type;
-    protected int contentLength;
-    protected long contentLengthLong;
-    protected String payloadDigestStr;
+    public String readerIdentifier;
+    public String recordIdentifier;
+    public String url = null;
+    public String mimeType = null;
+    public String identifiedPayloadType;
+    public Date date = null;
+    public int httpReturnCode = -1;
+    public String ipAddress;
+    public String type;
+    public int contentLength;
+    public long contentLengthLong;
+    public long startOffset;
+    public String payloadDigestStr;
+
     
     public String getReaderIdentifier() {
         return readerIdentifier;
@@ -121,8 +123,20 @@ public abstract class ArchiveRecordBase {
         return contentLengthLong;
     }
 
+    public long getStartOffset() {
+        return startOffset;
+    }
+
+    public void setStartOffset(long startOffset) {
+        this.startOffset = startOffset;
+    }
+
     public void setContentLengthLong(long contentLengthLong) {
         this.contentLengthLong = contentLengthLong;
+    }
+    
+    public String getPayloadDigestStr() {
+        return payloadDigestStr;
     }
     
     public void setPayloadDigestStr(String payloadDigestStr) {

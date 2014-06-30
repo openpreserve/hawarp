@@ -97,15 +97,20 @@ public class CDXCreationTask {
 
             CsvMapper mapper = new CsvMapper();
             mapper.setDateFormat(new SimpleDateFormat("yyyyMMddHHmmss"));
-            SerializationConfig sc = mapper.getSerializationConfig();
-
-            CsvSchema schema = mapper.schemaFor(CdxArchiveRecord.class).withColumnSeparator('\t').withoutQuoteChar();
             
-            String[] cdxFields = {"url", "mimeType", "date", "httpReturnCode", "ipAddress"};
-
+            String[] cdxFields = {"url", "mimeType", "date", "httpReturnCode", "ipAddress", "startOffset"};
+           
+            CsvSchema.Builder builder = CsvSchema.builder();
+            for(String cdxField : cdxFields) {
+                builder.addColumn(cdxField);
+            }
+            builder.setColumnSeparator('\t');
+            CsvSchema schema = builder.build();
+            schema = schema.withoutQuoteChar();
+            
             SimpleFilterProvider filterProvider = new SimpleFilterProvider()
                     .addFilter("cdxfields", FilterExceptFilter.filterOutAllExcept(cdxFields));
-
+            
             ObjectWriter cdxArchRecordsWriter = mapper.writer(filterProvider).withSchema(schema);
             
             PrintStream pout = null;
@@ -122,8 +127,6 @@ public class CDXCreationTask {
             }
             
             cdxArchRecordsWriter.writeValue(System.out, cdxArchRecords);
-            
-            
 
             if (pout != null) {
                 pout.close();
