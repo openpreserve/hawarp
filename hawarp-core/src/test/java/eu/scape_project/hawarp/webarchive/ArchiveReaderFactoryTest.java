@@ -80,8 +80,7 @@ public class ArchiveReaderFactoryTest {
     public static Collection<Object[]> data() {
         Object[][] data = new Object[][]{
             {"arc/example.arc.gz", 0},
-            {"arc/example.arc", 1},
-            {"warc/example.warc.gz", 0}
+            {"arc/example.arc", 1}
         };
         return Arrays.asList(data);
     }
