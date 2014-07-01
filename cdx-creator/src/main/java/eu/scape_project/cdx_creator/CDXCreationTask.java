@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
@@ -103,12 +104,12 @@ public class CDXCreationTask {
             CsvMapper mapper = new CsvMapper();
             mapper.setDateFormat(GMTGTechDateFormat);
             
-            LOG.info("Time zone: "+GMTGTechDateFormat.getTimeZone().getDisplayName()+" ("+GMTGTechDateFormat.getTimeZone().getID()+")");
-            
-            String[] cdxFields = {"url", "mimeType", "date", "httpReturnCode", "ipAddress", "startOffset"};
+            String cdxfileCsColumns = config.getCdxfileCsColumns();
+            List<String> cdxfileCsColumnsList = Arrays.asList(cdxfileCsColumns.split("\\s*,\\s*"));
+            String[] cdxfileCsColumnsArray = cdxfileCsColumnsList.toArray(new String[cdxfileCsColumnsList.size()]);
 
             CsvSchema.Builder builder = CsvSchema.builder();
-            for (String cdxField : cdxFields) {
+            for (String cdxField : cdxfileCsColumnsList) {
                 builder.addColumn(cdxField);
             }
             builder.setColumnSeparator('\t');
@@ -116,7 +117,7 @@ public class CDXCreationTask {
             schema = schema.withoutQuoteChar();
 
             SimpleFilterProvider filterProvider = new SimpleFilterProvider()
-                    .addFilter("cdxfields", FilterExceptFilter.filterOutAllExcept(cdxFields));
+                    .addFilter("cdxfields", FilterExceptFilter.filterOutAllExcept(cdxfileCsColumnsArray));
 
             ObjectWriter cdxArchRecordsWriter = mapper.writer(filterProvider).withSchema(schema);
 

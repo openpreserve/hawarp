@@ -18,6 +18,7 @@ package eu.scape_project.cdx_creator;
 
 import eu.scape_project.cdx_creator.cli.CDXCreatorConfig;
 import eu.scape_project.cdx_creator.cli.CDXCreatorOptions;
+import eu.scape_project.hawarp.utils.PropertyUtil;
 import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -41,10 +42,11 @@ import org.apache.commons.cli.ParseException;
  */
 public class CDXCreator {
 
-    
     private static CDXCreatorConfig config;
 
-    public CDXCreator() {   
+    private static PropertyUtil pu;
+
+    public CDXCreator() {
     }
 
     public static CDXCreatorConfig getConfig() {
@@ -71,19 +73,28 @@ public class CDXCreator {
         } else {
             cdxCreatorOpts.initOptions(cmd, config);
         }
-        CDXCreator cdxCreator = new CDXCreator();
-        long startMillis = System.currentTimeMillis();
-        File input = new File(config.getInputStr());
         
-        if(input.isDirectory()) {
+        // configuration properties
+        if (config.getPropertiesFilePath() != null) {
+            pu = new PropertyUtil(config.getPropertiesFilePath(), true);
+        } else {
+            pu = new PropertyUtil("/eu/scape_project/cdx_creator/config.properties", false);
+        }
+        
+        config.setCdxfileCsColumns(pu.getProp("cdxfile.cscolumns"));
+        
+        CDXCreator cdxCreator = new CDXCreator();
+
+        File input = new File(config.getInputStr());
+
+        if (input.isDirectory()) {
             config.setDirectoryInput(true);
             cdxCreator.traverseDir(input);
         } else {
             CDXCreationTask cdxCreationTask = new CDXCreationTask(config, input);
             cdxCreationTask.createIndex();
         }
-        long elapsedTimeMillis = System.currentTimeMillis() - startMillis;
-      
+
         System.exit(0);
     }
 

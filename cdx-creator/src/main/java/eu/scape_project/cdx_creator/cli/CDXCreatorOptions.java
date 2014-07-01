@@ -34,6 +34,8 @@ public class CDXCreatorOptions extends CliOptions {
     public CDXCreatorOptions() {
         options.addOption(OUTPUT_FLG, OUTPUT_OPT, true, OUTPUT_OPT_DESC);
         options.addOption(INPUTPATHREGEX_FLG, INPUTPATHREGEX_OPT, true, INPUTPATHREGEX_OPT_DESC);
+        options.addOption(PROPERTIESFILE_FLG, PROPERTIESFILE_OPT, true, PROPERTIESFILE_OPT_DESC);
+
     }
 
     public void initOptions(CommandLine cmd, CDXCreatorConfig pc) {

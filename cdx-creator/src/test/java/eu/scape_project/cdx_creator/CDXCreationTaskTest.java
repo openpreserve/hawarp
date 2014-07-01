@@ -19,6 +19,7 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import eu.scape_project.cdx_creator.cli.CDXCreatorConfig;
 import eu.scape_project.hawarp.utils.IOUtils;
+import eu.scape_project.hawarp.utils.PropertyUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,6 +46,9 @@ public class CDXCreationTaskTest {
 
     private static File tempDir;
 
+    private CDXCreatorConfig conf;
+    private PropertyUtil pu;
+
     public CDXCreationTaskTest() {
     }
 
@@ -60,7 +64,8 @@ public class CDXCreationTaskTest {
 
     @Before
     public void setUp() throws Exception {
-
+        conf = new CDXCreatorConfig();
+        pu = new PropertyUtil("/eu/scape_project/cdx_creator/config.properties", false);
     }
 
     @After
@@ -78,14 +83,14 @@ public class CDXCreationTaskTest {
         assertNotNull(arcInputStream);
         File tmpArcFile = new File(tempDir.getAbsolutePath() + "/" + arcFileName);
         String outputFileName = tmpArcFile + ".cdx";
-        CDXCreatorConfig conf = new CDXCreatorConfig();
         conf.setInputStr(tmpArcFile.getAbsolutePath());
         conf.setOutputStr(outputFileName);
         conf.setDirectoryInput(false);
+        conf.setCdxfileCsColumns(pu.getProp("cdxfile.cscolumns"));
         CDXCreationTask cdxCreator = new CDXCreationTask(conf, arcFile);
         cdxCreator.createIndex();
         assertTrue("File does not exist: " + outputFileName, (new File(outputFileName)).exists());
-        // check WARC CDX file (0: no lines skipped)
+        // check WARC CDX file 
         checkCdxArcFile(outputFileName);
     }
 
@@ -100,14 +105,14 @@ public class CDXCreationTaskTest {
         assertNotNull(arcInputStream);
         File tmpWarcFile = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
         String outputFileName = tmpWarcFile + ".cdx";
-        CDXCreatorConfig conf = new CDXCreatorConfig();
         conf.setInputStr(tmpWarcFile.getAbsolutePath());
         conf.setOutputStr(outputFileName);
         conf.setDirectoryInput(false);
+        conf.setCdxfileCsColumns(pu.getProp("cdxfile.cscolumns"));
         CDXCreationTask cdxCreator = new CDXCreationTask(conf, warcFile);
         cdxCreator.createIndex();
         assertTrue("File does not exist: " + outputFileName, (new File(outputFileName)).exists());
-        // check WARC CDX file (1: skipping 1 line)
+        // check WARC CDX file
         checkCdxWarcFile(outputFileName);
     }
 
@@ -148,7 +153,7 @@ public class CDXCreationTaskTest {
         assertEquals(5, i);
         input.close();
     }
-    
+
     /**
      * Check CDX WARC index file
      *
