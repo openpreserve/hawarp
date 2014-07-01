@@ -26,14 +26,10 @@ import java.util.TimeZone;
 public class DateUtils {
 
     public static final SimpleDateFormat GMTUTCUnixTsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-    {
-        GMTUTCUnixTsFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-    }
-    
     public static final SimpleDateFormat GMTGTechDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
-    {
+    static {
+        GMTUTCUnixTsFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         GMTGTechDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 

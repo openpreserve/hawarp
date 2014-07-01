@@ -24,6 +24,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import eu.scape_project.cdx_creator.cli.CDXCreatorConfig;
 import eu.scape_project.hawarp.interfaces.ArchiveReader;
+import static eu.scape_project.hawarp.utils.DateUtils.GMTGTechDateFormat;
 import eu.scape_project.hawarp.utils.StringUtils;
 import eu.scape_project.hawarp.webarchive.ArchiveReaderFactory;
 import eu.scape_project.hawarp.webarchive.ArchiveRecord;
@@ -36,9 +37,9 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import static eu.scape_project.hawarp.utils.DateUtils.GMTGTechDateFormat;
 
 /**
  * CDX creation task
@@ -56,6 +57,8 @@ public class CDXCreationTask {
     private final String cdxFileName;
 
     private final String cdxFilePath;
+    
+   
 
     public CDXCreationTask(CDXCreatorConfig config, File archiveFile) {
         this.config = config;
@@ -99,7 +102,9 @@ public class CDXCreationTask {
 
             CsvMapper mapper = new CsvMapper();
             mapper.setDateFormat(GMTGTechDateFormat);
-
+            
+            LOG.info("Time zone: "+GMTGTechDateFormat.getTimeZone().getDisplayName()+" ("+GMTGTechDateFormat.getTimeZone().getID()+")");
+            
             String[] cdxFields = {"url", "mimeType", "date", "httpReturnCode", "ipAddress", "startOffset"};
 
             CsvSchema.Builder builder = CsvSchema.builder();
