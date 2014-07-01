@@ -40,8 +40,9 @@ import org.jwat.arc.ArcReaderFactory;
 import org.jwat.arc.ArcRecordBase;
 
 /**
+ * Archive reader factory test
  *
- * @author onbscs
+ * @author Sven Schlarb <https://github.com/shsdev>
  */
 @RunWith(Parameterized.class)
 public class ArchiveReaderFactoryTest {
@@ -87,6 +88,7 @@ public class ArchiveReaderFactoryTest {
 
     /**
      * Test of getReader method, of class ArchiveReaderFactory.
+     *
      * @throws java.io.FileNotFoundException
      */
     @Test
@@ -109,17 +111,17 @@ public class ArchiveReaderFactoryTest {
                 "http://www.unet.univie.ac.at/~a9210170/scape/index.html",
                 "http://www.unet.univie.ac.at/~a9210170/scape/black.gif"
             }
-            
+
         };
         ArchiveReader reader = ArchiveReaderFactory.getReader(arcFileStream);
         int i = 0;
         while (reader.hasNext()) {
-            if(testResource.equals("warc/example.warc.gz") && i == 0) {
+            if (testResource.equals("warc/example.warc.gz") && i == 0) {
                 reader.next(); // skip first
             }
             ArchiveRecord ar = reader.next();
-            System.out.println("Test resource: "+testResource + ": " + ar.getUrl());
-            assertEquals("Record URL not as expected at pos "+i+": ", expected[expValSetIndex][i], ar.getUrl());
+            System.out.println("Test resource: " + testResource + ": " + ar.getUrl());
+            assertEquals("Record URL not as expected at pos " + i + ": ", expected[expValSetIndex][i], ar.getUrl());
             i++;
         }
         //assertEquals("Number of records incorrect", expected[expValSetIndex].length, i);

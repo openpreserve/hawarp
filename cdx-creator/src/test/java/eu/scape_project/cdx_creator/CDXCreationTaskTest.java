@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
 /**
  * CDXCreationTask test class
  *
- * @author onbscs
+ * @author Sven Schlarb <https://github.com/shsdev>
  */
 public class CDXCreationTaskTest {
 

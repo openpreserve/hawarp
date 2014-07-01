@@ -35,6 +35,7 @@ import org.jwat.arc.ArcRecordBase;
 import org.jwat.common.HeaderLine;
 import org.jwat.warc.WarcRecord;
 import org.jwat.warc.WarcWriter;
+import static eu.scape_project.hawarp.utils.DateUtils.GMTUTCUnixTsFormat;
 
 /**
  *
@@ -54,10 +55,10 @@ class RecordMigrator {
 
     private boolean arcMetadataRecord;
     
-    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    {
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-    }
+//    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+//    {
+//        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+//    }
     
     public RecordMigrator(WarcWriter writer, String warcFileName) {
         this.writer = writer;
@@ -67,7 +68,7 @@ class RecordMigrator {
     public void createWarcInfoRecord() throws IOException, URISyntaxException {
         WarcRecord record = WarcRecord.createRecord(writer);
         record.header.addHeader("WARC-Type", "warcinfo");
-        record.header.addHeader("WARC-Date", sdf.format(Calendar.getInstance().getTime()));
+        record.header.addHeader("WARC-Date", GMTUTCUnixTsFormat.format(Calendar.getInstance().getTime()));
 
         warcInfoId = getRecordID().toString();
 
@@ -93,7 +94,7 @@ class RecordMigrator {
         String type = (arcMetadataRecord) ? "metadata" : (mimeType.equals("text/dns")) ? "response" : "response";
         record.header.addHeader("WARC-Type", type);
         record.header.addHeader("WARC-Target-URI", jwatArcRecord.getUrlStr());
-        record.header.addHeader("WARC-Date", sdf.format(jwatArcRecord.getArchiveDate()));
+        record.header.addHeader("WARC-Date", GMTUTCUnixTsFormat.format(jwatArcRecord.getArchiveDate()));
         record.header.addHeader("WARC-Record-ID", recordId);
         if (arcMetadataRecord) {
             // ARC metadata record relates to the WARC info record

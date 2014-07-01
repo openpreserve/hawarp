@@ -38,10 +38,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import static eu.scape_project.hawarp.utils.DateUtils.GMTGTechDateFormat;
 
 /**
+ * CDX creation task
  *
- * @author onbscs
+ * @author Sven Schlarb <https://github.com/shsdev>
  */
 public class CDXCreationTask {
 
@@ -96,23 +98,23 @@ public class CDXCreationTask {
             }
 
             CsvMapper mapper = new CsvMapper();
-            mapper.setDateFormat(new SimpleDateFormat("yyyyMMddHHmmss"));
-            
+            mapper.setDateFormat(GMTGTechDateFormat);
+
             String[] cdxFields = {"url", "mimeType", "date", "httpReturnCode", "ipAddress", "startOffset"};
-           
+
             CsvSchema.Builder builder = CsvSchema.builder();
-            for(String cdxField : cdxFields) {
+            for (String cdxField : cdxFields) {
                 builder.addColumn(cdxField);
             }
             builder.setColumnSeparator('\t');
             CsvSchema schema = builder.build();
             schema = schema.withoutQuoteChar();
-            
+
             SimpleFilterProvider filterProvider = new SimpleFilterProvider()
                     .addFilter("cdxfields", FilterExceptFilter.filterOutAllExcept(cdxFields));
-            
+
             ObjectWriter cdxArchRecordsWriter = mapper.writer(filterProvider).withSchema(schema);
-            
+
             PrintStream pout = null;
             String outputPathStr = config.getOutputStr();
             if (outputPathStr != null) {
@@ -125,7 +127,7 @@ public class CDXCreationTask {
                     LOG.error("File not found error", ex);
                 }
             }
-            
+
             cdxArchRecordsWriter.writeValue(System.out, cdxArchRecords);
 
             if (pout != null) {
