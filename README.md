@@ -6,6 +6,8 @@ HAdoop-based Web Archive Record Processing.
 This project consists of a collection of tools to process web archive records
 using the Hadoop framework. 
 
+Requires Java >= 1.7
+
 Several command line applications are aggregated as modules in this project:
 
 arc2warc-migration-cli
