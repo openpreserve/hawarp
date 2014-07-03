@@ -16,7 +16,6 @@
 
 package eu.scape_project.hawarp.interfaces;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -26,7 +25,7 @@ import java.io.IOException;
  */
 public interface Identifier {
     
-    public static final String MIME_UNKNOWN = "application/octet-stream";
+    public static final String MIME_UNKNOWN = "no-type";
     
     public String identify(byte[] prefix);
     

@@ -92,5 +92,21 @@ public class StringUtilsTest {
         String result = StringUtils.formatCommandOutput(pattern, inlist, outlist);
         assertEquals(expResult, result);
     }
+    
+     /**
+     * Test of formatCommandOutput method, of class StrUt.
+     */
+    @Test
+    public void testGetStrUntilChar() {
+        System.out.println("getStrUntilChar");
+        String testStr1 = "first part;second part";
+        String result1 = StringUtils.getStrUntilChar(testStr1, ";");
+        String expResult1 = "first part";
+        assertEquals(expResult1, result1);
+        String testStr2 = "Do not change";
+        String result2 = StringUtils.getStrUntilChar(testStr2, ";");
+        String expResult2 = "Do not change";
+        assertEquals(expResult2, result2);
+    }
 
 }

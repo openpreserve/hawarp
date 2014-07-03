@@ -25,6 +25,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,6 +66,27 @@ public class StringUtils {
     public static String formatCommandOutput(String pattern, String inlist, String outlist) {
         String ptmapred_cmd = String.format(pattern, inlist, outlist);
         return ptmapred_cmd;
+    }
+    
+    public static String getStrUntilChar(String str, String c) {
+        int index = str.indexOf(c);
+        if(str.contains(c)) {
+            return str.substring(0, index);
+        } else {
+            return str;
+        }
+    }
+    
+    public static String normaliseMimetype(String mime) {
+        String normalised = getStrUntilChar(mime,";");
+        HashMap<String,String> replMap = new HashMap<String,String>();
+        replMap.put("no-type", "application/octet-stream");
+        for(String key : replMap.keySet()) {
+            if(normalised.contains(key)) {
+                normalised = normalised.replace(key, replMap.get(key));
+            }
+        }
+        return normalised.toLowerCase();
     }
 
 }

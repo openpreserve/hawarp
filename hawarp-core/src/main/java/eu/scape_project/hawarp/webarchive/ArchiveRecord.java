@@ -15,7 +15,9 @@
  */
 package eu.scape_project.hawarp.webarchive;
 
+import static eu.scape_project.hawarp.utils.DateUtils.GMTUTCUnixTsFormat;
 import static eu.scape_project.hawarp.utils.IOUtils.BUFFER_SIZE;
+import eu.scape_project.hawarp.utils.StringUtils;
 import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.text.ParseException;
@@ -38,13 +40,6 @@ import org.jwat.warc.WarcRecord;
  */
 public class ArchiveRecord extends ArchiveRecordBase {
 
-//    private static final Log LOG = LogFactory.getLog(ArchiveRecord.class);
-    public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-    {
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-    }
-
     public ArchiveRecord() {
 
     }
@@ -56,9 +51,9 @@ public class ArchiveRecord extends ArchiveRecordBase {
             this.ipAddress = arcRecord.header.ipAddressStr;
         }
         if (!arcRecord.header.contentTypeStr.isEmpty()) {
-            this.mimeType = arcRecord.header.contentTypeStr;
+            this.mimeType = StringUtils.normaliseMimetype(arcRecord.header.contentTypeStr);
         } else {
-            this.mimeType = "unknown/unknown";
+            this.mimeType = eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
         }
         this.type = "response";
         this.date = arcRecord.getArchiveDate();
@@ -88,6 +83,10 @@ public class ArchiveRecord extends ArchiveRecordBase {
                 HttpHeader httpHeader = HttpHeader.processPayload(HttpHeader.HT_RESPONSE, pbin, length, "SHA1");
                 if (httpHeader != null && httpHeader.statusCode != null) {
                     this.httpReturnCode = httpHeader.statusCode;
+                }
+                if (httpHeader != null && httpHeader.contentType != null) {
+                    // take only mime type part, discard extended mime type information
+                    this.mimeType = StringUtils.normaliseMimetype(httpHeader.contentType);
                 }
                 // long to int conversion safe, payload header size must not exceed buffer size
                 pbin.unread((int) consumed);
@@ -136,7 +135,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
             HeaderLine dateHl = warcRecord.getHeader("WARC-Date");
             if (dateHl != null) {
                 try {
-                    this.date = sdf.parse(dateHl.value);
+                    this.date = GMTUTCUnixTsFormat.parse(dateHl.value);
                 } catch (ParseException ex) {
                     this.date = new Date(0);
                 }
