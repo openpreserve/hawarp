@@ -17,23 +17,16 @@ package eu.scape_project.hawarp.webarchive;
 
 import static eu.scape_project.hawarp.utils.IOUtils.BUFFER_SIZE;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jwat.arc.ArcRecordBase;
 import org.jwat.common.ByteCountingPushBackInputStream;
 import org.jwat.common.HeaderLine;
 import org.jwat.common.HttpHeader;
 import org.jwat.common.Payload;
-import org.jwat.common.PayloadWithHeaderAbstract;
 import org.jwat.warc.WarcRecord;
 
 /**
@@ -46,7 +39,6 @@ import org.jwat.warc.WarcRecord;
 public class ArchiveRecord extends ArchiveRecordBase {
 
 //    private static final Log LOG = LogFactory.getLog(ArchiveRecord.class);
-
     public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     {
@@ -79,6 +71,31 @@ public class ArchiveRecord extends ArchiveRecordBase {
 
         }
         this.startOffset = arcRecord.getStartOffset();
+
+        // Some ARC records do not have HTTP Response metadata in the ARC header
+        // but these metadata are part of the payload content. One possible reason
+        // for why this could have happened is a malformed request URL breaking
+        // the metadata creation during the crawl. In such a case the original 
+        // response was stored together with the response metadata as payload.
+        // For this reason HTTP Response metadata that are part of the payload
+        // must be read here.
+        if (arcRecord.getHttpHeader() == null) {
+            Payload pl = arcRecord.getPayload();
+            long length = pl.getTotalLength();
+            try {
+                ByteCountingPushBackInputStream pbin = new ByteCountingPushBackInputStream(arcRecord.getPayloadContent(), BUFFER_SIZE);
+                long consumed = length - pbin.getConsumed();
+                HttpHeader httpHeader = HttpHeader.processPayload(HttpHeader.HT_RESPONSE, pbin, length, "SHA1");
+                if (httpHeader != null && httpHeader.statusCode != null) {
+                    this.httpReturnCode = httpHeader.statusCode;
+                }
+                // long to int conversion safe, payload header size must not exceed buffer size
+                pbin.unread((int) consumed);
+
+            } catch (IOException ex) {
+                //LOG.warn("Unable to process HTTP metadata", ex);
+            }
+        }
     }
 
     ArchiveRecord(WarcRecord warcRecord) {
@@ -142,9 +159,9 @@ public class ArchiveRecord extends ArchiveRecordBase {
             } catch (IOException ex) {
                 //LOG.warn("Unable to process HTTP metadata", ex);
             }
-            
+
             this.startOffset = warcRecord.getStartOffset();
-            
+
         }
 
     }
