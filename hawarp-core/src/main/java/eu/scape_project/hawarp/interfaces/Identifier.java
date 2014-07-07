@@ -25,7 +25,7 @@ import java.io.IOException;
  */
 public interface Identifier {
     
-    public static final String MIME_UNKNOWN = "no-type";
+    public static final String MIME_UNKNOWN = "application/octet-stream";
     
     public String identify(byte[] prefix);
     
