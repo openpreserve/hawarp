@@ -36,7 +36,7 @@ import java.util.Date;
 //            "date", // b date
 //            "httpReturnCode", // s response code
 //            "ipAddress", // e IP
-//            "startOffset" // offset in container
+//            "offsetCompressed" // offset in container
 //        }
 //)
 @JsonFilter("cdxfields")
@@ -76,42 +76,6 @@ public class CdxArchiveRecord extends ArchiveRecord {
             e.printStackTrace();
         }
         return cdxArchiveRecord;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getRecordIdentifier() {
-        return this.recordIdentifier;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getReaderIdentifier() {
-        return this.readerIdentifier;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getIdentifiedPayloadType() {
-        return this.identifiedPayloadType;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getType() {
-        return this.type;
-    }
-
-    @JsonIgnore
-    @Override
-    public int getContentLength() {
-        return this.contentLength;
-    }
-
-    @JsonIgnore
-    @Override
-    public long getContentLengthLong() {
-        return this.contentLengthLong;
     }
 
 }

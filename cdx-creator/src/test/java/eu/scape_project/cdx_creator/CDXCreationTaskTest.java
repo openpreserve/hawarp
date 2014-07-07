@@ -88,7 +88,7 @@ public class CDXCreationTaskTest {
         conf.setDirectoryInput(false);
         conf.setCdxfileCsColumns(pu.getProp("cdxfile.cscolumns"));
         conf.setCdxfileCsHeader(pu.getProp("cdxfile.csheader"));
-        CDXCreationTask cdxCreator = new CDXCreationTask(conf, arcFile);
+        CDXCreationTask cdxCreator = new CDXCreationTask(conf, arcFile, arcFileName);
         cdxCreator.createIndex();
         assertTrue("File does not exist: " + outputFileName, (new File(outputFileName)).exists());
         // check WARC CDX file 
@@ -111,7 +111,7 @@ public class CDXCreationTaskTest {
         conf.setDirectoryInput(false);
         conf.setCdxfileCsColumns(pu.getProp("cdxfile.cscolumns"));
         conf.setCdxfileCsHeader(pu.getProp("cdxfile.csheader"));
-        CDXCreationTask cdxCreator = new CDXCreationTask(conf, warcFile);
+        CDXCreationTask cdxCreator = new CDXCreationTask(conf, warcFile, warcFileName);
         cdxCreator.createIndex();
         assertTrue("File does not exist: " + outputFileName, (new File(outputFileName)).exists());
         // check WARC CDX file
@@ -136,19 +136,19 @@ public class CDXCreationTaskTest {
                     assertEquals("CDX A b e a m s c k r V v D d g M n", line);
                     break;
                 case 1:
-                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc\ttext/plain\t20130522085320\t-1\t0.0.0.0\t0", line);
+                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc\t20130522085320\t0.0.0.0\tfiledesc://3-2-20130522085320-00000-prepc2.arc\ttext/plain\t-1\t-\t-\t-\t0\t-\t-\t-\texample.arc.gz\t-\t2035", line);
                     break;
                 case 2:
-                    assertEquals("dns:fue.onb.ac.at\ttext/dns\t20130522085319\t-1\t172.16.4.1\t1353", line);
+                    assertEquals("dns:fue.onb.ac.at\t20130522085319\t172.16.4.1\tdns:fue.onb.ac.at\ttext/dns\t-1\t-\t-\t-\t1353\t-\t-\t-\texample.arc.gz\t-\t2035", line);
                     break;
                 case 3:
-                    assertEquals("http://fue.onb.ac.at/robots.txt\ttext/html\t20130522085320\t404\t172.16.14.151\t1467", line);
+                    assertEquals("http://fue.onb.ac.at/robots.txt\t20130522085320\t172.16.14.151\thttp://fue.onb.ac.at/robots.txt\ttext/html\t404\t-\t-\t-\t1467\t-\t-\t-\texample.arc.gz\t-\t2035", line);
                     break;
                 case 4:
-                    assertEquals("http://fue.onb.ac.at/test/\ttext/html\t20130522085321\t200\t172.16.14.151\t2033", line);
+                    assertEquals("http://fue.onb.ac.at/test/\t20130522085321\t172.16.14.151\thttp://fue.onb.ac.at/test/\ttext/html\t200\t-\t-\t-\t2033\t-\t-\t-\texample.arc.gz\t-\t2035", line);
                     break;
                 case 5:
-                    assertEquals("http://fue.onb.ac.at/test/image.png\timage/png\t20130522085321\t200\t172.16.14.151\t2545", line);
+                    assertEquals("http://fue.onb.ac.at/test/image.png\t20130522085321\t172.16.14.151\thttp://fue.onb.ac.at/test/image.png\timage/png\t200\t-\t-\t-\t2545\t-\t-\t-\texample.arc.gz\t-\t2035", line);
                     break;
                 default:
                     break;
@@ -177,22 +177,22 @@ public class CDXCreationTaskTest {
                     assertEquals("CDX A b e a m s c k r V v D d g M n", line);
                     break;
                 case 1:
-                    assertEquals("\tapplication/warc-fields\t20140626075501\t-1\t\t0", line);
+                    assertEquals("\t20140626075501\t\t\tapplication/warc-fields\t-1\t-\t-\t-\t0\t-\t-\t-\texample.warc\t-\t5104", line);
                     break;
                 case 2:
-                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc\ttext/plain\t20130522085320\t-1\t0.0.0.0\t357", line);
+                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc\t20130522085320\t0.0.0.0\tfiledesc://3-2-20130522085320-00000-prepc2.arc\ttext/plain\t-1\t-\t-\t-\t357\t-\t-\t-\texample.warc\t-\t5104", line);
                     break;
                 case 3:
-                    assertEquals("dns:fue.onb.ac.at\ttext/dns\t20130522085319\t-1\t172.16.4.1\t1958", line);
+                    assertEquals("dns:fue.onb.ac.at\t20130522085319\t172.16.4.1\tdns:fue.onb.ac.at\ttext/dns\t-1\t-\t-\t-\t1958\t-\t-\t-\texample.warc\t-\t5104", line);
                     break;
                 case 4:
-                    assertEquals("http://fue.onb.ac.at/robots.txt\ttext/html\t20130522085320\t404\t172.16.14.151\t2322", line);
+                    assertEquals("http://fue.onb.ac.at/robots.txt\t20130522085320\t172.16.14.151\thttp://fue.onb.ac.at/robots.txt\ttext/html\t404\t-\t-\t-\t2322\t-\t-\t-\texample.warc\t-\t5104", line);
                     break;
                 case 5:
-                    assertEquals("http://fue.onb.ac.at/test/\ttext/html\t20130522085321\t200\t172.16.14.151\t3142", line);
+                    assertEquals("http://fue.onb.ac.at/test/\t20130522085321\t172.16.14.151\thttp://fue.onb.ac.at/test/\ttext/html\t200\t-\t-\t-\t3142\t-\t-\t-\texample.warc\t-\t5104", line);
                     break;
                 case 6:
-                    assertEquals("http://fue.onb.ac.at/test/image.png\timage/png\t20130522085321\t200\t172.16.14.151\t3908", line);
+                    assertEquals("http://fue.onb.ac.at/test/image.png\t20130522085321\t172.16.14.151\thttp://fue.onb.ac.at/test/image.png\timage/png\t200\t-\t-\t-\t3908\t-\t-\t-\texample.warc\t-\t5104", line);
                     break;
                 default:
                     break;

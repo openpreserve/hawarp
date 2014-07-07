@@ -24,9 +24,8 @@ import java.util.Date;
  */
 public abstract class ArchiveRecordBase {
     
-    public String readerIdentifier;
-    public String recordIdentifier;
     public String url = null;
+    public String origUrl = null;
     public String mimeType = null;
     public String identifiedPayloadType;
     public Date date = null;
@@ -35,32 +34,36 @@ public abstract class ArchiveRecordBase {
     public String type;
     public int contentLength;
     public long contentLengthLong;
-    public long startOffset;
-    public String payloadDigestStr;
-
+    public String offsetCompressedStr;
+    public String offsetUncompressedStr;
     
-    public String getReaderIdentifier() {
-        return readerIdentifier;
-    }
-
-    public void setReaderIdentifier(String readerIdentifier) {
-        this.readerIdentifier = readerIdentifier;
-    }
-
-    public String getRecordIdentifier() {
-        return recordIdentifier;
-    }
-
-    public void setRecordIdentifier(String recordIdentifier) {
-        this.recordIdentifier = recordIdentifier;
-    }
-
+    public String payloadDigestStr;
+    public String payloadDigestOldStr;
+    public String redirectUrl;
+    
+    public String compressedDatFileOffset;
+    public String uncompressedDatFileOffset;
+    
+    public String containerFileName;
+    
+    public String metaTags;
+    
+    public String containerLengthStr;
+    
     public String getUrl() {
         return url;
     }
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getOrigUrl() {
+        return origUrl;
+    }
+
+    public void setOrigUrl(String origUrl) {
+        this.origUrl = origUrl;
     }
 
     public String getMimeType() {
@@ -123,16 +126,24 @@ public abstract class ArchiveRecordBase {
         return contentLengthLong;
     }
 
-    public long getStartOffset() {
-        return startOffset;
-    }
-
-    public void setStartOffset(long startOffset) {
-        this.startOffset = startOffset;
-    }
-
     public void setContentLengthLong(long contentLengthLong) {
         this.contentLengthLong = contentLengthLong;
+    }
+
+    public String getOffsetCompressedStr() {
+        return offsetCompressedStr;
+    }
+
+    public void setOffsetCompressedStr(String offsetCompressedStr) {
+        this.offsetCompressedStr = offsetCompressedStr;
+    }
+
+    public String getOffsetUncompressedStr() {
+        return offsetUncompressedStr;
+    }
+
+    public void setOffsetUncompressedStr(String offsetUncompressedStr) {
+        this.offsetUncompressedStr = offsetUncompressedStr;
     }
     
     public String getPayloadDigestStr() {
@@ -141,6 +152,62 @@ public abstract class ArchiveRecordBase {
     
     public void setPayloadDigestStr(String payloadDigestStr) {
         this.payloadDigestStr = payloadDigestStr;
+    }
+
+    public String getPayloadDigestOldStr() {
+        return payloadDigestOldStr;
+    }
+
+    public void setPayloadDigestOldStr(String payloadDigestOldStr) {
+        this.payloadDigestOldStr = payloadDigestOldStr;
+    }
+
+    public String getRedirectUrl() {
+        return redirectUrl;
+    }
+
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
+    }
+
+    public String getCompressedDatFileOffset() {
+        return compressedDatFileOffset;
+    }
+
+    public void setCompressedDatFileOffset(String compressedDatFileOffset) {
+        this.compressedDatFileOffset = compressedDatFileOffset;
+    }    
+
+    public String getUncompressedDatFileOffset() {
+        return uncompressedDatFileOffset;
+    }
+
+    public void setUncompressedDatFileOffset(String uncompressedDatFileOffset) {
+        this.uncompressedDatFileOffset = uncompressedDatFileOffset;
+    }
+
+    public String getContainerFileName() {
+        return containerFileName;
+    }
+
+    public void setContainerFileName(String containerFileName) {
+        this.containerFileName = containerFileName;
+    }
+
+    public String getMetaTags() {
+        return metaTags;
+    }
+
+    public void setMetaTags(String metaTags) {
+        this.metaTags = metaTags;
+    }
+
+    public String getContainerLengthStr() {
+        return containerLengthStr;
+    }
+
+    public void setContainerLengthStr(String containerLengthStr) {
+        this.containerLengthStr = containerLengthStr;
     }
     
 }

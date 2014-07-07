@@ -41,8 +41,6 @@ public class HadoopWebArchiveRecord extends ArchiveRecordBase implements Writabl
      * Reset the properties
      */
     public void clear() {
-        readerIdentifier = "";
-        recordIdentifier = "";
         url = "";
         mimeType = null;
         date = null;
@@ -69,8 +67,6 @@ public class HadoopWebArchiveRecord extends ArchiveRecordBase implements Writabl
 
     @Override
     public void write(DataOutput out) throws IOException {
-        out.writeUTF(readerIdentifier);
-        out.writeUTF(recordIdentifier);
         out.writeUTF(url);
         out.writeUTF(mimeType);
         out.writeUTF(identifiedPayloadType);
@@ -85,8 +81,6 @@ public class HadoopWebArchiveRecord extends ArchiveRecordBase implements Writabl
 
     @Override
     public void readFields(DataInput in) throws IOException {
-        readerIdentifier = in.readUTF();
-        recordIdentifier = in.readUTF();
         url = in.readUTF();
         mimeType = in.readUTF();
         identifiedPayloadType = in.readUTF();

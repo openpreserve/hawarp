@@ -54,6 +54,8 @@ public class CDXCreationTask {
     private final CDXCreatorConfig config;
 
     private final File archiveFile;
+    
+    private final String archiveFileName;
 
     private final String cdxFileName;
 
@@ -61,9 +63,11 @@ public class CDXCreationTask {
     
    
 
-    public CDXCreationTask(CDXCreatorConfig config, File archiveFile) {
+    public CDXCreationTask(CDXCreatorConfig config, File archiveFile, String archiveFileName) {
+        
         this.config = config;
         this.archiveFile = archiveFile;
+        this.archiveFileName = archiveFileName;
         if (config.isDirectoryInput()) {
             String inputFileName = archiveFile.getName();
             String warcExt = ".cdx.csv";
@@ -98,6 +102,8 @@ public class CDXCreationTask {
             while (reader.hasNext()) {
                 ArchiveRecord archRec = (ArchiveRecord) reader.next();
                 CdxArchiveRecord cdxArchRec = CdxArchiveRecord.fromArchiveRecord(archRec);
+                cdxArchRec.setContainerFileName(archiveFileName);
+                cdxArchRec.setContainerLengthStr(Long.toString(archiveFile.length()));
                 cdxArchRecords.add(cdxArchRec);
             }
 

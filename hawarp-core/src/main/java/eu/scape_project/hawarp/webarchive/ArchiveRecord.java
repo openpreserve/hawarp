@@ -45,8 +45,9 @@ public class ArchiveRecord extends ArchiveRecordBase {
     }
 
     ArchiveRecord(ArcRecordBase arcRecord) {
-        this.readerIdentifier = arcRecord.getFileName();
+
         this.url = arcRecord.getUrlStr();
+        this.origUrl = arcRecord.getUrlStr();
         if (!arcRecord.header.ipAddressStr.isEmpty()) {
             this.ipAddress = arcRecord.header.ipAddressStr;
         }
@@ -65,7 +66,19 @@ public class ArchiveRecord extends ArchiveRecordBase {
             }
 
         }
-        this.startOffset = arcRecord.getStartOffset();
+
+        this.payloadDigestStr = "-";
+        this.payloadDigestOldStr = "-";
+
+        this.redirectUrl = "-";
+
+        this.offsetCompressedStr = Long.toString(arcRecord.getStartOffset());
+        this.offsetUncompressedStr = "-";
+
+        this.compressedDatFileOffset = "-";
+        this.uncompressedDatFileOffset = "-";
+        
+        this.metaTags = "-";
 
         // Some ARC records do not have HTTP Response metadata in the ARC header
         // but these metadata are part of the payload content. One possible reason
@@ -103,7 +116,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
         if (warcRecord.getHeaderList() != null) {
             HeaderLine warcTypeHl = warcRecord.getHeader("WARC-Type");
             if (warcTypeHl != null && warcTypeHl.value.equals("warcinfo")) {
-                this.readerIdentifier = warcRecord.getHeader("WARC-Filename").value;
+
             } else if (warcTypeHl != null && warcTypeHl.value.equals("response")) {
                 isResponseType = true;
             }
@@ -131,6 +144,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
             HeaderLine targetUriHl = warcRecord.getHeader("WARC-Target-URI");
             if (targetUriHl != null) {
                 this.url = targetUriHl.value;
+                this.origUrl = targetUriHl.value;
             }
             HeaderLine dateHl = warcRecord.getHeader("WARC-Date");
             if (dateHl != null) {
@@ -143,6 +157,12 @@ public class ArchiveRecord extends ArchiveRecordBase {
             Payload pl = warcRecord.getPayload();
 
             long length = pl.getTotalLength();
+
+            this.payloadDigestStr = "-";
+            this.payloadDigestOldStr = "-";
+
+            this.redirectUrl = "-";
+
             // http header
             try {
                 ByteCountingPushBackInputStream pbin = new ByteCountingPushBackInputStream(warcRecord.getPayloadContent(), BUFFER_SIZE);
@@ -159,7 +179,13 @@ public class ArchiveRecord extends ArchiveRecordBase {
                 //LOG.warn("Unable to process HTTP metadata", ex);
             }
 
-            this.startOffset = warcRecord.getStartOffset();
+            this.offsetCompressedStr = Long.toString(warcRecord.getStartOffset());
+            this.offsetUncompressedStr = "-";
+
+            this.compressedDatFileOffset = "-";
+            this.uncompressedDatFileOffset = "-";
+            
+            this.metaTags = "-";
 
         }
 

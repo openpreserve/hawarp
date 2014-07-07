@@ -92,7 +92,7 @@ public class CDXCreator {
             config.setDirectoryInput(true);
             cdxCreator.traverseDir(input);
         } else {
-            CDXCreationTask cdxCreationTask = new CDXCreationTask(config, input);
+            CDXCreationTask cdxCreationTask = new CDXCreationTask(config, input, input.getName());
             cdxCreationTask.createIndex();
         }
 
@@ -115,7 +115,7 @@ public class CDXCreator {
         } else if (!dirStructItem.isDirectory()) {
             String filePath = dirStructItem.getAbsolutePath();
             if (RegexUtils.pathMatchesRegexFilter(filePath, config.getInputPathRegexFilter())) {
-                CDXCreationTask cdxCreationTask = new CDXCreationTask(config, dirStructItem);
+                CDXCreationTask cdxCreationTask = new CDXCreationTask(config, dirStructItem, dirStructItem.getName());
                 cdxCreationTask.createIndex();
             }
         }
