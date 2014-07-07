@@ -82,6 +82,7 @@ public class CDXCreator {
         }
         
         config.setCdxfileCsColumns(pu.getProp("cdxfile.cscolumns"));
+        config.setCdxfileCsHeader(pu.getProp("cdxfile.csheader"));
         
         CDXCreator cdxCreator = new CDXCreator();
 

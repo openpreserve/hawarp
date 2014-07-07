@@ -28,6 +28,7 @@ public class CDXCreatorConfig extends CliConfig {
     private String inputPathRegexFilter;
     private boolean directoryInput;
     private String cdxfileCsColumns;
+    private String cdxfileCsHeader;
 
     /**
      * Empty constructor
@@ -58,6 +59,14 @@ public class CDXCreatorConfig extends CliConfig {
 
     public void setCdxfileCsColumns(String cdxfileCsColumns) {
         this.cdxfileCsColumns = cdxfileCsColumns;
+    }
+
+    public String getCdxfileCsHeader() {
+        return cdxfileCsHeader;
+    }
+
+    public void setCdxfileCsHeader(String cdxfileCsHeader) {
+        this.cdxfileCsHeader = cdxfileCsHeader;
     }
     
 }
