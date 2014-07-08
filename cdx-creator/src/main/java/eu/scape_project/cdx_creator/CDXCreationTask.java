@@ -96,7 +96,7 @@ public class CDXCreationTask {
         FileOutputStream outputStream = null;
         try {
             fileInputStream = new FileInputStream(archiveFile);
-            reader = ArchiveReaderFactory.getReader(fileInputStream);
+            reader = ArchiveReaderFactory.getReader(fileInputStream,this.archiveFileName);
 
             List<CdxArchiveRecord> cdxArchRecords = new ArrayList<CdxArchiveRecord>();
             while (reader.hasNext()) {
@@ -118,7 +118,7 @@ public class CDXCreationTask {
             for (String cdxField : cdxfileCsColumnsList) {
                 builder.addColumn(cdxField);
             }
-            builder.setColumnSeparator('\t');
+            builder.setColumnSeparator(' ');
             CsvSchema schema = builder.build();
             schema = schema.withoutQuoteChar();
 

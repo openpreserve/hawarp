@@ -26,10 +26,20 @@ import java.util.Formatter;
  */
 public class DigestUtils {
 
-    public static String SHAsum(byte[] convertme) {
+    public static String SHAsum(byte[] convertme, boolean prefix, boolean uppercase) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
-            return "sha1:"+byteArray2Hex(md.digest(convertme));
+            String sha1 = byteArray2Hex(md.digest(convertme));
+            if (prefix) {
+                return "sha1:" + sha1;
+            } else {
+                if(uppercase) {
+                    return sha1.toUpperCase();
+                } else {
+                    
+                }
+                return sha1;
+            }
         } catch (NoSuchAlgorithmException e) {
             return "";
         }

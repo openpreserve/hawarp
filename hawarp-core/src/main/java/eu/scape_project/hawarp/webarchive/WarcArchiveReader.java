@@ -36,8 +36,12 @@ public class WarcArchiveReader implements ArchiveReader {
 
     Iterator<WarcRecord> iterator;
 
-    public WarcArchiveReader(InputStream is) throws IOException {
-        reader = WarcReaderFactory.getReaderUncompressed(is);
+    public WarcArchiveReader(InputStream is, boolean compressed) throws IOException {
+        if (compressed) {
+            reader = WarcReaderFactory.getReaderCompressed(is);
+        } else {
+            reader = WarcReaderFactory.getReaderUncompressed(is);
+        }
         iterator = reader.iterator();
     }
 

@@ -16,14 +16,18 @@
 package eu.scape_project.hawarp.webarchive;
 
 import static eu.scape_project.hawarp.utils.DateUtils.GMTUTCUnixTsFormat;
+import eu.scape_project.hawarp.utils.DigestUtils;
 import static eu.scape_project.hawarp.utils.IOUtils.BUFFER_SIZE;
 import eu.scape_project.hawarp.utils.StringUtils;
+import eu.scape_project.hawarp.utils.UrlUtils;
 import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jwat.arc.ArcRecordBase;
 import org.jwat.common.ByteCountingPushBackInputStream;
 import org.jwat.common.HeaderLine;
@@ -46,7 +50,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
 
     ArchiveRecord(ArcRecordBase arcRecord) {
 
-        this.url = arcRecord.getUrlStr();
+        this.url = UrlUtils.canonicalize(arcRecord.getUrlStr());
         this.origUrl = arcRecord.getUrlStr();
         if (!arcRecord.header.ipAddressStr.isEmpty()) {
             this.ipAddress = arcRecord.header.ipAddressStr;
@@ -67,7 +71,6 @@ public class ArchiveRecord extends ArchiveRecordBase {
 
         }
 
-        this.payloadDigestStr = "-";
         this.payloadDigestOldStr = "-";
 
         this.redirectUrl = "-";
@@ -77,7 +80,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
 
         this.compressedDatFileOffset = "-";
         this.uncompressedDatFileOffset = "-";
-        
+
         this.metaTags = "-";
 
         // Some ARC records do not have HTTP Response metadata in the ARC header
@@ -87,11 +90,13 @@ public class ArchiveRecord extends ArchiveRecordBase {
         // response was stored together with the response metadata as payload.
         // For this reason HTTP Response metadata that are part of the payload
         // must be read here.
+        Payload pl = null;
+        ByteCountingPushBackInputStream pbin = null;
         if (arcRecord.getHttpHeader() == null) {
-            Payload pl = arcRecord.getPayload();
+            pl = arcRecord.getPayload();
             long length = pl.getTotalLength();
             try {
-                ByteCountingPushBackInputStream pbin = new ByteCountingPushBackInputStream(arcRecord.getPayloadContent(), BUFFER_SIZE);
+                pbin = new ByteCountingPushBackInputStream(arcRecord.getPayloadContent(), BUFFER_SIZE);
                 long consumed = length - pbin.getConsumed();
                 HttpHeader httpHeader = HttpHeader.processPayload(HttpHeader.HT_RESPONSE, pbin, length, "SHA1");
                 if (httpHeader != null && httpHeader.statusCode != null) {
@@ -108,6 +113,24 @@ public class ArchiveRecord extends ArchiveRecordBase {
                 //LOG.warn("Unable to process HTTP metadata", ex);
             }
         }
+
+        try {
+            pbin = new ByteCountingPushBackInputStream(arcRecord.getPayloadContent(), BUFFER_SIZE);
+            pl = arcRecord.getPayload();
+            PayloadContent pc = new PayloadContent(pbin);
+            pc.readPayloadContent();
+            byte[] payloadBytes = pc.getPayloadBytes();
+            long length = pl.getTotalLength();
+            long consumed = length - pbin.getConsumed();
+            pbin.unread((int) consumed);
+            this.payloadDigestStr = DigestUtils.SHAsum(payloadBytes, false, true);
+            if (this.payloadDigestStr == null || this.payloadDigestStr.isEmpty()) {
+                this.payloadDigestStr = "-";
+            }
+        } catch (IOException ex) {
+
+        }
+
     }
 
     ArchiveRecord(WarcRecord warcRecord) {
@@ -144,6 +167,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
             HeaderLine targetUriHl = warcRecord.getHeader("WARC-Target-URI");
             if (targetUriHl != null) {
                 this.url = targetUriHl.value;
+                this.url = UrlUtils.canonicalize(this.url);
                 this.origUrl = targetUriHl.value;
             }
             HeaderLine dateHl = warcRecord.getHeader("WARC-Date");
@@ -184,7 +208,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
 
             this.compressedDatFileOffset = "-";
             this.uncompressedDatFileOffset = "-";
-            
+
             this.metaTags = "-";
 
         }

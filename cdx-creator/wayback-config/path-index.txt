@@ -1,0 +1,1 @@
+example.warc	/path/to/waybackbasedir/files1/example.warc

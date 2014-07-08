@@ -100,20 +100,20 @@ public class ArchiveReaderFactoryTest {
             {
                 "filedesc://3-2-20130522085320-00000-prepc2.arc",
                 "dns:fue.onb.ac.at",
-                "http://fue.onb.ac.at/robots.txt",
-                "http://fue.onb.ac.at/test/",
-                "http://fue.onb.ac.at/test/image.png"
+                "fue.onb.ac.at/robots.txt",
+                "fue.onb.ac.at/test/",
+                "fue.onb.ac.at/test/image.png"
             },
             {
                 "filedesc://IAH-20110227124529-00000-ubuntu-8080.arc.open",
                 "dns:www.unet.univie.ac.at",
-                "http://www.unet.univie.ac.at/robots.txt",
-                "http://www.unet.univie.ac.at/~a9210170/scape/index.html",
-                "http://www.unet.univie.ac.at/~a9210170/scape/black.gif"
+                "unet.univie.ac.at/robots.txt",
+                "unet.univie.ac.at/~a9210170/scape/index.html",
+                "unet.univie.ac.at/~a9210170/scape/black.gif"
             }
 
         };
-        ArchiveReader reader = ArchiveReaderFactory.getReader(arcFileStream);
+        ArchiveReader reader = ArchiveReaderFactory.getReader(arcFileStream,testResource);
         int i = 0;
         while (reader.hasNext()) {
             if (testResource.equals("warc/example.warc.gz") && i == 0) {

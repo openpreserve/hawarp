@@ -109,7 +109,7 @@ public class PayloadContent {
                 }
                 firstByteArray = false;
             }
-            buffis.close();
+            //buffis.close();
             buffos.flush();
             buffos.close();
             

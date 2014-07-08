@@ -33,46 +33,61 @@ import org.jwat.warc.WarcConstants;
 public class ArchiveReaderFactory {
 
     public static final int LEADING_BYTES_BUFFER_LENGTH = 16;
-    
-    
 
-    public static ArchiveReader getReader(InputStream inputStream) {
+    public static ArchiveReader getReader(InputStream inputStream, String archiveFileName) {
         ArchiveReader reader = null;
-
         try {
-            ByteCountingPushBackInputStream mainBcPbin = new ByteCountingPushBackInputStream(inputStream, LEADING_BYTES_BUFFER_LENGTH);
-            if (GzipReader.isGzipped(mainBcPbin)) {
-                GzipPushbackStream gzPbis = new GzipPushbackStream(mainBcPbin);
-                ByteCountingPushBackInputStream subBcPbin = new ByteCountingPushBackInputStream(gzPbis, LEADING_BYTES_BUFFER_LENGTH);
-                Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.INFO, "Using GZIP Reader");
-                reader = getReaderByMagicHeader(subBcPbin);
-            } else {
-                Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.INFO, "Using uncompressed Reader");
-                reader = getReaderByMagicHeader(mainBcPbin);
+            if (archiveFileName.endsWith(".gz")) {
+                reader = new ArcArchiveReader(inputStream, true);
+                
+
+            } else if (archiveFileName.endsWith(".arc")) {
+                reader = new ArcArchiveReader(inputStream, false);
+               
+            } else if (archiveFileName.endsWith(".warc")) {
+                reader = new WarcArchiveReader(inputStream, false);
+                
+            } else if (archiveFileName.endsWith(".warc.gz")) {
+                reader = new WarcArchiveReader(inputStream, true);
+                
             }
-            return reader;
         } catch (IOException ex) {
             Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+//        try {
+//            ByteCountingPushBackInputStream mainBcPbin = new ByteCountingPushBackInputStream(inputStream, LEADING_BYTES_BUFFER_LENGTH);
+//            if (GzipReader.isGzipped(mainBcPbin)) {
+//                GzipPushbackStream gzPbis = new GzipPushbackStream(mainBcPbin);
+//                ByteCountingPushBackInputStream subBcPbin = new ByteCountingPushBackInputStream(gzPbis, LEADING_BYTES_BUFFER_LENGTH);
+//                Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.INFO, "Using GZIP Reader");
+//                reader = getReaderByMagicHeader(subBcPbin);
+//            } else {
+//                Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.INFO, "Using uncompressed Reader");
+//                reader = getReaderByMagicHeader(mainBcPbin);
+//            }
+//            return reader;
+//        } catch (IOException ex) {
+//            Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         return reader;
     }
 
-    private static ArchiveReader getReaderByMagicHeader(ByteCountingPushBackInputStream bcPbis) throws IOException {
-        byte[] leadingBytes = new byte[LEADING_BYTES_BUFFER_LENGTH];
-        bcPbis.read(leadingBytes);
-        String leadingStr = new String(leadingBytes);
-        bcPbis.unread(leadingBytes);
-        if (leadingStr.startsWith(ArcConstants.ARC_MAGIC_HEADER)) {
-            Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.INFO, "Using ARC Reader");
-            return new ArcArchiveReader(bcPbis);
-        } else if (leadingStr.startsWith(WarcConstants.WARC_MAGIC_HEADER)) {
-            Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.INFO, "Using WARC Reader");
-            return new WarcArchiveReader(bcPbis);
-        } else {
-            Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.SEVERE, "Reader cannot be initialised");
-            return null;
-        }
-
-    }
-
+//    private static ArchiveReader getReaderByMagicHeader(ByteCountingPushBackInputStream bcPbis) throws IOException {
+//        byte[] leadingBytes = new byte[LEADING_BYTES_BUFFER_LENGTH];
+//        bcPbis.read(leadingBytes);
+//        String leadingStr = new String(leadingBytes);
+//        bcPbis.unread(leadingBytes);
+//        if (leadingStr.startsWith(ArcConstants.ARC_MAGIC_HEADER)) {
+//            Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.INFO, "Using ARC Reader");
+//            return new ArcArchiveReader(bcPbis);
+//        } else if (leadingStr.startsWith(WarcConstants.WARC_MAGIC_HEADER)) {
+//            Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.INFO, "Using WARC Reader");
+//            return new WarcArchiveReader(bcPbis);
+//        } else {
+//            Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.SEVERE, "Reader cannot be initialised");
+//            return null;
+//        }
+//
+//    }
 }
