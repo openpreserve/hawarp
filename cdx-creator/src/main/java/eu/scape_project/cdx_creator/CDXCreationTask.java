@@ -139,7 +139,7 @@ public class CDXCreationTask {
                     LOG.error("File not found error", ex);
                 }
             }
-            System.out.println(config.getCdxfileCsHeader());
+            System.out.println(" "+config.getCdxfileCsHeader());
 
             cdxArchRecordsWriter.writeValue(System.out, cdxArchRecords);
 

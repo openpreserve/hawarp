@@ -133,22 +133,22 @@ public class CDXCreationTaskTest {
         while ((line = input.readLine()) != null) {
             switch (i) {
                 case 0:
-                    assertEquals("CDX A b e a m s c k r V v D d g M n", line);
+                    assertEquals(" CDX N b a m s k r M V g", line);
                     break;
                 case 1:
-                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc\t20130522085320\t0.0.0.0\tfiledesc://3-2-20130522085320-00000-prepc2.arc\ttext/plain\t-1\t-\t-\t-\t0\t-\t-\t-\texample.arc.gz\t-\t2035", line);
+                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc\t20130522085320\tfiledesc://3-2-20130522085320-00000-prepc2.arc\ttext/plain\t-1\t-\t-\t-\t0\texample.arc.gz", line);
                     break;
                 case 2:
-                    assertEquals("dns:fue.onb.ac.at\t20130522085319\t172.16.4.1\tdns:fue.onb.ac.at\ttext/dns\t-1\t-\t-\t-\t1353\t-\t-\t-\texample.arc.gz\t-\t2035", line);
+                    assertEquals("dns:fue.onb.ac.at\t20130522085319\tdns:fue.onb.ac.at\ttext/dns\t-1\t-\t-\t-\t1353\texample.arc.gz", line);
                     break;
                 case 3:
-                    assertEquals("http://fue.onb.ac.at/robots.txt\t20130522085320\t172.16.14.151\thttp://fue.onb.ac.at/robots.txt\ttext/html\t404\t-\t-\t-\t1467\t-\t-\t-\texample.arc.gz\t-\t2035", line);
+                    assertEquals("http://fue.onb.ac.at/robots.txt\t20130522085320\thttp://fue.onb.ac.at/robots.txt\ttext/html\t404\t-\t-\t-\t1467\texample.arc.gz", line);
                     break;
                 case 4:
-                    assertEquals("http://fue.onb.ac.at/test/\t20130522085321\t172.16.14.151\thttp://fue.onb.ac.at/test/\ttext/html\t200\t-\t-\t-\t2033\t-\t-\t-\texample.arc.gz\t-\t2035", line);
+                    assertEquals("http://fue.onb.ac.at/test/\t20130522085321\thttp://fue.onb.ac.at/test/\ttext/html\t200\t-\t-\t-\t2033\texample.arc.gz", line);
                     break;
                 case 5:
-                    assertEquals("http://fue.onb.ac.at/test/image.png\t20130522085321\t172.16.14.151\thttp://fue.onb.ac.at/test/image.png\timage/png\t200\t-\t-\t-\t2545\t-\t-\t-\texample.arc.gz\t-\t2035", line);
+                    assertEquals("http://fue.onb.ac.at/test/image.png\t20130522085321\thttp://fue.onb.ac.at/test/image.png\timage/png\t200\t-\t-\t-\t2545\texample.arc.gz", line);
                     break;
                 default:
                     break;
@@ -174,25 +174,25 @@ public class CDXCreationTaskTest {
         while ((line = input.readLine()) != null) {
             switch (i) {
                 case 0:
-                    assertEquals("CDX A b e a m s c k r V v D d g M n", line);
+                    assertEquals(" CDX N b a m s k r M V g", line);
                     break;
                 case 1:
-                    assertEquals("\t20140626075501\t\t\tapplication/warc-fields\t-1\t-\t-\t-\t0\t-\t-\t-\texample.warc\t-\t5104", line);
+                    assertEquals("\t20140626075501\t\tapplication/warc-fields\t-1\t-\t-\t-\t0\texample.warc", line);
                     break;
                 case 2:
-                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc\t20130522085320\t0.0.0.0\tfiledesc://3-2-20130522085320-00000-prepc2.arc\ttext/plain\t-1\t-\t-\t-\t357\t-\t-\t-\texample.warc\t-\t5104", line);
+                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc\t20130522085320\tfiledesc://3-2-20130522085320-00000-prepc2.arc\ttext/plain\t-1\t-\t-\t-\t357\texample.warc", line);
                     break;
                 case 3:
-                    assertEquals("dns:fue.onb.ac.at\t20130522085319\t172.16.4.1\tdns:fue.onb.ac.at\ttext/dns\t-1\t-\t-\t-\t1958\t-\t-\t-\texample.warc\t-\t5104", line);
+                    assertEquals("dns:fue.onb.ac.at\t20130522085319\tdns:fue.onb.ac.at\ttext/dns\t-1\t-\t-\t-\t1958\texample.warc", line);
                     break;
                 case 4:
-                    assertEquals("http://fue.onb.ac.at/robots.txt\t20130522085320\t172.16.14.151\thttp://fue.onb.ac.at/robots.txt\ttext/html\t404\t-\t-\t-\t2322\t-\t-\t-\texample.warc\t-\t5104", line);
+                    assertEquals("http://fue.onb.ac.at/robots.txt\t20130522085320\thttp://fue.onb.ac.at/robots.txt\ttext/html\t404\t-\t-\t-\t2322\texample.warc", line);
                     break;
                 case 5:
-                    assertEquals("http://fue.onb.ac.at/test/\t20130522085321\t172.16.14.151\thttp://fue.onb.ac.at/test/\ttext/html\t200\t-\t-\t-\t3142\t-\t-\t-\texample.warc\t-\t5104", line);
+                    assertEquals("http://fue.onb.ac.at/test/\t20130522085321\thttp://fue.onb.ac.at/test/\ttext/html\t200\t-\t-\t-\t3142\texample.warc", line);
                     break;
                 case 6:
-                    assertEquals("http://fue.onb.ac.at/test/image.png\t20130522085321\t172.16.14.151\thttp://fue.onb.ac.at/test/image.png\timage/png\t200\t-\t-\t-\t3908\t-\t-\t-\texample.warc\t-\t5104", line);
+                    assertEquals("http://fue.onb.ac.at/test/image.png\t20130522085321\thttp://fue.onb.ac.at/test/image.png\timage/png\t200\t-\t-\t-\t3908\texample.warc", line);
                     break;
                 default:
                     break;
