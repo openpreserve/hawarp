@@ -152,7 +152,7 @@ public class ArchiveRecord extends ArchiveRecordBase {
             }
             HeaderLine contentTypeHl = warcRecord.getHeader("Content-Type");
             if (contentTypeHl != null) {
-                this.mimeType = contentTypeHl.value;
+                this.mimeType = StringUtils.normaliseMimetype(contentTypeHl.value);
             }
             HeaderLine contentLengthHl = warcRecord.getHeader("Content-Length");
             if (contentLengthHl != null) {
