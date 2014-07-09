@@ -43,12 +43,14 @@ import org.jwat.warc.WarcRecord;
  * @author onbscs
  */
 public class ArchiveRecord extends ArchiveRecordBase {
+    
+    
 
     public ArchiveRecord() {
 
     }
 
-    ArchiveRecord(ArcRecordBase arcRecord) {
+    ArchiveRecord(ArcRecordBase arcRecord, boolean computePayloadDigest) {
 
         this.url = UrlUtils.canonicalize(arcRecord.getUrlStr());
         this.origUrl = arcRecord.getUrlStr();
@@ -113,27 +115,28 @@ public class ArchiveRecord extends ArchiveRecordBase {
                 //LOG.warn("Unable to process HTTP metadata", ex);
             }
         }
+        // compute payload digest
+        if (computePayloadDigest) {
+            try {
+                pbin = new ByteCountingPushBackInputStream(arcRecord.getPayloadContent(), BUFFER_SIZE);
+                pl = arcRecord.getPayload();
+                PayloadContent pc = new PayloadContent(pbin);
+                pc.readPayloadContent();
+                byte[] payloadBytes = pc.getPayloadBytes();
+                long length = pl.getTotalLength();
+                long consumed = length - pbin.getConsumed();
+                pbin.unread((int) consumed);
+                this.payloadDigestStr = DigestUtils.SHAsum(payloadBytes, false, true);
+                if (this.payloadDigestStr == null || this.payloadDigestStr.isEmpty()) {
+                    this.payloadDigestStr = "-";
+                }
+            } catch (IOException ex) {
 
-        try {
-            pbin = new ByteCountingPushBackInputStream(arcRecord.getPayloadContent(), BUFFER_SIZE);
-            pl = arcRecord.getPayload();
-            PayloadContent pc = new PayloadContent(pbin);
-            pc.readPayloadContent();
-            byte[] payloadBytes = pc.getPayloadBytes();
-            long length = pl.getTotalLength();
-            long consumed = length - pbin.getConsumed();
-            pbin.unread((int) consumed);
-            this.payloadDigestStr = DigestUtils.SHAsum(payloadBytes, false, true);
-            if (this.payloadDigestStr == null || this.payloadDigestStr.isEmpty()) {
-                this.payloadDigestStr = "-";
             }
-        } catch (IOException ex) {
-
         }
-
     }
 
-    ArchiveRecord(WarcRecord warcRecord) {
+    ArchiveRecord(WarcRecord warcRecord, boolean computePayloadDigest) {
         boolean isResponseType = false;
 
         if (warcRecord.getHeaderList() != null) {
@@ -178,9 +181,6 @@ public class ArchiveRecord extends ArchiveRecordBase {
                     this.date = new Date(0);
                 }
             }
-            Payload pl = warcRecord.getPayload();
-
-            long length = pl.getTotalLength();
 
             this.payloadDigestStr = "-";
             this.payloadDigestOldStr = "-";
@@ -189,6 +189,8 @@ public class ArchiveRecord extends ArchiveRecordBase {
 
             // http header
             try {
+                Payload pl = warcRecord.getPayload();
+                long length = pl.getTotalLength();
                 ByteCountingPushBackInputStream pbin = new ByteCountingPushBackInputStream(warcRecord.getPayloadContent(), BUFFER_SIZE);
 
                 long consumed = length - pbin.getConsumed();
@@ -201,6 +203,26 @@ public class ArchiveRecord extends ArchiveRecordBase {
 
             } catch (IOException ex) {
                 //LOG.warn("Unable to process HTTP metadata", ex);
+            }
+
+            // compute payload digest
+            if (computePayloadDigest) {
+                try {
+                    ByteCountingPushBackInputStream pbin = new ByteCountingPushBackInputStream(warcRecord.getPayloadContent(), BUFFER_SIZE);
+                    Payload pl = warcRecord.getPayload();
+                    PayloadContent pc = new PayloadContent(pbin);
+                    pc.readPayloadContent();
+                    byte[] payloadBytes = pc.getPayloadBytes();
+                    long length = pl.getTotalLength();
+                    long consumed = length - pbin.getConsumed();
+                    pbin.unread((int) consumed);
+                    this.payloadDigestStr = DigestUtils.SHAsum(payloadBytes, false, true);
+                    if (this.payloadDigestStr == null || this.payloadDigestStr.isEmpty()) {
+                        this.payloadDigestStr = "-";
+                    }
+                } catch (IOException ex) {
+
+                }
             }
 
             this.offsetCompressedStr = Long.toString(warcRecord.getStartOffset());

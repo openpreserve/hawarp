@@ -29,6 +29,7 @@ public class CDXCreatorConfig extends CliConfig {
     private boolean directoryInput;
     private String cdxfileCsColumns;
     private String cdxfileCsHeader;
+    private boolean createPayloadDigest;
 
     /**
      * Empty constructor
@@ -67,6 +68,14 @@ public class CDXCreatorConfig extends CliConfig {
 
     public void setCdxfileCsHeader(String cdxfileCsHeader) {
         this.cdxfileCsHeader = cdxfileCsHeader;
+    }
+
+    public boolean isCreatePayloadDigest() {
+        return createPayloadDigest;
+    }
+
+    public void setCreatePayloadDigest(boolean createPayloadDigest) {
+        this.createPayloadDigest = createPayloadDigest;
     }
     
 }

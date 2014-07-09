@@ -34,6 +34,7 @@ public class ArcArchiveReader implements ArchiveReader {
     ArcReader reader;
 
     Iterator<ArcRecordBase> iterator;
+    private boolean computePayloadDigest;
 
     public ArcArchiveReader(InputStream is, boolean compressed) throws IOException {
         if (compressed) {
@@ -58,7 +59,7 @@ public class ArcArchiveReader implements ArchiveReader {
             throw new IllegalStateException("Iterator not initialised!");
         }
         ArcRecordBase arcRecord = iterator.next();
-        ArchiveRecord archiveRecord = new ArchiveRecord(arcRecord);
+        ArchiveRecord archiveRecord = new ArchiveRecord(arcRecord,computePayloadDigest);
         return archiveRecord;
     }
 
@@ -68,6 +69,11 @@ public class ArcArchiveReader implements ArchiveReader {
             throw new IllegalStateException("Iterator not initialised!");
         }
         iterator.remove();
+    }
+
+    @Override
+    public void setComputePayloadDigest(boolean computePayloadDigest) {
+       this.computePayloadDigest = computePayloadDigest;
     }
 
 }

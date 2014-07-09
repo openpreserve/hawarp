@@ -30,11 +30,16 @@ public class CDXCreatorOptions extends CliOptions {
     public String INPUTPATHREGEX_FLG = "r";
     public String INPUTPATHREGEX_OPT = "regex";
     public String INPUTPATHREGEX_OPT_DESC = "Only input paths matching the regular expression will be processed. [optional].";
+    
+    public String COMPUTEPAYLOADDIGEST_FLG = "d";
+    public String COMPUTEPAYLOADDIGEST_OPT = "digest";
+    public String COMPUTEPAYLOADDIGEST_OPT_DESC = "Calculate payload digest. [optional].";
 
     public CDXCreatorOptions() {
         options.addOption(OUTPUT_FLG, OUTPUT_OPT, true, OUTPUT_OPT_DESC);
         options.addOption(INPUTPATHREGEX_FLG, INPUTPATHREGEX_OPT, true, INPUTPATHREGEX_OPT_DESC);
         options.addOption(PROPERTIESFILE_FLG, PROPERTIESFILE_OPT, true, PROPERTIESFILE_OPT_DESC);
+        options.addOption(COMPUTEPAYLOADDIGEST_FLG, COMPUTEPAYLOADDIGEST_OPT, false, COMPUTEPAYLOADDIGEST_OPT_DESC);
 
     }
 
@@ -52,7 +57,10 @@ public class CDXCreatorOptions extends CliOptions {
             if (input.isDirectory()) {
                 output.mkdirs();
             }
-
+        }
+        
+        if(cmd.hasOption(COMPUTEPAYLOADDIGEST_FLG)) {
+            pc.setCreatePayloadDigest(true);
         }
 
     }

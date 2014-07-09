@@ -88,6 +88,7 @@ public class CDXCreationTaskTest {
         conf.setDirectoryInput(false);
         conf.setCdxfileCsColumns(pu.getProp("cdxfile.cscolumns"));
         conf.setCdxfileCsHeader(pu.getProp("cdxfile.csheader"));
+        conf.setCreatePayloadDigest(true);
         CDXCreationTask cdxCreator = new CDXCreationTask(conf, arcFile, arcFileName);
         cdxCreator.createIndex();
         assertTrue("File does not exist: " + outputFileName, (new File(outputFileName)).exists());
@@ -111,6 +112,7 @@ public class CDXCreationTaskTest {
         conf.setDirectoryInput(false);
         conf.setCdxfileCsColumns(pu.getProp("cdxfile.cscolumns"));
         conf.setCdxfileCsHeader(pu.getProp("cdxfile.csheader"));
+        conf.setCreatePayloadDigest(true);
         CDXCreationTask cdxCreator = new CDXCreationTask(conf, warcFile, warcFileName);
         cdxCreator.createIndex();
         assertTrue("File does not exist: " + outputFileName, (new File(outputFileName)).exists());
@@ -177,22 +179,22 @@ public class CDXCreationTaskTest {
                     assertEquals(" CDX N b a m s k r M V g", line);
                     break;
                 case 1:
-                    assertEquals(" 20140626075501  application/warc-fields -1 - - - 0 example.warc", line);
+                    assertEquals(" 20140626075501  application/warc-fields -1 FECF4CD5CDE782126DC2C25E947E3B7FEAF5DBBA - - 0 example.warc", line);
                     break;
                 case 2:
-                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc 20130522085320 filedesc://3-2-20130522085320-00000-prepc2.arc text/plain -1 - - - 357 example.warc", line);
+                    assertEquals("filedesc://3-2-20130522085320-00000-prepc2.arc 20130522085320 filedesc://3-2-20130522085320-00000-prepc2.arc text/plain -1 066A950FB7D49644689B371BD6FDDC8A1FBEA3F3 - - 357 example.warc", line);
                     break;
                 case 3:
-                    assertEquals("dns:fue.onb.ac.at 20130522085319 dns:fue.onb.ac.at text/dns -1 - - - 1958 example.warc", line);
+                    assertEquals("dns:fue.onb.ac.at 20130522085319 dns:fue.onb.ac.at text/dns -1 7E08F640546ECB9538E973D698FD918645EF147B - - 1958 example.warc", line);
                     break;
                 case 4:
-                    assertEquals("fue.onb.ac.at/robots.txt 20130522085320 http://fue.onb.ac.at/robots.txt text/html 404 - - - 2322 example.warc", line);
+                    assertEquals("fue.onb.ac.at/robots.txt 20130522085320 http://fue.onb.ac.at/robots.txt text/html 404 881AE766338CFFDA0DD0DDFCA9D555A16995C87C - - 2322 example.warc", line);
                     break;
                 case 5:
-                    assertEquals("fue.onb.ac.at/test/ 20130522085321 http://fue.onb.ac.at/test/ text/html 200 - - - 3142 example.warc", line);
+                    assertEquals("fue.onb.ac.at/test/ 20130522085321 http://fue.onb.ac.at/test/ text/html 200 5304803976FF20E88B1BC47DF439F011D781FB20 - - 3142 example.warc", line);
                     break;
                 case 6:
-                    assertEquals("fue.onb.ac.at/test/image.png 20130522085321 http://fue.onb.ac.at/test/image.png image/png 200 - - - 3908 example.warc", line);
+                    assertEquals("fue.onb.ac.at/test/image.png 20130522085321 http://fue.onb.ac.at/test/image.png image/png 200 FBA570FCDB1D8621BD331F44E32C29FB4F7B0191 - - 3908 example.warc", line);
                     break;
                 default:
                     break;

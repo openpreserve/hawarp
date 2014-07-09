@@ -97,7 +97,7 @@ public class CDXCreationTask {
         try {
             fileInputStream = new FileInputStream(archiveFile);
             reader = ArchiveReaderFactory.getReader(fileInputStream,this.archiveFileName);
-
+            reader.setComputePayloadDigest(config.isCreatePayloadDigest());
             List<CdxArchiveRecord> cdxArchRecords = new ArrayList<CdxArchiveRecord>();
             while (reader.hasNext()) {
                 ArchiveRecord archRec = (ArchiveRecord) reader.next();

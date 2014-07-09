@@ -49,7 +49,7 @@ public abstract class ArchiveRecordBase {
     public String metaTags;
     
     public String containerLengthStr;
-    
+      
     public String getUrl() {
         return url;
     }
@@ -209,5 +209,5 @@ public abstract class ArchiveRecordBase {
     public void setContainerLengthStr(String containerLengthStr) {
         this.containerLengthStr = containerLengthStr;
     }
-    
+
 }

@@ -35,6 +35,7 @@ public class WarcArchiveReader implements ArchiveReader {
     WarcReader reader;
 
     Iterator<WarcRecord> iterator;
+    private boolean computePayloadDigest;
 
     public WarcArchiveReader(InputStream is, boolean compressed) throws IOException {
         if (compressed) {
@@ -59,7 +60,7 @@ public class WarcArchiveReader implements ArchiveReader {
             throw new IllegalStateException("Iterator not initialised!");
         }
         WarcRecord arcRecord = iterator.next();
-        ArchiveRecord archiveRecord = new ArchiveRecord(arcRecord);
+        ArchiveRecord archiveRecord = new ArchiveRecord(arcRecord,computePayloadDigest);
         return archiveRecord;
     }
 
@@ -69,6 +70,11 @@ public class WarcArchiveReader implements ArchiveReader {
             throw new IllegalStateException("Iterator not initialised!");
         }
         iterator.remove();
+    }
+    
+    @Override
+    public void setComputePayloadDigest(boolean computePayloadDigest) {
+       this.computePayloadDigest = computePayloadDigest;
     }
 
 }

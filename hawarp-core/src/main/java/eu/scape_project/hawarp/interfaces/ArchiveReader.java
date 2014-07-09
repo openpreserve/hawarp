@@ -25,4 +25,6 @@ import java.util.Iterator;
  */
 public interface ArchiveReader extends Iterator<ArchiveRecord> {
     
+    public void setComputePayloadDigest(boolean computePayloadDigest);
+    
 }
