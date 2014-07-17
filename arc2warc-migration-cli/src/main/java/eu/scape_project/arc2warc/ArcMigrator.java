@@ -18,6 +18,14 @@ package eu.scape_project.arc2warc;
 import eu.scape_project.arc2warc.cli.Arc2WarcMigrationConfig;
 import eu.scape_project.hawarp.mapreduce.JwatArcReaderFactory;
 import eu.scape_project.hawarp.utils.StringUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jwat.arc.ArcReader;
+import org.jwat.arc.ArcRecordBase;
+import org.jwat.warc.WarcWriter;
+import org.jwat.warc.WarcWriterFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,12 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Iterator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jwat.arc.ArcReader;
-import org.jwat.arc.ArcRecordBase;
-import org.jwat.warc.WarcWriter;
-import org.jwat.warc.WarcWriterFactory;
 
 /**
  *
@@ -40,6 +42,8 @@ public class ArcMigrator {
 
     private static final Log LOG = LogFactory.getLog(ArcMigrator.class);
 
+    public static final int LIMIT_LARGE_PAYLOAD =  4194304; // 4MB
+
     private final Arc2WarcMigrationConfig config;
 
     private final File arcFile;
@@ -47,6 +51,7 @@ public class ArcMigrator {
     private final String warcFileName;
 
     private final String warcFilePath;
+    private final byte[] buffer;
 
     public ArcMigrator(Arc2WarcMigrationConfig config, File arcFile) {
         this.config = config;
@@ -65,6 +70,7 @@ public class ArcMigrator {
                 warcFileName = warcFilePath;
             }
         }
+        buffer = new byte[LIMIT_LARGE_PAYLOAD];
     }
 
     public void migrate() {
@@ -75,15 +81,16 @@ public class ArcMigrator {
         try {
             fileInputStream = new FileInputStream(arcFile);
             reader = JwatArcReaderFactory.getReader(fileInputStream);
+
             outputStream = new FileOutputStream(new File(warcFilePath));
             writer = WarcWriterFactory.getWriter(outputStream, config.createCompressedWarc());
-            Iterator<ArcRecordBase> arcIterator = reader.iterator();
-            ArcRecordBase jwatArcRecord = null;
-            RecordMigrator recordMigrator = new RecordMigrator(writer, warcFileName);
+            RecordMigrator recordMigrator = new RecordMigrator(writer, warcFileName, buffer);
             recordMigrator.createWarcInfoRecord();
             recordMigrator.setArcMetadataRecord(true);
+
+            Iterator<ArcRecordBase> arcIterator = reader.iterator();
             while (arcIterator.hasNext()) {
-                jwatArcRecord = arcIterator.next();
+                ArcRecordBase jwatArcRecord = arcIterator.next();
                 if (jwatArcRecord != null) {
                     recordMigrator.migrateRecord(jwatArcRecord,
                             config.isContentTypeIdentification());
@@ -97,22 +104,10 @@ public class ArcMigrator {
         } catch (IOException ex) {
             LOG.error("I/O Error", ex);
         } finally {
-            try {
-                if (fileInputStream != null) {
-                    fileInputStream.close();
-                }
-                if (reader != null) {
-                    reader.close();
-                }
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException ex) {
-                LOG.error("I/O Error", ex);
-            }
+            IOUtils.closeQuietly(fileInputStream);
+            IOUtils.closeQuietly(outputStream);
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(writer);
         }
     }
 

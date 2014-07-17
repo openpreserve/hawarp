@@ -15,16 +15,7 @@
  */
 package eu.scape_project.arc2warc;
 
-import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
-import static eu.scape_project.hawarp.utils.UUIDGenerator.getRecordID;
 import eu.scape_project.tika_identify.tika.TikaIdentificationTask;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.net.URISyntaxException;
-import java.util.Calendar;
-import java.util.List;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +23,18 @@ import org.jwat.arc.ArcRecordBase;
 import org.jwat.common.HeaderLine;
 import org.jwat.warc.WarcRecord;
 import org.jwat.warc.WarcWriter;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.net.URISyntaxException;
+import java.util.Calendar;
+import java.util.List;
+
+import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
 import static eu.scape_project.hawarp.utils.DateUtils.GMTUTCUnixTsFormat;
+import static eu.scape_project.hawarp.utils.UUIDGenerator.getRecordID;
 
 /**
  *
@@ -42,13 +44,13 @@ class RecordMigrator {
 
     private static final Log LOG = LogFactory.getLog(RecordMigrator.class);
 
-    public static final long LIMIT_LARGE_PAYLOAD = Integer.MAX_VALUE; // 4194304; // 4MB
-    
+
 
     static private String warcInfoId;
 
     private final WarcWriter writer;
     private final String warcFileName;
+    private final byte[] buffer;
 
     private boolean arcMetadataRecord;
     
@@ -57,9 +59,10 @@ class RecordMigrator {
 //        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 //    }
     
-    public RecordMigrator(WarcWriter writer, String warcFileName) {
+    public RecordMigrator(WarcWriter writer, String warcFileName, byte[] buffer) {
         this.writer = writer;
         this.warcFileName = warcFileName;
+        this.buffer = buffer;
     }
 
     public void createWarcInfoRecord() throws IOException, URISyntaxException {
@@ -88,6 +91,7 @@ class RecordMigrator {
         String recordId = getRecordID().toString();
         String mimeType = (jwatArcRecord.getContentType() != null) ? jwatArcRecord.getContentType().toString() : MIME_UNKNOWN;
 
+        //TODO line seems meaningless
         String type = (arcMetadataRecord) ? "metadata" : (mimeType.equals("text/dns")) ? "response" : "response";
         record.header.addHeader("WARC-Type", type);
         record.header.addHeader("WARC-Target-URI", jwatArcRecord.getUrlStr());
@@ -123,29 +127,21 @@ class RecordMigrator {
             payloadHeader += "\r\n"; // end of HTTP response header
         }
 
-        byte[] payloadBytes = null;
         InputStream payloadInputStream = null;
-        boolean isLarge = false;
         if (jwatArcRecord.hasPayload()) {
             long remaining = jwatArcRecord.getPayload().getRemaining();
             // WARC content length is payload length + payload header length
             record.header.addHeader("Content-Length", Long.toString(remaining + payloadHeader.length()));
             InputStream inputStream = jwatArcRecord.getPayloadContent();
-            PayloadContent payloadContent = new PayloadContent(inputStream);
+            PayloadContent payloadContent = new PayloadContent(inputStream,remaining,buffer);
+
             if (doPayloadContIdent) {
                 TikaIdentificationTask ti = TikaIdentificationTask.getInstance();
                 ti.setCurrentItemId(recordId);
                 payloadContent.setIdentifier(ti);
                 payloadContent.doPayloadIdentification(true);
             }
-            if (remaining < LIMIT_LARGE_PAYLOAD) {
-                payloadBytes = payloadContent.getPayloadContentAsByteArray();
-            } else {
-                LOG.info("Large file: " + remaining);
-
-                payloadInputStream = payloadContent.getDumpedPayloadContentAsInputStream();
-                isLarge = true;
-            }
+            payloadInputStream = payloadContent.getPayloadContentAsInputStream();
             if (payloadContent.getDigestStr() != null) {
                 record.header.addHeader("WARC-Payload-Digest",
                         payloadContent.getDigestStr());
@@ -162,20 +158,10 @@ class RecordMigrator {
         // Record payload
         if (jwatArcRecord.hasPayload()) {
             // "large" payload is added as input stream (see RecordMigrator.LIMIT_LARGE_PAYLOAD)
-            if (isLarge) {
-                // Prepend payload metadata = HTTP Response lines
-                ByteArrayInputStream bais = new ByteArrayInputStream(payloadHeader.getBytes());
-                SequenceInputStream sis = new SequenceInputStream(bais, payloadInputStream);
-                writer.streamPayload(sis);
-            // "small" payload is added as byte array (see RecordMigrator.LIMIT_LARGE_PAYLOAD)
-            } else {
-                // Prepend payload metadata = HTTP Response lines
-                byte[] prepend = payloadHeader.getBytes();
-                byte[] combined = new byte[prepend.length + payloadBytes.length];
-                System.arraycopy(prepend, 0, combined, 0, prepend.length);
-                System.arraycopy(payloadBytes, 0, combined, prepend.length, payloadBytes.length);
-                writer.writePayload(combined);
-            }
+            // Prepend payload metadata = HTTP Response lines
+            ByteArrayInputStream bais = new ByteArrayInputStream(payloadHeader.getBytes());
+            SequenceInputStream sis = new SequenceInputStream(bais, payloadInputStream);
+            writer.streamPayload(sis);
         }
 
         writer.closeRecord();
