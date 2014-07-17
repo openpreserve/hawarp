@@ -18,21 +18,19 @@ package eu.scape_project.arc2warc;
 
 import eu.scape_project.arc2warc.cli.Arc2WarcMigrationConfig;
 import eu.scape_project.arc2warc.cli.Arc2WarcMigrationOptions;
-import java.io.IOException;
+import eu.scape_project.hawarp.utils.RegexUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import eu.scape_project.hawarp.utils.RegexUtils;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import org.apache.commons.cli.ParseException;
+import java.io.IOException;
 
 /**
  * ARC to WARC conversion.
@@ -91,7 +89,7 @@ public class Arc2WarcMigration {
     /**
      * Traverse the root directory recursively
      *
-     * @param dir Root directory
+     * @param dirStructItem Root directory
      * @throws FileNotFoundException
      * @throws IOException
      */
