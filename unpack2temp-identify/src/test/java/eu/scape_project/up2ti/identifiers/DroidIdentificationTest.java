@@ -16,18 +16,20 @@
  */
 package eu.scape_project.up2ti.identifiers;
 
-import eu.scape_project.up2ti.identifiers.DroidIdentification;
 import eu.scape_project.up2ti.container.ArcContainer;
-import java.io.File;
-import java.io.FileOutputStream;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.compress.utils.IOUtils;
-import org.junit.*;
-import static org.junit.Assert.*;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.InputStreamResource;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * DroidIdentification test class.
@@ -82,7 +84,7 @@ public class DroidIdentificationTest {
         }
         String tmpTestFilePath = ArcFilesTestMap.getInstance().getTmpTestFile().getAbsolutePath();
         List<String> vals = result.get(tmpTestFilePath + "/20130522085321/http://fue.onb.ac.at/test/image.png");
-        assertEquals(vals.get(0), "droid mime image/png");
-        assertEquals(vals.get(1), "droid puid fmt/11");
+        assertEquals("droid puid fmt/11", vals.get(0));
+        assertEquals("droid mime image/png", vals.get(1));
     }
 }

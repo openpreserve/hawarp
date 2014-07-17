@@ -16,13 +16,17 @@
  */
 package eu.scape_project.up2ti.container;
 
-import eu.scape_project.up2ti.container.Container;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.io.Files;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.hadoop.thirdparty.guava.common.io.Files;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test container class
