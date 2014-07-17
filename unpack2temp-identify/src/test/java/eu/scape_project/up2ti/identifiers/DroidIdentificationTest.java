@@ -26,6 +26,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -84,7 +85,8 @@ public class DroidIdentificationTest {
         }
         String tmpTestFilePath = ArcFilesTestMap.getInstance().getTmpTestFile().getAbsolutePath();
         List<String> vals = result.get(tmpTestFilePath + "/20130522085321/http://fue.onb.ac.at/test/image.png");
-        assertEquals("droid puid fmt/11", vals.get(0));
-        assertEquals("droid mime image/png", vals.get(1));
+        Collections.sort(vals);
+        assertEquals("droid mime image/png", vals.get(0));
+        assertEquals("droid puid fmt/11", vals.get(1));
     }
 }
