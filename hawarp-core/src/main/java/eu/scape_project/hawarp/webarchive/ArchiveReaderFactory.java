@@ -16,15 +16,11 @@
 package eu.scape_project.hawarp.webarchive;
 
 import eu.scape_project.hawarp.interfaces.ArchiveReader;
-import eu.scape_project.hawarp.gzip.GzipPushbackStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jwat.arc.ArcConstants;
-import org.jwat.common.ByteCountingPushBackInputStream;
-import org.jwat.gzip.GzipReader;
-import org.jwat.warc.WarcConstants;
 
 /**
  *
@@ -37,19 +33,10 @@ public class ArchiveReaderFactory {
     public static ArchiveReader getReader(InputStream inputStream, String archiveFileName) {
         ArchiveReader reader = null;
         try {
-            if (archiveFileName.endsWith(".gz")) {
-                reader = new ArcArchiveReader(inputStream, true);
-                
-
-            } else if (archiveFileName.endsWith(".arc")) {
-                reader = new ArcArchiveReader(inputStream, false);
-               
-            } else if (archiveFileName.endsWith(".warc")) {
-                reader = new WarcArchiveReader(inputStream, false);
-                
-            } else if (archiveFileName.endsWith(".warc.gz")) {
-                reader = new WarcArchiveReader(inputStream, true);
-                
+            if (archiveFileName.endsWith("arc.gz") || archiveFileName.endsWith(".arc")) {
+                reader = new ArcArchiveReader(inputStream);
+            } else if (archiveFileName.endsWith(".warc") || archiveFileName.endsWith(".warc.gz")) {
+                reader = new WarcArchiveReader(inputStream);
             }
         } catch (IOException ex) {
             Logger.getLogger(ArchiveReaderFactory.class.getName()).log(Level.SEVERE, null, ex);

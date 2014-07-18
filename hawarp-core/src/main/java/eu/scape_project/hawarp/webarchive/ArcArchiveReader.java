@@ -16,17 +16,15 @@
 package eu.scape_project.hawarp.webarchive;
 
 import eu.scape_project.hawarp.interfaces.ArchiveReader;
+import org.jwat.arc.ArcReader;
+import org.jwat.arc.ArcReaderFactory;
+import org.jwat.arc.ArcRecordBase;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import org.jwat.arc.ArcReader;
-import org.jwat.arc.ArcReaderCompressed;
-import org.jwat.arc.ArcReaderFactory;
-import org.jwat.arc.ArcRecordBase;
-import org.jwat.warc.WarcReaderFactory;
 
 /**
- *
  * @author onbscs
  */
 public class ArcArchiveReader implements ArchiveReader {
@@ -36,12 +34,8 @@ public class ArcArchiveReader implements ArchiveReader {
     Iterator<ArcRecordBase> iterator;
     private boolean computePayloadDigest;
 
-    public ArcArchiveReader(InputStream is, boolean compressed) throws IOException {
-        if (compressed) {
-            reader = ArcReaderFactory.getReaderCompressed(is);
-        } else {
-            reader = ArcReaderFactory.getReaderUncompressed(is);
-        }
+    public ArcArchiveReader(InputStream is) throws IOException {
+        reader = ArcReaderFactory.getReader(is);
         iterator = reader.iterator();
     }
 
@@ -59,7 +53,7 @@ public class ArcArchiveReader implements ArchiveReader {
             throw new IllegalStateException("Iterator not initialised!");
         }
         ArcRecordBase arcRecord = iterator.next();
-        ArchiveRecord archiveRecord = new ArchiveRecord(arcRecord,computePayloadDigest);
+        ArchiveRecord archiveRecord = new ArchiveRecord(arcRecord, computePayloadDigest);
         return archiveRecord;
     }
 
@@ -73,7 +67,6 @@ public class ArcArchiveReader implements ArchiveReader {
 
     @Override
     public void setComputePayloadDigest(boolean computePayloadDigest) {
-       this.computePayloadDigest = computePayloadDigest;
+        this.computePayloadDigest = computePayloadDigest;
     }
-
 }
