@@ -99,7 +99,7 @@ public class Arc2WarcMigration {
             for (String child : children) {
                 traverseDir(new File(dirStructItem, child));
             }
-        } else if (!dirStructItem.isDirectory()) {
+        } else {
             String filePath = dirStructItem.getAbsolutePath();
             if (RegexUtils.pathMatchesRegexFilter(filePath, config.getInputPathRegexFilter())) {
                 ArcMigrator arcMigrator = new ArcMigrator(config, dirStructItem);
