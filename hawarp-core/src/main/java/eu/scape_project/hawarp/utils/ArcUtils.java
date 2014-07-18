@@ -15,19 +15,18 @@
  */
 package eu.scape_project.hawarp.utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jwat.arc.ArcRecordBase;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 //import org.archive.io.ArchiveRecord;
 //import org.archive.io.arc.ARCRecord;
 //import org.archive.io.arc.ARCRecordMetaData;
 //import org.archive.uid.RecordIDGenerator;
 //import org.archive.uid.UUIDGenerator;
-import org.jwat.arc.ArcRecordBase;
 
 /**
  * ARC utility methods.
@@ -36,8 +35,7 @@ import org.jwat.arc.ArcRecordBase;
  */
 public class ArcUtils {
     
-    public static final int BUFFER_SIZE = 8192;
-    
+
     private static final Log LOG = LogFactory.getLog(ArcUtils.class);
 
 //    static protected RecordIDGenerator generator = new UUIDGenerator();
@@ -78,16 +76,14 @@ public class ArcUtils {
      * @throws IOException
      */
     public static void recordToOutputStream(ArcRecordBase arcRecord, OutputStream outputStream) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(arcRecord.getPayloadContent());
-        BufferedOutputStream bos = new BufferedOutputStream(outputStream);
-        byte[] tempBuffer = new byte[BUFFER_SIZE];
-        int bytesRead;
-        while ((bytesRead = bis.read(tempBuffer)) != -1) {
-            bos.write(tempBuffer, 0, bytesRead);
+        InputStream bis = null;
+        try {
+            bis = arcRecord.getPayloadContent();
+            org.apache.commons.io.IOUtils.copyLarge(bis,outputStream);
+        } finally {
+            org.apache.commons.io.IOUtils.closeQuietly(bis);
+            org.apache.commons.io.IOUtils.closeQuietly(outputStream);
         }
-        bos.flush();
-        bis.close();
-        bos.close();
     }
     
 }
