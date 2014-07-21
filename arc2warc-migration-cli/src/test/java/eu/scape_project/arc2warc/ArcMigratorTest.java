@@ -17,11 +17,9 @@
 package eu.scape_project.arc2warc;
 
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
 import eu.scape_project.arc2warc.cli.Arc2WarcMigrationConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -42,7 +40,6 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -81,13 +78,10 @@ public class ArcMigratorTest {
     @Test
     public void testWarcCreator() throws Exception {
         String warcFileName = "example.warc";
-        InputStream arcInputStream = Resources.getResource("arc/example.arc.gz").openStream();
-        File arcFile = new File(tempDir, System.currentTimeMillis() + RandomStringUtils.randomAlphabetic(5) + "arc.gz");
-        FileUtils.copyInputStreamToFile(arcInputStream,arcFile);
-        assertNotNull(arcInputStream);
+        File arcFile = new File(Thread.currentThread().getContextClassLoader().getResource("arc/example.arc.gz").toURI());
         File tmpWarcFile = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
         Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
-        conf.setInputStr(tmpWarcFile.getAbsolutePath());
+        conf.setInputStr(arcFile.getAbsolutePath());
         conf.setOutputStr(tmpWarcFile.getAbsolutePath());
         conf.setDirectoryInput(false);
         ArcMigrator warcCreator = new ArcMigrator(conf, arcFile);
@@ -95,7 +89,7 @@ public class ArcMigratorTest {
         validateWarcFile(tmpWarcFile);
     }
 
-    private void validateWarcFile(File tmpWarcFile) throws FileNotFoundException, IOException {
+    public static void validateWarcFile(File tmpWarcFile) throws FileNotFoundException, IOException {
         // Validate warc records using jwat
         InputStream is = new FileInputStream(tmpWarcFile);
         ByteCountingPushBackInputStream pbin = new ByteCountingPushBackInputStream(new BufferedInputStream(is, 8192), 16);

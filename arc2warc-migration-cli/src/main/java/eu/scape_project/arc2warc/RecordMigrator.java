@@ -25,6 +25,7 @@ import org.jwat.warc.WarcRecord;
 import org.jwat.warc.WarcWriter;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -86,9 +87,9 @@ class RecordMigrator {
         writer.closeRecord();
     }
 
-    public void migrateRecord(ArcRecordBase jwatArcRecord, boolean doPayloadContIdent) throws IOException, URISyntaxException {
+    public void migrateRecord(ArcRecordBase jwatArcRecord, File arcFile, long startOffset, boolean doPayloadContIdent) throws IOException, URISyntaxException {
         WarcRecord record = WarcRecord.createRecord(writer);
-        String recordId = getRecordID().toString();
+        String recordId = getRecordID(arcFile,startOffset).toString();
         String mimeType = (jwatArcRecord.getContentType() != null) ? jwatArcRecord.getContentType().toString() : MIME_UNKNOWN;
 
         //TODO line seems meaningless

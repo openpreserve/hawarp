@@ -92,7 +92,7 @@ public class ArcMigrator {
             while (arcIterator.hasNext()) {
                 ArcRecordBase jwatArcRecord = arcIterator.next();
                 if (jwatArcRecord != null) {
-                    recordMigrator.migrateRecord(jwatArcRecord,
+                    recordMigrator.migrateRecord(jwatArcRecord,arcFile, reader.getStartOffset(),
                             config.isContentTypeIdentification());
                 }
             }

@@ -1,4 +1,4 @@
-filedesc://2-metadata-1.arc 0.0.0.0 20130522083953 text/plain 77
+filedesc://2-metadata-1.arc 0.0.0.0 20130522083953 text/plain 76
 1 0 InternetArchive
 URL IP-address Archive-date Content-type Archive-length
 
@@ -693,7 +693,7 @@ Heritrix 1.14.4 is running.
 Web console is at: http://0.0.0.0:8192
 Web console login and password: admin/adminPassword
 
-metadata://netarkivet.dk/crawl/logs/local-errors.log?heritrixVersion=1.14.4&harvestid=1&jobid=2 172.16.13.127 20130522082947 text/plain 0
+metadata://netarkivet.dk/crawl/logs/local-errors.log?heritrixVersion=1.14.4&harvestid=1&jobid=2 172.16.13.127 20130522082947 text/plain 1
 
 metadata://netarkivet.dk/crawl/logs/progress-statistics.log?heritrixVersion=1.14.4&harvestid=1&jobid=2 172.16.13.127 20130522082955 text/plain 474
 20130522082951 CRAWL RESUMED - Running
@@ -702,9 +702,9 @@ metadata://netarkivet.dk/crawl/logs/progress-statistics.log?heritrixVersion=1.14
 2013-05-22T08:29:55Z           4           0            4             1(1)       0(0)             0             0        23292         61824            �           0           0
 20130522082955 CRAWL ENDED - Finished
 
-metadata://netarkivet.dk/crawl/logs/runtime-errors.log?heritrixVersion=1.14.4&harvestid=1&jobid=2 172.16.13.127 20130522082947 text/plain 0
+metadata://netarkivet.dk/crawl/logs/runtime-errors.log?heritrixVersion=1.14.4&harvestid=1&jobid=2 172.16.13.127 20130522082947 text/plain 1
 
-metadata://netarkivet.dk/crawl/logs/uri-errors.log?heritrixVersion=1.14.4&harvestid=1&jobid=2 172.16.13.127 20130522082947 text/plain 0
+metadata://netarkivet.dk/crawl/logs/uri-errors.log?heritrixVersion=1.14.4&harvestid=1&jobid=2 172.16.13.127 20130522082947 text/plain 1
 
 metadata://netarkivet.dk/crawl/index/cdx?majorversion=1&minorversion=0&harvestid=1&jobid=2&timestamp=20130522082952&serialno=00000 172.16.13.127 20130522083953 application/x-cdx 390
 dns:fue.onb.ac.at - 20130522082951 text/dns 57 2-1-20130522082952-00000-prepc2.arc 1356 d8162a42a38237cbbdee8d7c302a2820
