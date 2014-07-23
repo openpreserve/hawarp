@@ -73,13 +73,15 @@ public class Arc2WarcMigration {
         Arc2WarcMigration a2wm = new Arc2WarcMigration();
         long startMillis = System.currentTimeMillis();
         File input = new File(config.getInputStr());
-        
+
         if(input.isDirectory()) {
             config.setDirectoryInput(true);
             a2wm.traverseDir(input);
         } else {
-            ArcMigrator arcMigrator = new ArcMigrator(config, input);
-            arcMigrator.migrate();
+            File output = new File(config.getOutputStr(),
+                    input.getName().replaceAll("\\.arc(.gz)?$",config.createCompressedWarc()? ".warc.gz":".warc"));
+            ArcMigrator arcMigrator = new ArcMigrator(config, input, output);
+            arcMigrator.migrateArcFile();
         }
         long elapsedTimeMillis = System.currentTimeMillis() - startMillis;
         LOG.info("Processing time (sec): " + elapsedTimeMillis / 1000F);
@@ -102,8 +104,10 @@ public class Arc2WarcMigration {
         } else {
             String filePath = dirStructItem.getAbsolutePath();
             if (RegexUtils.pathMatchesRegexFilter(filePath, config.getInputPathRegexFilter())) {
-                ArcMigrator arcMigrator = new ArcMigrator(config, dirStructItem);
-                arcMigrator.migrate();
+                File output = new File(config.getOutputStr(), dirStructItem.getName()
+                                      .replaceAll("\\.arc(.gz)?$", config.createCompressedWarc() ? ".warc.gz" : ".warc"));
+                ArcMigrator arcMigrator = new ArcMigrator(config, dirStructItem, output);
+                arcMigrator.migrateArcFile();
             }
         }
     }

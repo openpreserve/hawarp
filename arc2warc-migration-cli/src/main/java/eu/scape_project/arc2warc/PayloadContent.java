@@ -15,6 +15,7 @@
  */
 package eu.scape_project.arc2warc;
 
+import eu.scape_project.hawarp.utils.StreamUtils;
 import eu.scape_project.hawarp.interfaces.Identifier;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -29,7 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -93,73 +93,31 @@ public class PayloadContent {
             File tempDir = org.apache.commons.io.FileUtils.getTempDirectory();
             final File tmp = File.createTempFile(RandomStringUtils.randomAlphabetic(10), "tmp", tempDir);
             tmp.deleteOnExit();
-            File tempFile = tmp;
             FileOutputStream outputStream = null;
             try {
-                outputStream = new FileOutputStream(tempFile);
-                checkedInputStreamToOutputStream(outputStream);
+                outputStream = new FileOutputStream(tmp);
+                copyAndCheck(outputStream);
             } finally {
                 IOUtils.closeQuietly(outputStream);
             }
-            return new FileInputStream(tempFile);
+            return new FileInputStream(tmp);
         } else {
             final ByteBuffer wrap = ByteBuffer.wrap(buffer);
             wrap.clear();
-            OutputStream outStream = newOutputStream(wrap);
-            checkedInputStreamToOutputStream(outStream);
+            OutputStream outStream = StreamUtils.newOutputStream(wrap);
+            copyAndCheck(outStream);
             wrap.flip();
-            return newInputStream(wrap);
+            return StreamUtils.newInputStream(wrap);
         }
     }
 
-    public static InputStream newInputStream(final ByteBuffer buf) {
-        return new InputStream() {
-            public synchronized int read() throws IOException {
-                if (!buf.hasRemaining()) {
-                    return -1;
-                }
-                return buf.get();
-            }
 
-            public synchronized int read(byte[] bytes, int off, int len) throws IOException {
-                // Read only what's left
-                len = Math.min(len, buf.remaining());
-                if (len == 0) {
-                    return -1;
-                } else {
-                    buf.get(bytes, off, len);
-                    return len;
-                }
-            }
-        };
-    }
-
-    public static OutputStream newOutputStream(final ByteBuffer buf) {
-        return new OutputStream() {
-            public synchronized void write(int b) throws IOException {
-                try {
-                    buf.put((byte) b);
-                } catch (BufferOverflowException e) {
-                    throw new IOException(e);
-                }
-            }
-            public synchronized void write(byte[] bytes, int off, int len) throws IOException {
-                try {
-                    buf.put(bytes, off, len);
-                } catch (BufferOverflowException e) {
-                    throw new IOException(e);
-                }
-            }
-        };
-    }
-
-
-    private void checkedInputStreamToOutputStream(OutputStream outputStream) throws IOException {
-        MessageDigest md = null;
+    private void copyAndCheck(OutputStream outputStream) throws IOException {
+        MessageDigest md;
         try {
             md = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException ex) {
-            LOG.warn("Message digest algorithm not available", ex);
+            throw new RuntimeException("SHA-1 not known");
         }
         BufferedInputStream buffis = new BufferedInputStream(inputStream);
         BufferedOutputStream buffos = new BufferedOutputStream(outputStream);
@@ -168,29 +126,28 @@ public class PayloadContent {
             int bytesRead;
             boolean firstByteArray = true;
             while ((bytesRead = buffis.read(tempBuffer)) != -1) {
-                if (md != null) {
-                    md.update(tempBuffer, 0, bytesRead);
-                }
+                md.update(tempBuffer, 0, bytesRead);
                 buffos.write(tempBuffer, 0, bytesRead);
                 if (doPayloadIdentification && firstByteArray && bytesRead > 0) {
                     identified = identifyPayloadType(tempBuffer);
                 }
                 firstByteArray = false;
             }
-            if (md != null) {
-                byte[] mdbytes = md.digest();
-                StringBuilder hexString = new StringBuilder();
-                for (byte mdbyte : mdbytes) {
-                    hexString.append(Integer.toHexString(0xFF & mdbyte));
-                }
-                digestStr = "sha1:" + hexString.toString();
-            }
+            digestStr = "sha1:" + calcDigest(md);
             consumed = true;
         } finally {
             IOUtils.closeQuietly(buffis);
             IOUtils.closeQuietly(buffos);
         }
+    }
 
+    private String calcDigest(MessageDigest md) {
+        byte[] mdbytes = md.digest();
+        StringBuilder hexString = new StringBuilder();
+        for (byte mdbyte : mdbytes) {
+            hexString.append(Integer.toHexString(0xFF & mdbyte));
+        }
+        return hexString.toString();
     }
 
     private boolean identifyPayloadType(byte[] prefix) {
