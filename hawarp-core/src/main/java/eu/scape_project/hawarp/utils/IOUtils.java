@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -42,48 +41,7 @@ public class IOUtils {
             dir += "/";
         }
         File tmpFile = new File(dir, filename);
-        return writeFile(inStream, tmpFile);
-    }
-
-    private static File writeFile(InputStream inStream, File tmpFile) throws IOException {
-        try {
-            FileUtils.copyInputStreamToFile(inStream, tmpFile);
-        } finally {
-            org.apache.commons.io.IOUtils.closeQuietly(inStream);
-        }
+        FileUtils.copyInputStreamToFile(inStream, tmpFile);
         return tmpFile;
-    }
-
-    public static File copyInputStreamToTempFile(InputStream is, String prefix, String ext) {
-        File tmpFile = null;
-        try {
-            tmpFile = File.createTempFile(prefix, ext);
-            return writeFile(is, tmpFile);
-        } catch (FileNotFoundException ex) {
-            LOG.error("Temporary file not available.", ex);
-        } catch (IOException ex) {
-            LOG.error("I/O Error occured.", ex);
-        } finally {
-            org.apache.commons.io.IOUtils.closeQuietly(is);
-        }
-        return null;
-    }
-
-    public static String copyInputStreamToString(InputStream is) {
-        String strContent = null;
-        try {
-            strContent = org.apache.commons.io.IOUtils.toString(is);
-        } catch (IOException ex) {
-            LOG.error("I/O Error", ex);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException _) {
-                    // ignore
-                }
-            }
-        }
-        return strContent;
     }
 }
