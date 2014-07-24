@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -145,7 +144,6 @@ public class PayloadContent {
 
     private String calcDigest(MessageDigest md) {
         byte[] mdbytes = md.digest();
-        System.out.println(new String(mdbytes, Charset.defaultCharset()));
         return Base32.encodeArray(mdbytes);
     }
 
