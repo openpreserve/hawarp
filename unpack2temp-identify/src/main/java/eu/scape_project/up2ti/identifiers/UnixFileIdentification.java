@@ -16,13 +16,18 @@
  */
 package eu.scape_project.up2ti.identifiers;
 
-import eu.scape_project.hawarp.utils.IOUtils;
+import org.apache.commons.collections.bidimap.DualHashBidiMap;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+import java.util.StringTokenizer;
 
 /**
  * Unix file identification
@@ -67,7 +72,7 @@ public class UnixFileIdentification extends Identification {
     /**
      * Run unix file identification on file (unused)
      *
-     * @param filePath Absolute file path
+     * @param file Absolute file path
      * @return Result list
      * @throws FileNotFoundException
      * @throws IOException
@@ -87,15 +92,16 @@ public class UnixFileIdentification extends Identification {
     /**
      * Run unix file identification on file
      *
-     * @param filePath Absolute file path
      * @return Result list
      * @throws FileNotFoundException
      * @throws IOException
      */
     private synchronized String executeProcess(String command) throws FileNotFoundException, IOException {
         Process p = Runtime.getRuntime().exec(command);
-        InputStream is = p.getInputStream();
-        return IOUtils.copyInputStreamToString(is);
+        try (InputStream is = p.getInputStream()) {
+            return org.apache.commons.io.IOUtils.toString(is);
+        }
+
     }
 
     @Override

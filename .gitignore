@@ -6,3 +6,9 @@
 *.ear
 /hawarp-core/target/
 nbactions.xml
+
+# Intellij Idea
+*.iml
+*.ipr
+*.iws
+.idea/

@@ -15,33 +15,36 @@
  */
 package eu.scape_project.arc2warc;
 
-import static eu.scape_project.hawarp.utils.IOUtils.BUFFER_SIZE;
+import eu.scape_project.hawarp.utils.StreamUtils;
 import eu.scape_project.hawarp.interfaces.Identifier;
-import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
+import static eu.scape_project.hawarp.utils.IOUtils.BUFFER_SIZE;
 
 /**
- *
  * @author scape
  */
 public class PayloadContent {
 
     private static final Log LOG = LogFactory.getLog(PayloadContent.class);
+    private final long length;
+    private final byte[] buffer;
 
     InputStream inputStream;
 
@@ -51,24 +54,21 @@ public class PayloadContent {
 
     private boolean identified;
 
-    private byte[] payloadBytes;
-
     private Identifier identifier;
 
     private boolean doPayloadIdentification;
 
     private String digestStr;
 
-    private PayloadContent() {
+
+    public PayloadContent(InputStream inputStream, long length, byte[] buffer) {
+        this.length = length;
+        this.buffer = buffer;
         identifiedPayLoadType = MIME_UNKNOWN;
         identified = false;
         consumed = false;
         identifier = null;
         doPayloadIdentification = false;
-    }
-
-    public PayloadContent(InputStream inputStream) {
-        this();
         this.inputStream = inputStream;
     }
 
@@ -81,62 +81,73 @@ public class PayloadContent {
             throw new IllegalStateException("Input stream must be read before accessing the payload type.");
         }
         if (identifier == null) {
-            throw new IllegalStateException("An identifier must be set before reading the payload content in order to get the identified payload type.");
+            throw new IllegalStateException(
+                    "An identifier must be set before reading the payload content in order to get the identified payload type.");
         }
         return identifiedPayLoadType;
     }
 
-    public byte[] getPayloadContentAsByteArray() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        checkedInputStreamToOutputStream(baos);
-        return baos.toByteArray();
+
+    public InputStream getPayloadContentAsInputStream() throws IOException {
+        if (length >= buffer.length) {
+            File tempDir = org.apache.commons.io.FileUtils.getTempDirectory();
+            final File tmp = File.createTempFile(RandomStringUtils.randomAlphabetic(10), "tmp", tempDir);
+            tmp.deleteOnExit();
+            FileOutputStream outputStream = null;
+            try {
+                outputStream = new FileOutputStream(tmp);
+                copyAndCheck(outputStream);
+            } finally {
+                IOUtils.closeQuietly(outputStream);
+            }
+            return new FileInputStream(tmp);
+        } else {
+            final ByteBuffer wrap = ByteBuffer.wrap(buffer);
+            wrap.clear();
+            OutputStream outStream = StreamUtils.newOutputStream(wrap);
+            copyAndCheck(outStream);
+            wrap.flip();
+            return StreamUtils.newInputStream(wrap);
+        }
     }
 
-    public InputStream getDumpedPayloadContentAsInputStream() throws IOException {
-        File tempDir = org.apache.commons.io.FileUtils.getTempDirectory();
-        File tempFile = File.createTempFile(RandomStringUtils.randomAlphabetic(10), "tmp", tempDir);
-        FileOutputStream outputStream = new FileOutputStream(tempFile);
-        checkedInputStreamToOutputStream(outputStream);
-        outputStream.close();
-        FileInputStream fis = new FileInputStream(tempFile);
-        return fis;
-    }
 
-    private void checkedInputStreamToOutputStream(OutputStream outputStream) throws IOException {
-
-        MessageDigest md = null;
+    private void copyAndCheck(OutputStream outputStream) throws IOException {
+        MessageDigest md;
         try {
             md = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException ex) {
-            LOG.warn("Message digest algorithm not available", ex);
+            throw new RuntimeException("SHA-1 not known");
         }
         BufferedInputStream buffis = new BufferedInputStream(inputStream);
         BufferedOutputStream buffos = new BufferedOutputStream(outputStream);
-        byte[] tempBuffer = new byte[BUFFER_SIZE];
-        int bytesRead;
-        boolean firstByteArray = true;
-        while ((bytesRead = buffis.read(tempBuffer)) != -1) {
-            if (md != null) {
+        try {
+            byte[] tempBuffer = new byte[BUFFER_SIZE];
+            int bytesRead;
+            boolean firstByteArray = true;
+            while ((bytesRead = buffis.read(tempBuffer)) != -1) {
                 md.update(tempBuffer, 0, bytesRead);
+                buffos.write(tempBuffer, 0, bytesRead);
+                if (doPayloadIdentification && firstByteArray && bytesRead > 0) {
+                    identified = identifyPayloadType(tempBuffer);
+                }
+                firstByteArray = false;
             }
-            buffos.write(tempBuffer, 0, bytesRead);
-            if (doPayloadIdentification && firstByteArray && tempBuffer != null && bytesRead > 0) {
-                identified = identifyPayloadType(tempBuffer);
-            }
-            firstByteArray = false;
+            digestStr = "sha1:" + calcDigest(md);
+            consumed = true;
+        } finally {
+            IOUtils.closeQuietly(buffis);
+            IOUtils.closeQuietly(buffos);
         }
-        if (md != null) {
-            byte[] mdbytes = md.digest();
-            StringBuilder hexString = new StringBuilder();
-            for (int i = 0; i < mdbytes.length; i++) {
-                hexString.append(Integer.toHexString(0xFF & mdbytes[i]));
-            }
-            digestStr = "sha1:" + hexString.toString();
+    }
+
+    private String calcDigest(MessageDigest md) {
+        byte[] mdbytes = md.digest();
+        StringBuilder hexString = new StringBuilder();
+        for (byte mdbyte : mdbytes) {
+            hexString.append(Integer.toHexString(0xFF & mdbyte));
         }
-        buffis.close();
-        buffos.flush();
-        buffos.close();
-        consumed = true;
+        return hexString.toString();
     }
 
     private boolean identifyPayloadType(byte[] prefix) {
@@ -170,5 +181,4 @@ public class PayloadContent {
         }
         return digestStr;
     }
-
 }

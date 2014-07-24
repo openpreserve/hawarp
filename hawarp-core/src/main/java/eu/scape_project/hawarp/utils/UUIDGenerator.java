@@ -15,6 +15,7 @@
  */
 package eu.scape_project.hawarp.utils;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -24,8 +25,15 @@ public final class UUIDGenerator {
     private static final String PREFIX = "urn:uuid:";
 
     public static URI getRecordID() throws URISyntaxException {
-           return new URI(PREFIX + UUID.randomUUID().toString());
-
+        return new URI(PREFIX + UUID.randomUUID().toString());
     }
-    
+
+
+    public static URI getRecordID(File file, long offset) throws URISyntaxException {
+        return new URI(PREFIX + UUID.nameUUIDFromBytes((file + "," + offset).getBytes()).toString());
+    }
+
+    public static URI getRecordID(String name) throws URISyntaxException {
+        return new URI(PREFIX + UUID.nameUUIDFromBytes(name.getBytes()).toString());
+    }
 }

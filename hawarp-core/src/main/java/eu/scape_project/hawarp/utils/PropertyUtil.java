@@ -17,14 +17,13 @@
 
 package eu.scape_project.hawarp.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -37,7 +36,6 @@ public class PropertyUtil {
     private static final Log LOG = LogFactory.getLog(PropertyUtil.class);
     
     private Properties properties;
-    private HashMap<String, String> map;
 
     /**
      * Construct the property utils object from the properties file
@@ -62,21 +60,11 @@ public class PropertyUtil {
     }
 
     /**
-     * @return the properties key value pair map
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-	public Map<String, String> getKeyValuePairs() {
-        map = new HashMap<String, String>((Map) properties);
-        return map;
-    }
-
-    /**
      * get a property value by key
      * @param key the property key
      * @return the property value
      */
     public String getProp(String key) {
-        String val = properties.getProperty(key);
-        return val;
+        return properties.getProperty(key);
     }
 }

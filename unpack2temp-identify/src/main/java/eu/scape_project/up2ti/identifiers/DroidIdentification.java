@@ -17,13 +17,13 @@
 package eu.scape_project.up2ti.identifiers;
 
 import static eu.scape_project.hawarp.interfaces.Identifier.MIME_UNKNOWN;
-import eu.scape_project.hawarp.utils.IOUtils;
-import eu.scape_project.up2ti.container.ZipContainer;
+
 import java.io.*;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import uk.gov.nationalarchives.droid.core.BinarySignatureIdentifier;
@@ -64,7 +64,9 @@ public class DroidIdentification extends Identification {
     public DroidIdentification(Resource resource) throws IOException {
         try {
             InputStream is = resource.getInputStream();
-            File tmpFile = IOUtils.copyInputStreamToTempFile(is, "DroidSignatureFile", ".xml");
+            File tmpFile1 = File.createTempFile("DroidSignatureFile", ".xml");
+            FileUtils.copyInputStreamToFile(is, tmpFile1);
+            File tmpFile = tmpFile1;
             tmpFile.deleteOnExit();
             bsi = new BinarySignatureIdentifier();
             bsi.setSignatureFile(tmpFile.getAbsolutePath());

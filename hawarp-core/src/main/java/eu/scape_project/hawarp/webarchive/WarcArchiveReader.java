@@ -16,15 +16,13 @@
 package eu.scape_project.hawarp.webarchive;
 
 import eu.scape_project.hawarp.interfaces.ArchiveReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-import org.jwat.arc.ArcReader;
-import org.jwat.arc.ArcReaderFactory;
-import org.jwat.arc.ArcRecordBase;
 import org.jwat.warc.WarcReader;
 import org.jwat.warc.WarcReaderFactory;
 import org.jwat.warc.WarcRecord;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 
 /**
  *
@@ -37,12 +35,8 @@ public class WarcArchiveReader implements ArchiveReader {
     Iterator<WarcRecord> iterator;
     private boolean computePayloadDigest;
 
-    public WarcArchiveReader(InputStream is, boolean compressed) throws IOException {
-        if (compressed) {
-            reader = WarcReaderFactory.getReaderCompressed(is);
-        } else {
-            reader = WarcReaderFactory.getReaderUncompressed(is);
-        }
+    public WarcArchiveReader(InputStream is) throws IOException {
+        reader = WarcReaderFactory.getReader(is);
         iterator = reader.iterator();
     }
 

@@ -18,21 +18,19 @@ package eu.scape_project.arc2warc;
 
 import eu.scape_project.arc2warc.cli.Arc2WarcMigrationConfig;
 import eu.scape_project.arc2warc.cli.Arc2WarcMigrationOptions;
-import java.io.IOException;
+import eu.scape_project.hawarp.utils.RegexUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import eu.scape_project.hawarp.utils.RegexUtils;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import org.apache.commons.cli.ParseException;
+import java.io.IOException;
 
 /**
  * ARC to WARC conversion.
@@ -75,13 +73,15 @@ public class Arc2WarcMigration {
         Arc2WarcMigration a2wm = new Arc2WarcMigration();
         long startMillis = System.currentTimeMillis();
         File input = new File(config.getInputStr());
-        
+
         if(input.isDirectory()) {
             config.setDirectoryInput(true);
             a2wm.traverseDir(input);
         } else {
-            ArcMigrator arcMigrator = new ArcMigrator(config, input);
-            arcMigrator.migrate();
+            File output = new File(config.getOutputStr(),
+                    input.getName().replaceAll("\\.arc(.gz)?$",config.createCompressedWarc()? ".warc.gz":".warc"));
+            ArcMigrator arcMigrator = new ArcMigrator(config, input, output);
+            arcMigrator.migrateArcFile();
         }
         long elapsedTimeMillis = System.currentTimeMillis() - startMillis;
         LOG.info("Processing time (sec): " + elapsedTimeMillis / 1000F);
@@ -91,7 +91,7 @@ public class Arc2WarcMigration {
     /**
      * Traverse the root directory recursively
      *
-     * @param dir Root directory
+     * @param dirStructItem Root directory
      * @throws FileNotFoundException
      * @throws IOException
      */
@@ -101,11 +101,13 @@ public class Arc2WarcMigration {
             for (String child : children) {
                 traverseDir(new File(dirStructItem, child));
             }
-        } else if (!dirStructItem.isDirectory()) {
+        } else {
             String filePath = dirStructItem.getAbsolutePath();
             if (RegexUtils.pathMatchesRegexFilter(filePath, config.getInputPathRegexFilter())) {
-                ArcMigrator arcMigrator = new ArcMigrator(config, dirStructItem);
-                arcMigrator.migrate();
+                File output = new File(config.getOutputStr(), dirStructItem.getName()
+                                      .replaceAll("\\.arc(.gz)?$", config.createCompressedWarc() ? ".warc.gz" : ".warc"));
+                ArcMigrator arcMigrator = new ArcMigrator(config, dirStructItem, output);
+                arcMigrator.migrateArcFile();
             }
         }
     }

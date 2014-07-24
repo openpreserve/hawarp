@@ -16,15 +16,13 @@
 
 package eu.scape_project.hawarp.mapreduce;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jwat.arc.ArcReader;
 import org.jwat.arc.ArcReaderFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
@@ -37,18 +35,7 @@ public class JwatArcReaderFactory {
     public static ArcReader getReader(InputStream inputStream) {
         ArcReader reader = null;
         try {
-            // Read first two bytes to check if we have a gzipped input stream
-            PushbackInputStream pb = new PushbackInputStream(inputStream, 2);
-            byte[] signature = new byte[2];
-            pb.read(signature);
-            pb.unread(signature); 
-            // use compressed reader if gzip magic number is matched
-            if (signature[ 0] == (byte) 0x1f && signature[ 1] == (byte) 0x8b)
-            {
-                reader = ArcReaderFactory.getReaderCompressed(pb);
-            } else {
-                reader = ArcReaderFactory.getReaderUncompressed(pb);
-            }
+            reader = ArcReaderFactory.getReader(inputStream);
         } catch (IOException ex) {
             LOG.error("Unable to create reader", ex);
         }
