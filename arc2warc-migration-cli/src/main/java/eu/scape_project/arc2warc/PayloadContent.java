@@ -15,12 +15,13 @@
  */
 package eu.scape_project.arc2warc;
 
-import eu.scape_project.hawarp.utils.StreamUtils;
 import eu.scape_project.hawarp.interfaces.Identifier;
+import eu.scape_project.hawarp.utils.StreamUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jwat.common.Base32;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -31,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -143,11 +145,8 @@ public class PayloadContent {
 
     private String calcDigest(MessageDigest md) {
         byte[] mdbytes = md.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte mdbyte : mdbytes) {
-            hexString.append(Integer.toHexString(0xFF & mdbyte));
-        }
-        return hexString.toString();
+        System.out.println(new String(mdbytes, Charset.defaultCharset()));
+        return Base32.encodeArray(mdbytes);
     }
 
     private boolean identifyPayloadType(byte[] prefix) {

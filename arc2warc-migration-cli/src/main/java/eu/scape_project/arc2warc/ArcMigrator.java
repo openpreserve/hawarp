@@ -16,7 +16,7 @@
 package eu.scape_project.arc2warc;
 
 import eu.scape_project.arc2warc.cli.Arc2WarcMigrationConfig;
-import eu.scape_project.hawarp.mapreduce.JwatArcReaderFactory;
+import eu.scape_project.hawarp.utils.JwatArcReaderFactory;
 import eu.scape_project.hawarp.utils.RegexUtils;
 import eu.scape_project.hawarp.utils.UUIDGenerator;
 import eu.scape_project.tika_identify.tika.TikaIdentificationTask;
