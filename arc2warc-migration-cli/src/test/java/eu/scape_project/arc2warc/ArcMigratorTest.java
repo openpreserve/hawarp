@@ -84,7 +84,7 @@ public class ArcMigratorTest {
         File arcFile = new File(Thread.currentThread().getContextClassLoader().getResource("arc/example.arc.gz").toURI());
         File tmpWarcFile = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
         Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
-        ArcMigrator warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile);
+        ArcMigrator warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile,false);
         warcCreator.migrateArcFile();
         validateExampleArcGzMigrated(tmpWarcFile);
     }
@@ -255,16 +255,36 @@ public class ArcMigratorTest {
         File arcFile = new File(Resources.getResource("arc-dedup/1-1-20130522081727-00000-prepc2.arc").toURI());
         File tmpWarcFile1 = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
 
-        ArcMigrator warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile1);
+        ArcMigrator warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile1,false);
         warcCreator.migrateArcFile();
 
-        warcFileName = "example.warc";
-        arcFile = new File(Resources.getResource("arc-dedup/2-metadata-1.arc").toURI());
-        File tmpWarcFile2 = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
-        warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile2);
-        warcCreator.migrateArcFile();
+        String warcFileName2 = "example.warc";
+        File arcFile2 = new File(Resources.getResource("arc-dedup/2-metadata-1.arc").toURI());
+        File tmpWarcFile2 = new File(tempDir.getAbsolutePath() + "/" + warcFileName2);
+        ArcMigrator warcCreator2 = new ArcMigrator(conf, arcFile2, tmpWarcFile2, true);
+        warcCreator2.migrateArcFile();
 
         ArcMigratorTest.validateDeduplicated(tmpWarcFile1,tmpWarcFile2);
 
+    }
+
+    @Test
+    public void testMetadataMigration() throws Exception {
+        Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
+        String warcFileName2 = "example.warc";
+        File arcFile2 = new File(Resources.getResource("arc-dedup/1-metadata-1.arc").toURI());
+        File tmpWarcFile2 = new File(tempDir.getAbsolutePath() + "/" + warcFileName2);
+        ArcMigrator warcCreator2 = new ArcMigrator(conf, arcFile2, tmpWarcFile2, false);
+        warcCreator2.migrateArcFile();
+    }
+
+    @Test
+    public void testMetadataMigration2() throws Exception {
+        Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
+        String warcFileName2 = "example.warc";
+        File arcFile2 = new File(Resources.getResource("arc-dedup/1-1-20130522081727-00000-prepc2.arc").toURI());
+        File tmpWarcFile2 = new File(tempDir.getAbsolutePath() + "/" + warcFileName2);
+        ArcMigrator warcCreator2 = new ArcMigrator(conf, arcFile2, tmpWarcFile2, false);
+        warcCreator2.migrateArcFile();
     }
 }

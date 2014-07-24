@@ -64,6 +64,7 @@ public class ArcMigrator {
     private final File arcFile;
 
     private final File warcFile;
+    private final boolean deduplicate;
     private final byte[] buffer;
 
     //Migration state
@@ -71,10 +72,11 @@ public class ArcMigrator {
     private WarcWriter writer;
     private ArcReader reader;
 
-    public ArcMigrator(Arc2WarcMigrationConfig config, File arcFile, File warcFile) {
+    public ArcMigrator(Arc2WarcMigrationConfig config, File arcFile, File warcFile, boolean deduplicate) {
         this.config = config;
         this.arcFile = arcFile;
         this.warcFile = warcFile;
+        this.deduplicate = deduplicate;
         buffer = new byte[LIMIT_LARGE_PAYLOAD];
     }
 
@@ -91,7 +93,7 @@ public class ArcMigrator {
                 if (first) {
                     migrateMetadataRecord(jwatArcRecord);
                     first = false;
-                } else if (arcFile.getName().contains("-metadata-")) {
+                } else if (deduplicate) {
                     if (RegexUtils.pathMatchesRegexFilter(jwatArcRecord.getUrlStr(),
                             "^metadata://.*/crawl/logs/crawl\\.log.*$")) {
                         migrateCrawlLog(jwatArcRecord, writer);
@@ -103,8 +105,10 @@ public class ArcMigrator {
             LOG.info("File processed: " + arcFile.getAbsolutePath());
         } catch (URISyntaxException | FileNotFoundException ex) {
             LOG.error("File not found error", ex);
+            throw new RuntimeException(ex);
         } catch (IOException ex) {
             LOG.error("I/O Error", ex);
+            throw new RuntimeException(ex);
         } finally {
             IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(writer);
@@ -198,6 +202,8 @@ public class ArcMigrator {
                 warcRecord.header.addHeader(WarcConstants.FN_WARC_IDENTIFIED_PAYLOAD_TYPE,
                         payloadContent.getIdentifiedPayLoadType());
             }
+        } else {
+            warcRecord.header.addHeader(WarcConstants.FN_CONTENT_LENGTH, 0, null);
         }
         // finished creating header, write it to the WARC record
         writer.writeHeader(warcRecord);
