@@ -30,7 +30,7 @@ public final class UUIDGenerator {
 
 
     public static URI getRecordID(File file, long offset) throws URISyntaxException {
-        return new URI(PREFIX + UUID.nameUUIDFromBytes((file + "," + offset).getBytes()).toString());
+        return new URI(PREFIX + UUID.nameUUIDFromBytes((file.getName() + "," + offset).getBytes()).toString());
     }
 
     public static URI getRecordID(String name) throws URISyntaxException {
