@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.scape_project.hawarp.mapreduce;
+package eu.scape_project.hawarp.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

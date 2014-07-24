@@ -18,7 +18,16 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
                 <configuration>
+
                     <archive>
                         <manifest>
                             <mainClass>eu.scape_project.arc2warc.Arc2WarcMigration</mainClass>
@@ -32,6 +41,7 @@
         </plugins>
     </build>
     <dependencies>
+
         <dependency>
             <groupId>net.sf.supercsv</groupId>
             <artifactId>super-csv</artifactId>
