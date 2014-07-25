@@ -103,7 +103,10 @@ public class ArcMigrator {
                 }
             }
             LOG.info("File processed: " + arcFile.getAbsolutePath());
-        } catch (URISyntaxException | FileNotFoundException ex) {
+        } catch (URISyntaxException ex) {
+            LOG.error("File not found error", ex);
+            throw new RuntimeException(ex);
+        } catch (FileNotFoundException ex) {
             LOG.error("File not found error", ex);
             throw new RuntimeException(ex);
         } catch (IOException ex) {
