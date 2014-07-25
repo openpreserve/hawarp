@@ -117,7 +117,7 @@ public class Arc2WarcMigration {
         if (dirStructItem.getName().contains("-metadata-")){
             //then make a special deduplication arc file
             output = new File(config.getOutputStr(),
-                    output.getName().replace("-metadata-","-duplications"));
+                    output.getName().replace("-metadata-","-duplications-"));
             arcMigrator = new ArcMigrator(config, dirStructItem, output,true);
             arcMigrator.migrateArcFile();
 
