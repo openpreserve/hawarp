@@ -21,6 +21,7 @@ import eu.scape_project.hawarp.utils.RegexUtils;
 import eu.scape_project.hawarp.utils.UUIDGenerator;
 import eu.scape_project.tika_identify.tika.TikaIdentificationTask;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,6 +84,7 @@ public class ArcMigrator {
     public void migrateArcFile() {
         try {
             reader = JwatArcReaderFactory.getReader(new FileInputStream(arcFile));
+            FileUtils.forceMkdir(warcFile.getParentFile());
             writer = WarcWriterFactory.getWriter(new FileOutputStream(warcFile), config.createCompressedWarc());
             warcInfoId = getRecordID().toString();
             createWarcInfoRecord();
@@ -186,7 +188,16 @@ public class ArcMigrator {
         InputStream payloadContentStream = null;
         if (arcRecord.hasPayload()) {
             InputStream inputStream = arcRecord.getPayloadContent();
-            long remaining = inputStream.available();
+            long remaining;
+            try {
+                remaining = arcRecord.getPayload().getRemaining();
+            } catch (IOException e){
+                if (arcRecord.getStartOffset() == 0 && arcRecord.getArchiveLength() == 77){
+                    remaining = 0;
+                } else {
+                    throw new IOException(e);
+                }
+            }
             long contentLength
                     = remaining + payloadHeader.getBytes().length;// WARC content length is payload length + payload header length
             warcRecord.header.addHeader(WarcConstants.FN_CONTENT_LENGTH, contentLength, null);

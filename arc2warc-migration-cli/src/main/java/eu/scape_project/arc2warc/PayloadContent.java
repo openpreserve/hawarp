@@ -18,6 +18,7 @@ package eu.scape_project.arc2warc;
 import eu.scape_project.hawarp.interfaces.Identifier;
 import eu.scape_project.hawarp.utils.StreamUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,7 +71,8 @@ public class PayloadContent {
         consumed = false;
         identifier = null;
         doPayloadIdentification = false;
-        this.inputStream = inputStream;
+        this.inputStream = (length != 0?inputStream: new NullInputStream(0));
+
     }
 
     public void setIdentifier(Identifier identifier) {
