@@ -38,6 +38,12 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>${hadoop.version}</version>
+            <scope>provided</scope>
+        </dependency>
         
         <dependency>
             <groupId>eu.scape_project</groupId>
@@ -51,11 +57,11 @@
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
             <version>${tika.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-parsers</artifactId>
-            <version>${tika.version}</version>
+            <!--   </dependency>
+               <dependency>
+                   <groupId>org.apache.tika</groupId>
+                   <artifactId>tika-parsers</artifactId>
+                   <version>${tika.version}</version>-->
         </dependency>
     </dependencies>
     

@@ -17,6 +17,7 @@
 package eu.scape_project.up2ti.identifiers;
 
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -98,10 +99,12 @@ public class UnixFileIdentification extends Identification {
      */
     private synchronized String executeProcess(String command) throws FileNotFoundException, IOException {
         Process p = Runtime.getRuntime().exec(command);
-        try (InputStream is = p.getInputStream()) {
+        InputStream is = p.getInputStream();
+        try {
             return org.apache.commons.io.IOUtils.toString(is);
+        } finally {
+            IOUtils.closeQuietly(is);
         }
-
     }
 
     @Override

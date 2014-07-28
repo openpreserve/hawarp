@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.jwat.common.ByteCountingPushBackInputStream;
 import org.jwat.warc.WarcConstants;
 import org.jwat.warc.WarcReaderFactory;
+import org.jwat.warc.WarcRecord;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -83,7 +84,7 @@ public class ArcMigratorTest {
         File arcFile = new File(Thread.currentThread().getContextClassLoader().getResource("arc/example.arc.gz").toURI());
         File tmpWarcFile = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
         Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
-        ArcMigrator warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile);
+        ArcMigrator warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile,false);
         warcCreator.migrateArcFile();
         validateExampleArcGzMigrated(tmpWarcFile);
     }
@@ -162,11 +163,17 @@ public class ArcMigratorTest {
     }
 
 
-    public static void validateDeduplicated(File tmpWarcFile) throws FileNotFoundException, IOException {
+    public static void validateDeduplicated(File tmpWarcFile1,File tmpWarcFile2) throws FileNotFoundException, IOException {
+        org.jwat.warc.WarcReader warcReader2 = WarcReaderFactory.getReader(new ByteCountingPushBackInputStream(new BufferedInputStream(new FileInputStream(
+                tmpWarcFile2)), 16));
+        warcReader2.getNextRecord();
+        warcReader2.getNextRecord();
+        WarcRecord deduplicated = warcReader2.getNextRecord();
+
+
         // Validate warc records using jwat
-        InputStream is = new FileInputStream(tmpWarcFile);
-        ByteCountingPushBackInputStream pbin = new ByteCountingPushBackInputStream(new BufferedInputStream(is), 16);
-        org.jwat.warc.WarcReader warcReader = WarcReaderFactory.getReader(pbin);
+        org.jwat.warc.WarcReader warcReader = WarcReaderFactory.getReader(new ByteCountingPushBackInputStream(new BufferedInputStream(
+                new FileInputStream(tmpWarcFile1)), 16));
         Iterator<org.jwat.warc.WarcRecord> warcIterator = warcReader.iterator();
         int recordCounter = 0;
         while (warcIterator.hasNext()) {
@@ -174,72 +181,110 @@ public class ArcMigratorTest {
             org.jwat.warc.WarcRecord warcRecord = warcIterator.next();
             InputStream payloadIs = warcRecord.getPayloadContent();
             switch (recordCounter) {
-                case 1:
-                    // header
-                    assertEquals("warcinfo", warcRecord.getHeader("WARC-Type").value);
-                    assertEquals("application/warc-fields", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("133", warcRecord.getHeader("Content-Length").value);
-                    // payload
-                    String arcHeader = new String(IOUtils.toByteArray(payloadIs), CHARSET);
-                    assertTrue("header start not as expected",
-                            arcHeader.startsWith(
-                                    "software: JWAT Version 1.0.0 https://sbforge.org/display/JWAT/JWAT-Tools\n"));
-                    assertTrue("header end not as expected", arcHeader.endsWith("description: migrated from ARC format: WARC file version 1.0"));
-                    break;
-                case 2:
-                    // header
-                    assertEquals("metadata", warcRecord.getHeader("WARC-Type").value);
-                    assertEquals("0", warcRecord.getHeader("Content-Length").value);
-                    assertEquals("text/plain", warcRecord.getHeader("Content-Type").value);
-                    break;
-                case 3:
-                    // header
-                    assertEquals("revisit", warcRecord.getHeader("WARC-Type").value);
-                    assertEquals("image/png", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("0", warcRecord.getHeader("Content-Length").value);
-                    assertEquals("<urn:uuid:93994805-b2d9-3d09-8bed-aa658431e160>", warcRecord.getHeader(
-                            WarcConstants.FN_WARC_REFERS_TO).value);
-                    break;
-                case 4:
-                    // header
-                    assertEquals("response", warcRecord.getHeader("WARC-Type").value);
-                    assertEquals("text/html", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("490", warcRecord.getHeader("Content-Length").value);
-                    // payload
-                    String robots = IOUtils.toString(payloadIs);
-                    assertTrue(robots.startsWith("HTTP/1.1 404 Not Found"));
-                    assertTrue(robots.endsWith("</body></html>\n"));
-                    break;
-                case 5:
-                    // header
-                    assertEquals("response", warcRecord.getHeader("WARC-Type").value);
-                    assertEquals("text/html", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("441", warcRecord.getHeader("Content-Length").value);
-                    // payload
-                    String html = IOUtils.toString(payloadIs);
-                    assertTrue(html.startsWith("HTTP/1.1 200 OK"));
-                    assertTrue(html.endsWith("</html>\n\n"));
-                    break;
-                case 6:
-                    // header
-                    assertEquals("response", warcRecord.getHeader("WARC-Type").value);
-                    assertEquals("image/png", warcRecord.getHeader("Content-Type").value);
-                    assertEquals("862", warcRecord.getHeader("Content-Length").value);
-                    break;
+                    case 1:
+                        // header
+                        assertEquals("warcinfo", warcRecord.getHeader("WARC-Type").value);
+                        assertEquals("application/warc-fields", warcRecord.getHeader("Content-Type").value);
+                        assertEquals("133", warcRecord.getHeader("Content-Length").value);
+                        // payload
+                        String arcHeader = new String(IOUtils.toByteArray(payloadIs), CHARSET);
+                        assertTrue("header start not as expected",
+                                arcHeader.startsWith(
+                                        "software: JWAT Version 1.0.0 https://sbforge.org/display/JWAT/JWAT-Tools\n"));
+                        assertTrue("header end not as expected", arcHeader.endsWith("description: migrated from ARC format: WARC file version 1.0"));
+                        break;
+                    case 2:
+                        // header
+                        assertEquals("metadata", warcRecord.getHeader("WARC-Type").value);
+                        assertEquals("1188", warcRecord.getHeader("Content-Length").value);
+                        assertEquals("text/plain", warcRecord.getHeader("Content-Type").value);
+                        // payload
+                        String oldArcInfoRecord = IOUtils.toString(payloadIs);
+                        assertTrue(oldArcInfoRecord.startsWith(
+                                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
+                        assertTrue(oldArcInfoRecord.endsWith("</arcmetadata>\n"));
+                        break;
+                    case 3:
+                        // header
+                        assertEquals("response", warcRecord.getHeader("WARC-Type").value);
+                        assertEquals("text/dns", warcRecord.getHeader("Content-Type").value);
+                        assertEquals("57", warcRecord.getHeader("Content-Length").value);
+                        // payload
+                        String dns = IOUtils.toString(payloadIs);
+                        assertTrue(dns.startsWith("20130522081726"));
+                        assertTrue(dns.endsWith("fue-l.onb1.ac.at.\t3600\tIN\tA\t172.16.14.151\n"));
+                        break;
+                    case 4:
+                        // header
+                        assertEquals("response", warcRecord.getHeader("WARC-Type").value);
+                        assertEquals("text/html", warcRecord.getHeader("Content-Type").value);
+                        assertEquals("490", warcRecord.getHeader("Content-Length").value);
+                        // payload
+                        String robots = IOUtils.toString(payloadIs);
+                        assertTrue(robots.startsWith("HTTP/1.1 404 Not Found"));
+                        assertTrue(robots.endsWith("</body></html>\n"));
+                        break;
+                    case 5:
+                        // header
+                        assertEquals("response", warcRecord.getHeader("WARC-Type").value);
+                        assertEquals("text/html", warcRecord.getHeader("Content-Type").value);
+                        assertEquals("441", warcRecord.getHeader("Content-Length").value);
+                        // payload
+                        String html = IOUtils.toString(payloadIs);
+                        assertTrue(html.startsWith("HTTP/1.1 200 OK"));
+                        assertTrue(html.endsWith("</html>\n\n"));
+                        break;
+                    case 6:
+                        // header
+                        assertEquals("response", warcRecord.getHeader("WARC-Type").value);
+                        assertEquals("image/png", warcRecord.getHeader("Content-Type").value);
+                        assertEquals("862", warcRecord.getHeader("Content-Length").value);
+                        assertEquals(deduplicated.getHeader(WarcConstants.FN_WARC_REFERS_TO).value,warcRecord.getHeader(WarcConstants.FN_WARC_RECORD_ID).value);
+                        assertEquals(deduplicated.getHeader(WarcConstants.FN_WARC_PAYLOAD_DIGEST).value, warcRecord.getHeader(WarcConstants.FN_WARC_PAYLOAD_DIGEST).value);
+                        break;
+                }
             }
-        }
-        assertEquals(3, recordCounter);
+        assertEquals(6, recordCounter);
     }
 
     @Test
     public void testDeDuplicatin() throws Exception {
-        String warcFileName = "example.warc";
-        File arcFile = new File(Resources.getResource("arc-dedup/2-metadata-1.arc").toURI());
-        File tmpWarcFile = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
         Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
-        ArcMigrator warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile);
+
+        String warcFileName = "old.warc";
+        File arcFile = new File(Resources.getResource("arc-dedup/1-1-20130522081727-00000-prepc2.arc").toURI());
+        File tmpWarcFile1 = new File(tempDir.getAbsolutePath() + "/" + warcFileName);
+
+        ArcMigrator warcCreator = new ArcMigrator(conf, arcFile, tmpWarcFile1,false);
         warcCreator.migrateArcFile();
-        ArcMigratorTest.validateDeduplicated(tmpWarcFile);
-        System.out.println(FileUtils.readFileToString(tmpWarcFile));
+
+        String warcFileName2 = "example.warc";
+        File arcFile2 = new File(Resources.getResource("arc-dedup/2-metadata-1.arc").toURI());
+        File tmpWarcFile2 = new File(tempDir.getAbsolutePath() + "/" + warcFileName2);
+        ArcMigrator warcCreator2 = new ArcMigrator(conf, arcFile2, tmpWarcFile2, true);
+        warcCreator2.migrateArcFile();
+
+        ArcMigratorTest.validateDeduplicated(tmpWarcFile1,tmpWarcFile2);
+
+    }
+
+    @Test
+    public void testMetadataMigration() throws Exception {
+        Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
+        String warcFileName2 = "example.warc";
+        File arcFile2 = new File(Resources.getResource("arc-dedup/1-metadata-1.arc").toURI());
+        File tmpWarcFile2 = new File(tempDir.getAbsolutePath() + "/" + warcFileName2);
+        ArcMigrator warcCreator2 = new ArcMigrator(conf, arcFile2, tmpWarcFile2, false);
+        warcCreator2.migrateArcFile();
+    }
+
+    @Test
+    public void testMetadataMigration2() throws Exception {
+        Arc2WarcMigrationConfig conf = new Arc2WarcMigrationConfig();
+        String warcFileName2 = "example.warc";
+        File arcFile2 = new File(Resources.getResource("arc-dedup/1-1-20130522081727-00000-prepc2.arc").toURI());
+        File tmpWarcFile2 = new File(tempDir.getAbsolutePath() + "/" + warcFileName2);
+        ArcMigrator warcCreator2 = new ArcMigrator(conf, arcFile2, tmpWarcFile2, false);
+        warcCreator2.migrateArcFile();
     }
 }

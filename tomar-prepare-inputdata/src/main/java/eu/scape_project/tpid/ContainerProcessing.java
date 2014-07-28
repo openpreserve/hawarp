@@ -15,11 +15,9 @@
  */
 package eu.scape_project.tpid;
 
-import eu.scape_project.hawarp.mapreduce.JwatArcReaderFactory;
 import eu.scape_project.hawarp.utils.ArcUtils;
+import eu.scape_project.hawarp.utils.JwatArcReaderFactory;
 import eu.scape_project.hawarp.utils.StringUtils;
-import java.io.*;
-import java.util.Iterator;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -31,6 +29,13 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.jwat.arc.ArcReader;
 import org.jwat.arc.ArcReaderFactory;
 import org.jwat.arc.ArcRecordBase;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.util.Iterator;
 
 /**
  * ContainerItemPreparation

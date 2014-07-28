@@ -34,7 +34,7 @@
         </plugins>
     </build>
     <dependencies>
-        
+
         <dependency>
             <groupId>eu.scape_project</groupId>
             <artifactId>hawarp-core</artifactId>

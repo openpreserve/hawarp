@@ -1,16 +1,19 @@
 package eu.scape_project.arc2warc;
 
 import org.jwat.arc.ArcRecordBase;
+import org.supercsv.cellprocessor.CellProcessorAdaptor;
 import org.supercsv.cellprocessor.ParseDate;
 import org.supercsv.cellprocessor.ParseInt;
-import org.supercsv.cellprocessor.ParseLong;
 import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.constraint.StrNotNullOrEmpty;
 import org.supercsv.cellprocessor.ift.CellProcessor;
+import org.supercsv.cellprocessor.ift.StringCellProcessor;
+import org.supercsv.exception.SuperCsvCellProcessorException;
 import org.supercsv.io.CsvBeanReader;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.io.ITokenizer;
 import org.supercsv.prefs.CsvPreference;
+import org.supercsv.util.CsvContext;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,8 +28,8 @@ import java.util.NoSuchElementException;
 public class CrawlLogEntry {
 
     private Date loggingTimestamp;
-    private int statusCode;
-    private long size;
+    private Integer statusCode;
+    private Long size;
     private String downloaded;
     private String breadcrumbs;
     private String referrer;
@@ -63,8 +66,9 @@ public class CrawlLogEntry {
         final String[] header = new String[]{"loggingTimestamp", "statusCode", "size", "downloaded", "breadcrumbs",
                                              "referrer", "mimetype", "workerThreadID", "fetchTimestamp", "sha1Digest",
                                              "sourceTag", "annotations"};
-        final CellProcessor[] processors = new CellProcessor[]{new ParseDate("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"), new ParseInt(),//returnCode
-                                                               new ParseLong(),//size
+        final CellProcessor[] processors = new CellProcessor[]{new ParseDate("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+                                                               new ParseInt(),//returnCode
+                                                               new LongOrNull(),//size
                                                                new StrNotNullOrEmpty(),//downloaded
                                                                null, //breadcrumpts
                                                                null, // referrer
@@ -289,5 +293,34 @@ public class CrawlLogEntry {
                ", sourceTag='" + sourceTag + '\'' +
                ", annotations='" + annotations + '\'' +
                '}';
+    }
+
+    private static class LongOrNull extends CellProcessorAdaptor implements StringCellProcessor {
+        private LongOrNull() {
+        }
+
+        private LongOrNull(CellProcessor next) {
+            super(next);
+        }
+
+        @Override
+        public Object execute(Object value, CsvContext context) {
+            validateInputNotNull(value, context);
+            Long result;
+            if (value instanceof Long) {
+                result = (Long) value;
+            } else if (value instanceof String) {
+                try {
+                    result = Long.parseLong((String) value);
+                } catch (final NumberFormatException e) {
+                    result = null;
+                }
+            } else {
+                final String actualClassName = value.getClass().getName();
+                throw new SuperCsvCellProcessorException(String.format(
+                        "the input value should be of type Long or String but is of type %s", actualClassName), context, this);
+            }
+            return next.execute(result, context);
+        }
     }
 }

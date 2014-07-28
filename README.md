@@ -18,13 +18,6 @@ format WARC.
 
 [Documentation](https://github.com/openplanets/hawarp/blob/master/arc2warc-migration-cli/README.md)
 
-arc2warc-migration-cli
-----------------------
-
-Hadoop job to convert ARC container files to the new ISO standard format WARC.
-
-[Documentation](https://github.com/openplanets/hawarp/blob/master/arc2warc-migration-hdp/README.md)
-
 droid-identify
 --------------
 
