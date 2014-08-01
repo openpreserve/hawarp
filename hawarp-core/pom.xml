@@ -8,22 +8,27 @@
         <version>1.0</version>
     </parent>
 
-    <groupId>eu.scape_project</groupId>
     <artifactId>hawarp-core</artifactId>
-    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>hawarp-core</name>
     <url>http://maven.apache.org</url>
-    
+
     <dependencies>
-        
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>r05</version>
         </dependency>
+
     </dependencies>
-    
+
 </project>
 

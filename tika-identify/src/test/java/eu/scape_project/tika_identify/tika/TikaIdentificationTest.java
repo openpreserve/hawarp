@@ -17,14 +17,17 @@
 package eu.scape_project.tika_identify.tika;
 
 import com.google.common.io.Resources;
-import eu.scape_project.tika_identify.tika.TikaIdentificationTask;
-import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.List;
-import org.apache.commons.io.IOUtils;
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Test class for the Droid File Format Identification.
@@ -68,7 +71,7 @@ public class TikaIdentificationTest {
         InputStream odtFileInputStream = Resources.getResource("testfile.odt").openStream();
         assertNotNull(odtFileInputStream);
         String odtResult = tikaid.identify(odtFileInputStream);
-        assertEquals("application/zip",odtResult);
+        assertEquals("application/vnd.oasis.opendocument.text",odtResult);
         odtFileInputStream.close();
         
         InputStream pdfFileInputStream = Resources.getResource("testfile.pdf").openStream();

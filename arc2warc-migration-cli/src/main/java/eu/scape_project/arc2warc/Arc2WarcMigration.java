@@ -78,10 +78,7 @@ public class Arc2WarcMigration {
             config.setDirectoryInput(true);
             a2wm.traverseDir(input);
         } else {
-            File output = new File(config.getOutputStr(),
-                    input.getName().replaceAll("\\.arc(.gz)?$",config.createCompressedWarc()? ".warc.gz":".warc"));
-            ArcMigrator arcMigrator = new ArcMigrator(config, input, output);
-            arcMigrator.migrateArcFile();
+            migrate(input);
         }
         long elapsedTimeMillis = System.currentTimeMillis() - startMillis;
         LOG.info("Processing time (sec): " + elapsedTimeMillis / 1000F);
@@ -104,12 +101,26 @@ public class Arc2WarcMigration {
         } else {
             String filePath = dirStructItem.getAbsolutePath();
             if (RegexUtils.pathMatchesRegexFilter(filePath, config.getInputPathRegexFilter())) {
-                File output = new File(config.getOutputStr(), dirStructItem.getName()
-                                      .replaceAll("\\.arc(.gz)?$", config.createCompressedWarc() ? ".warc.gz" : ".warc"));
-                ArcMigrator arcMigrator = new ArcMigrator(config, dirStructItem, output);
-                arcMigrator.migrateArcFile();
+                migrate(dirStructItem);
             }
         }
     }
 
+    private static void migrate(File dirStructItem) {
+        //first do normal migration.
+        File output = new File(config.getOutputStr(),
+                dirStructItem.getName()
+                             .replaceAll("\\.arc(.gz)?$", config.createCompressedWarc() ? ".warc.gz" : ".warc"));
+        ArcMigrator arcMigrator = new ArcMigrator(config, dirStructItem, output, false);
+        arcMigrator.migrateArcFile();
+
+        if (dirStructItem.getName().contains("-metadata-")){
+            //then make a special deduplication arc file
+            output = new File(config.getOutputStr(),
+                    output.getName().replace("-metadata-","-duplications-"));
+            arcMigrator = new ArcMigrator(config, dirStructItem, output,true);
+            arcMigrator.migrateArcFile();
+
+        }
+    }
 }

@@ -15,12 +15,14 @@
  */
 package eu.scape_project.arc2warc;
 
-import eu.scape_project.hawarp.utils.StreamUtils;
 import eu.scape_project.hawarp.interfaces.Identifier;
+import eu.scape_project.hawarp.utils.StreamUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jwat.common.Base32;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -69,7 +71,8 @@ public class PayloadContent {
         consumed = false;
         identifier = null;
         doPayloadIdentification = false;
-        this.inputStream = inputStream;
+        this.inputStream = (length != 0?inputStream: new NullInputStream(0));
+
     }
 
     public void setIdentifier(Identifier identifier) {
@@ -143,11 +146,7 @@ public class PayloadContent {
 
     private String calcDigest(MessageDigest md) {
         byte[] mdbytes = md.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte mdbyte : mdbytes) {
-            hexString.append(Integer.toHexString(0xFF & mdbyte));
-        }
-        return hexString.toString();
+        return Base32.encodeArray(mdbytes);
     }
 
     private boolean identifyPayloadType(byte[] prefix) {

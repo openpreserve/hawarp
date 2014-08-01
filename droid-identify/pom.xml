@@ -8,16 +8,22 @@
         <version>1.0</version>
     </parent>
 
-    <groupId>eu.scape_project</groupId>
     <artifactId>droid-identify</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
     <name>droid-identify</name>
     
     <build>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <archive>
                         <manifest>
@@ -34,10 +40,15 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>${hadoop.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>eu.scape_project</groupId>
             <artifactId>hawarp-core</artifactId>
             <version>1.0</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>uk.gov.nationalarchives</groupId>

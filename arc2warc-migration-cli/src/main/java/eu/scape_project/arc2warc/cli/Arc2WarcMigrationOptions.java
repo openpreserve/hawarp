@@ -17,8 +17,9 @@
 package eu.scape_project.arc2warc.cli;
 
 import eu.scape_project.hawarp.cli.CliOptions;
-import java.io.File;
 import org.apache.commons.cli.CommandLine;
+
+import java.io.File;
 
 /**
  * Command line interface options.
@@ -76,9 +77,6 @@ public class Arc2WarcMigrationOptions extends CliOptions {
             File input = new File(cmd.getOptionValue(INPUT_OPT));
             String outputStr = cmd.getOptionValue(OUTPUT_OPT);
             File output = new File(outputStr);
-            if (output.exists()) {
-                throw new IllegalArgumentException("The output file/directory must not exist!");
-            }
             if (input.isDirectory()) {
                 output.mkdirs();
             }
