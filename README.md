@@ -65,6 +65,37 @@ and
 * Run a set of file format identification/characterisation tools on ARC or WARC container files to extract information about records in tabular form ([hawarp/unpack2temp-identify](https://github.com/openplanets/hawarp/tree/master/unpack2temp-identify) ).
 * Create CDX index files from ARC or WARC container files ([hawarp/cdx-creator](https://github.com/openplanets/hawarp/tree/master/cdx-creator)).
 
+Hawarp Can Be Used By
+---------------------
+
+People maintaining a multi-terabyte web archives storing their data in the ARC/WARC format.
+People holding large amounts of data in the ARC/WARC format for some reason.
+People who have large amounts of web archive container files in the ARC format which they want to convert to the new ISO standard WARC.
+
+Usage Examples
+--------------
+
+Examples how these tools can be applied in context are available in form of Taverna Workflows published on myExperiment:
+
+* [ARC to WARC Migration with CDX Index and wayback rendering screenshot comparison](http://www.myexperiment.org/workflows/4333.html)
+* [ONB Web Archive Fits Characterisation using ToMaR](http://www.myexperiment.org/workflows/3933.html)
+
+**Simple usage examples of the standaline Java executables**
+
+Use arc2warc-migration-cli to migrate an ARC container file to a file in the new WARC format:
+
+    java -jar hawarp/arc2warc-migration-cli/target/arc2warc-migration-cli-1.0-jar-with-dependencies.jar 
+    -i /local/input/directory/ -o /local/output/directory/
+    
+Run droid-identification using Apache Hadoop:
+
+    hadoop jar target/droid-identify-1.0.jar-with-dependencies.jar 
+    -d /hdfs/path/to/textfiles/with/absolutefilepaths/ -n job_name
+    
+The input for this Hadoop job is a text file listing file paths (either local file system paths – accessible from each worker node – or hadoop distributed file system paths).
+
+More usage example on other tools can be found in the documentation of the individual modules.
+
 Hawarp Modules
 --------------
 
