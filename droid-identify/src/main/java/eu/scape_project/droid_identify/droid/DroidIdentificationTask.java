@@ -25,9 +25,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import uk.gov.nationalarchives.droid.core.SignatureParseException;
 import uk.gov.nationalarchives.droid.core.BinarySignatureIdentifier;
 
@@ -40,11 +45,11 @@ import uk.gov.nationalarchives.droid.core.interfaces.resource.RequestMetaData;
 
 /**
  * Droid File Format Identification. File format identification using the Droid
- version 6.1 API. A DroidIdentificationTask object can be initialised with a
- default signature file version 67 using the default constructor or with
- another signature file using the constructor that allows to give a path to
- another signature file. Identification can be performed using a file or an
- input stream.
+ * version 6.1 API. A DroidIdentificationTask object can be initialised with a
+ * default signature file version 67 using the default constructor or with
+ * another signature file using the constructor that allows to give a path to
+ * another signature file. Identification can be performed using a file or an
+ * input stream.
  *
  * @author Sven Schlarb https://github.com/shsdev
  * @version 0.1
@@ -53,6 +58,17 @@ public class DroidIdentificationTask {
 
     private static final Log LOG = LogFactory.getLog(DroidIdentificationTask.class);
     public static final String SIGNATURE_FILE_V67_URL = "http://www.nationalarchives.gov.uk/documents/DROID_SignatureFile_V67.xml";
+
+    Configuration conf;
+
+    FileSystem hdfs;
+
+    public static DroidIdentificationTask getInstance(Configuration conf) throws IOException, SignatureParseException {
+        if (instance == null) {
+            instance = new DroidIdentificationTask(conf);
+        }
+        return instance;
+    }
     private String sigFilePath;
     private BinarySignatureIdentifier bsi;
     // Singleton Instance
@@ -89,6 +105,12 @@ public class DroidIdentificationTask {
             instance = new DroidIdentificationTask(sigFilePath);
         }
         return instance;
+    }
+
+    public DroidIdentificationTask(Configuration conf) throws IOException, SignatureParseException {
+        this();
+        this.conf = conf;
+        hdfs = FileSystem.get(conf);
     }
 
     /**
@@ -133,20 +155,26 @@ public class DroidIdentificationTask {
     /**
      * Run droid identification on file
      *
-     * @param filePath Absolute file path
+     * @param filePath Absolute file path (local/hdfs)
      * @return Result list
-     * @throws FileNotFoundException
-     * @throws IOException
      */
-    public String identify(String filePath)  {
+    public String identify(String filePath) {
         InputStream in = null;
         String puid = "fmt/0";
         IdentificationRequest request = null;
         try {
-            
+
             File file = new File(filePath);
             URI resourceUri = file.toURI();
-            in = new FileInputStream(file);
+            // check if the file is available in the local file system and try
+            // to open a hdfs stream otherwise
+            if (file.exists()) {
+                in = new FileInputStream(file);
+            } else {
+                Path hdfsPath = new Path(filePath);
+                in = hdfs.open(hdfsPath);
+            }
+
             LOG.debug("Identification of resource: " + resourceUri.toString());
             RequestMetaData metaData = new RequestMetaData(file.length(), file.lastModified(), file.getName());
             LOG.debug("File length: " + file.length());
@@ -175,22 +203,20 @@ public class DroidIdentificationTask {
                     puid = "fmt/0"; // unknown
                 }
             }
-             request.close();
+            request.close();
         } catch (IOException ex) {
             LOG.error("I/O Exception", ex);
         } finally {
-            try {
-                if(request != null) {
+            IOUtils.closeQuietly(in);
+            if (request != null) {
+                try {
                     request.close();
+                } catch (IOException ex) {
+                    LOG.warn("I/O Exception");
                 }
-                if(in != null) {
-                    in.close();
-                }
-            } catch (IOException ex) {
-                LOG.warn("I/O error when closing stream",ex);
             }
         }
-        
+
         return puid;
     }
 }

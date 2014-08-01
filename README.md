@@ -4,26 +4,20 @@ hawarp
 HAdoop-based Web Archive Record Processing.
 
 This project consists of a collection of tools to process web archive records
-using the Hadoop framework. 
+using the Hadoop framework and ToMaR (https://github.com/openplanets/tomar). 
 
 Requires Java >= 1.7
 
-Several command line applications are aggregated as modules in this project:
+The following set of command line interface applications is included in this 
+project as modules:
 
 arc2warc-migration-cli
 ----------------------
 
-Command line applicaiton to convert ARC container files to the new ISO standard
-format WARC.
+Command line application to convert ARC container files to the new ISO standard
+format WARC. 
 
 [Documentation](https://github.com/openplanets/hawarp/blob/master/arc2warc-migration-cli/README.md)
-
-arc2warc-migration-cli
-----------------------
-
-Hadoop job to convert ARC container files to the new ISO standard format WARC.
-
-[Documentation](https://github.com/openplanets/hawarp/blob/master/arc2warc-migration-hdp/README.md)
 
 droid-identify
 --------------

@@ -83,8 +83,9 @@ public class DroidIdentification {
         public void map(LongWritable key, Text value, Mapper.Context context)
                 throws IOException, InterruptedException {
             DroidIdentificationTask dihj = null;
+            Configuration conf = context.getConfiguration();
             try {
-                dihj = DroidIdentificationTask.getInstance();
+                dihj = DroidIdentificationTask.getInstance(conf);
                 if (dihj != null) {
                     String puid = dihj.identify(value.toString());
                     context.write(key, new Text(puid));
