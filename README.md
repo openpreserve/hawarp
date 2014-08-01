@@ -68,9 +68,9 @@ and
 Hawarp Can Be Used By
 ---------------------
 
-People maintaining a multi-terabyte web archives storing their data in the ARC/WARC format.
-People holding large amounts of data in the ARC/WARC format for some reason.
-People who have large amounts of web archive container files in the ARC format which they want to convert to the new ISO standard WARC.
+* People maintaining a multi-terabyte web archives storing their data in the ARC/WARC format.
+* People holding large amounts of data in the ARC/WARC format for some reason.
+* People who have large amounts of web archive container files in the ARC format which they want to convert to the new ISO standard WARC.
 
 Usage Examples
 --------------
