@@ -1,5 +1,6 @@
 Hawarp
 ======
+*Hadoop-based Web Archive Record Processing*
 
 What Is Hawarp?
 ---------------
