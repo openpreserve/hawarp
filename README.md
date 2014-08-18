@@ -1,5 +1,6 @@
 Hawarp
 ======
+*Hadoop-based Web Archive Record Processing*
 
 ![Hawarp Logo](https://lh4.googleusercontent.com/RTeHNY7CDXRu3Vd3Lrny0G8DUhvjkrKxCSKA1Po9LFGzGYeqIVuqzZPMO83oeWzjcNoYvn3H9TxNe1XzVBdR6M4SwXtR06qj5wmXJa7XfVTLEsxyxdGS8v1gJHs596qPXQ?raw=true)
 
