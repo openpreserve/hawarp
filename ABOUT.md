@@ -113,3 +113,6 @@ Credits
 * Matthias Rella <matthias.rella.fl@ait.ac.at>, Austrian Institute of Technology
 * Sven Schlarb <sven.schlarb@onb.ac.at>, Austrian National Library
 * Rainer Schmidt <rainer.schmidt@ait.ac.at>, Austrian Institute of Technology
+* This work was partially supported by the [SCAPE project](http://scape-project.eu). The SCAPE project is co-funded 
+by the European Union under FP7 ICT-2009.4.1 (Grant Agreement number 270137)
+* This tool is supported by the [Open Planets Foundation](http://www.openplanetsfoundation.org/). 
