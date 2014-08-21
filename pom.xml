@@ -46,11 +46,27 @@
     </scm>
     
     <repositories>
+
+		<repository>
+			<id>snapshots-repo</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		
         <repository>
             <id>libs-release-local</id>
             <name>CDH3u5</name>
             <url>https://repository.cloudera.com/artifactory/libs-release-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+          </snapshots>	
         </repository>
+
 <!--        <repository>
             
             <releases>
