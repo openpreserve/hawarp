@@ -4,6 +4,8 @@ Hawarp
 
 ![Hawarp Logo](https://lh4.googleusercontent.com/RTeHNY7CDXRu3Vd3Lrny0G8DUhvjkrKxCSKA1Po9LFGzGYeqIVuqzZPMO83oeWzjcNoYvn3H9TxNe1XzVBdR6M4SwXtR06qj5wmXJa7XfVTLEsxyxdGS8v1gJHs596qPXQ?raw=true)
 
+These tools are designed to served this usecase:
+[Quality assured ARC to WARC migration](http://www.openplanetsfoundation.org/blogs/2014-07-10-quality-assured-arc-warc-migration)
 
 Usage Examples
 --------------
@@ -28,6 +30,7 @@ Run droid-identification using Apache Hadoop:
 The input for this Hadoop job is a text file listing file paths (either local file system paths – accessible from each worker node – or hadoop distributed file system paths).
 
 More usage example on other tools can be found in the documentation of the individual modules.
+
 
 Hawarp Modules
 --------------
